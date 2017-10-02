@@ -13,4 +13,25 @@ use Illuminate\Http\Request;
 |
 */
 
+// AuthController
+Route::post('signUp', 'AuthController@signUp');   // sign up
+Route::post('login', 'AuthController@signIn');  // login
+Route::post('getusers', 'AuthController@getUsers');  // admin get users 
+Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
+
+// UserController
+Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user 
+Route::post('updateUser', 'UserController@updateUser'); // logged in user profile update   
+Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
+Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
+Route::post('search', 'UserController@search'); // search by skill/SpaceID
+Route::get('showuser', 'UserController@showUser'); // show logged in user
+
+// RoleController
+Route::get('newrole', 'RoleController@store');
+Route::get('getroles', 'RoleController@get');
+Route::get('showrole', 'RoleController@show');
+Route::get('deleterole', 'RoleController@delete');
+
+// MainController
 Route::any('{path?}', 'MainController@index')->where("path", ".+");
