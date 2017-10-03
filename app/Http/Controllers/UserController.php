@@ -23,7 +23,8 @@ class UserController extends Controller {
         'updateUser',
         'delete',
         'showUser',
-        'searchName',
+        // 'searchName',
+        'search',
       ]]);
     }
 
@@ -59,7 +60,6 @@ class UserController extends Controller {
   public function updateUser(Request $request) {
     //constants
     $userId = Auth::id();
-
     $rules = [
       'name' => 'nullable|string',
       'password' => 'nullable|string',
@@ -202,16 +202,16 @@ class UserController extends Controller {
     return Response::json(['success' => 'User updated successfully.']);
   }
 
-  /**
+  /** // TODO: add check for searchOpt
    * Search Users by name
    * @param Illuminate\Support\Facades\Request::class
    * @return  Illuminate\Support\Facades\Response::class
   **/
   public function searchName(Request $request) {
-
+    // validation rules
     $rules = [
       'name' => 'required|string',
-      'spaceIDs' => 'nullable|string',
+      'spaceID' => 'nullable|string',
     ];
 
     // Validate input against rules
@@ -223,27 +223,29 @@ class UserController extends Controller {
 
     // Search querys 
     $name = $request->input('name');
-    $spaceIDs = explode(',', $request->input('spaceIDs'));
+    $spaceID = $request->input('spaceID');
+    $spaceIDs = explode(',', $request->input('spaceID'));
 
-    if (empty($spaceIDs)) {
-      $users = User::where('name', $name)->get();
+    if (empty($spaceID)) {
+      $users = User::where('name', $name)->where('searchOpt', 0)->get();
 
-      if (!empty($users)) return response::json(['success' => $users]);
-      else return Response::json([ 'error' => $user.'(s) not in member database.' ]);
+      if (count($users) != 0) return response::json(['success' => $users ]);
+      else return Response::json([ 'error' => 'user: '.$name.' not in member database.' ]);
 
     } else {
       $res = array();
       foreach ($spaceIDs as $key => $spaceID) {
-       $user = User::where('name', $name)->where('spaceID', $spaceID)->get(); 
-       if (!empty($user)) array_push($res, $user);
+       $user = User::where('name', $name)
+                ->where('spaceID', $spaceID)
+                ->where('searchOpt', false)->get(); 
+       if (count($user) != 0) array_push($res, $user);
       }
     }
     if (!empty($res)) return Response::json($res);
     else return Response::json([ 'error' => $name.' is not a member of selected workspaces' ]);
   }
 
-
-  /** 
+  /** // TODO: add check for searchOpt
    * Search Users by skill/spaceid
    * @param Illuminate\Support\Facades\Request::class
    * @return  Illuminate\Support\Facades\Response::class
@@ -259,12 +261,53 @@ class UserController extends Controller {
       return Response::json(['error' => 'Must fill out required fields']);
     }
     $spaceID = $request->input('spaceID');
-    $skill = $request->input('skill');
     $spaceIDs = explode(',', $request->input('spaceID'));
+    $skill = $request->input('skill');
+
+    // return users from all spaces
+    if (empty($spaceID)) {
+      $skills = Userskill::where('name', $skill)->select('userskills.userID')->get();
+      if (count($skills) == 0) {
+        return Response::json([ 'error' => 'No users found with skill' ]);
+      }
+
+      $users = array();
+      foreach ($skills as $key => $skill) {
+        $match = User::where('id', $skill['userID'])->where('searchOpt', false)->first();
+        if (!empty($match)) {
+          array_push($users, $match);
+        }
+      }
+      return Response::json([ 'success' => $users ]);
+    }
+
+    // return users from request->input('spaceIDs');
+    $users = array();
+    $skills = Userskill::where('name', $skill)->select('userID')->get();     
+
+    foreach ($skills as $key => $skill) {
+      $match = User::where('id', $skill['userID'])->where('searchOpt', false)->first();
+      if(!empty($match)) {
+        array_push($users, $match);
+      }
+    }
+
+    $res = array();
+    foreach ($spaceIDs as $key => $spaceID) {
+      foreach ($users as $key => $user) {
+        if ($user['spaceID'] == $spaceID) {
+          array_push($res, $user);
+        }
+      }
+    }
+    if (!empty($res)) {
+      return Response::json([ 'success' => $res ]);
+    }
+    return Response::json([ 'error' => 'No users found.' ]);
   }
 
   /**
-   * Update user in database.
+   * Show logged in user.
    * @param void 
    * @return  Illuminate\Support\Facades\Response::class
   */

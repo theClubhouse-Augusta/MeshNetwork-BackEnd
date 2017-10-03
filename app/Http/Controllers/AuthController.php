@@ -41,7 +41,8 @@ class AuthController extends Controller {
       'name' => 'required|string',
       'password' => 'required|string',
       'email' => 'required|string',
-      'spaceID' => 'required|string'
+      'spaceID' => 'required|string',
+      'searchOpt' => 'required|string'
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -59,6 +60,7 @@ class AuthController extends Controller {
     $website = $request->input('website');
     $phoneNumber = $request->input('phoneNumber');
     $bio = $request->input('bio');
+    $searchOpt = $request->input('searchOpt');
     $skill = $request->input('skill');
     $skills = explode(',', $skill);
 
@@ -100,6 +102,7 @@ class AuthController extends Controller {
     $user->name = $name;
     $user->email = $email;
     $user->spaceID = $spaceID;
+    $user->searchOpt = $searchOpt;
     $user->password = Hash::make($password);
     // Optional Input
     if (!empty($company)) $user->company = $company;
@@ -115,6 +118,7 @@ class AuthController extends Controller {
       }
 
     if (!empty($bio)) $user->bio = $bio;
+
     // Profile Picture
     if (!empty($avatar)) {
       $avatarName = $avatar->getClientOriginalName();
@@ -245,8 +249,8 @@ class AuthController extends Controller {
     $spaceIds = explode(',', $spaceIDs);
     $res = array(); 
     foreach($spaceIds as $SpaceID) {
-      $users = User::where('spaceID', $spaceID)->get();
-      if (!empty($users)) {
+      $users = User::where('spaceID', $SpaceID)->get();
+      if (count($users) != 0) {
         array_push($res, $users);
       }
     }
