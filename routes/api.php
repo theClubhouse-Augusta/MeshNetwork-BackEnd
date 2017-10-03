@@ -28,10 +28,15 @@ Route::post('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
 
 // RoleController
-Route::get('newrole', 'RoleController@store');
+Route::post('newrole', 'RoleController@store');
 Route::get('getroles', 'RoleController@get');
-Route::get('showrole', 'RoleController@show');
-Route::get('deleterole', 'RoleController@delete');
+Route::post('showrole', 'RoleController@show');
+Route::get('deleterole/{id}', 'RoleController@delete');
+
+// WorkspaceController
+Route::post('newspace', 'WorkspaceController@store');
+Route::get('spacestatus/{spaceID}/{status}', 'WorkspaceController@approve');
+Route::post('spaceupdate', 'WorkspaceController@update');
 
 // MainController
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

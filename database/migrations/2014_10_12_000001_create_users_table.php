@@ -26,10 +26,10 @@ class CreateUsersTable extends Migration
             $table->longText('bio')->nullable();
             $table->longText('avatar')->nullable();
             $table->boolean('ban')->default(false);
-
-            //TODO: Can't read two fields on paper;
-            // $table->string('TODO')->nullable();
-            // $table->string('TODO')->nullable();
+            $table->boolean('verified')->default(false);
+            $table->boolean('subscriber')->default(false);
+            $table->boolean('searchOpt')->default(false);
+            $table->integer('score')->default(100);
             $table->rememberToken();
             $table->timestamps();
         });
