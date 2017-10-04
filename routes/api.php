@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -37,6 +38,15 @@ Route::get('deleterole/{id}', 'RoleController@delete');
 Route::post('newspace', 'WorkspaceController@store');
 Route::get('spacestatus/{spaceID}/{status}', 'WorkspaceController@approve');
 Route::post('spaceupdate', 'WorkspaceController@update');
+Route::get('workspaces', 'WorkspaceController@get');
+Route::get('workspace/{spaceID}', 'WorkspaceController@show');
+Route::get('workevents/{spaceID}', 'WorkspaceController@events');
+Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
+
+// test
+Route::get('test', function() {
+  return Response::json('wtf');
+}); // show logged in user
 
 // MainController
 Route::any('{path?}', 'MainController@index')->where("path", ".+");
