@@ -18,7 +18,6 @@ class Files extends Migration
             $table->integer('userID');
             $table->integer('eventID');
             $table->longText('path');
-            $table->boolean('read')->default(false);
             $table->timestamps();
 
         });
