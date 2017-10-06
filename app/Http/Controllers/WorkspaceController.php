@@ -11,8 +11,8 @@ use JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use App\User;
 use App\Workspace;
-use App\Events;
-use App\Bookables;
+use App\Event;
+use App\Bookable;
 
 class WorkspaceController extends Controller {
   /** JWTAuth for Routes
@@ -53,7 +53,7 @@ class WorkspaceController extends Controller {
     // test input
     $userID = $request->input('userID');
     $roleID = $request->input('roleID');
-
+    
     // production input
     // Logged in user
     // $userID = Auth::id(); 
@@ -159,23 +159,31 @@ class WorkspaceController extends Controller {
 
   public function get() {
     // Ensure user has admin privalages
-    $admin = Auth::user();
-    $id = $admin->roleID;
-    if ($id != 1 && $id != 2) {
-      return Response::json(['error' => 'invalid credentials']);
-    }
+    // $admin = Auth::user();
+    // $id = $admin->roleID;
+    // if ($id != 1 && $id != 2) {
+    //   return Response::json(['error' => 'invalid credentials']);
+    // }
+
+    return Response::json([ 'success' => Workspace::all() ]);
     
   }
 
-  public function show() {
+  public function show($spaceID) {
     // Ensure user has admin privalages
-    $admin = Auth::user();
-    $id = $admin->roleID;
-    if ($id != 1 && $id != 2) {
-      return Response::json(['error' => 'invalid credentials']);
+  //   $admin = Auth::user();
+  //   $id = $admin->roleID;
+  //   if ($id != 1 && $id != 2) {
+  //     return Response::json(['error' => 'invalid credentials']);
+  //   }
+    $workspace = Workspace::find($spaceID);
+    if (empty($workspace)) {
+      return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
     }
+    return Response::json([ 'success' => $workspace ]);
     
   }
+
 
   public function approve($spaceID, $status) {
     // // Ensure user has admin privalages
@@ -184,7 +192,7 @@ class WorkspaceController extends Controller {
     // if ($id != 1) {
     //   return Response::json(['error' => 'invalid credentials']);
     // }
-    $workspace = WorkSpace::where('id', $spaceID)->first();
+    $workspace = Workspace::where('id', $spaceID)->first();
     $workspace->status = $status;
     if (!$workspace->save()) {
       return Response::json([ 'error' => 'Database error' ]);
@@ -307,7 +315,7 @@ class WorkspaceController extends Controller {
 
   }
 
-  public function events() {
+  public function events($spaceID) {
     // Ensure user has admin privalages
     // $admin = Auth::user();
     // $id = $admin->roleID;
@@ -315,16 +323,31 @@ class WorkspaceController extends Controller {
     //   return Response::json(['error' => 'invalid credentials']);
     // }
 
+    // TODO provide check for dates or let 
+    // fron-end handle that?
+    $events = Event::where('spaceID', $spaceID)->get();
+
+    if (empty($events)) {
+      return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
+    }
+    return Response::json([ 'success' => $events ]);
 
   }
 
-  public function bookables() {
+  public function bookables($spaceID) {
     // Ensure user has admin privalages
-    $admin = Auth::user();
-    $id = $admin->roleID;
-    if ($id != 1 && $id != 2) {
-      return Response::json(['error' => 'invalid credentials']);
+    // $admin = Auth::user();
+    // $id = $admin->roleID;
+    // if ($id != 1 && $id != 2) {
+    //   return Response::json(['error' => 'invalid credentials']);
+    // }
+
+    $bookables = Bookable::where('spaceID',$spaceID)->get();
+
+    if (empty($bookables)) {
+      return Response::json([ 'error' => 'No bookables with id: '.$spaceID ]);
     }
-    
+    return Response::json([ 'success' => $bookables ]);
+
   }
 }
