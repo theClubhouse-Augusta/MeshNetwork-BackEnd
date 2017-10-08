@@ -30,6 +30,7 @@ class Workspaces extends Migration
             // if they don't provide one for some reason?
             $table->longtext('logo')->nullable();
             $table->string('status')->default('pending'); //approved, declined
+            $table->string('organizers');
             $table->timestamps();
       });
     }

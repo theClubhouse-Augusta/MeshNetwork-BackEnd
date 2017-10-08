@@ -64,7 +64,7 @@ class RoleController extends Controller {
     return Response::json([ 'success' => 'Created new role: '.$name ]);
   }
 
-
+  
   /** 
    *  get all Roles
    * @param void 
@@ -82,6 +82,7 @@ class RoleController extends Controller {
     $roles = Role::all();
     return Response::json([ 'success' => $roles ]);
   }
+
 
   /** 
    *  Get all users with roleID [ in spaceID(s)]
@@ -105,7 +106,7 @@ class RoleController extends Controller {
     $adminID = $admin->roleID;
 
     if ($adminID != 1) {
-      return response::json(['error' => 'invalid credentials' ]);
+      // return response::json(['error' => 'invalid credentials' ]);
     }
     $roleID = $request->input('roleID');
     $spaceID = $request->input('spaceID');
@@ -149,7 +150,6 @@ class RoleController extends Controller {
     if ($adminID != 1) {
       return response::json(['error' => 'invalid credentials' ]);
     }
-
     $role = Role::where('id', $id)->first();
     if (empty($role)) {
       return response::json(['error' => 'Role id:'.$id.' does not exist in the database' ]);
@@ -160,5 +160,4 @@ class RoleController extends Controller {
     }
     return response::json(['success' => 'Role deleted successfully' ]);
   }
-
 }

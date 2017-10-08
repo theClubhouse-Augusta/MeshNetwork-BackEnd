@@ -17,8 +17,6 @@ class Opts extends Migration
             $table->increments('id');
             $table->integer('spaceID');
             $table->integer('eventID');
-            $table->longText('path');
-            $table->boolean('read')->default(false);
             $table->timestamps();
 
         });

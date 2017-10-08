@@ -43,6 +43,26 @@ Route::get('workspace/{spaceID}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
 Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 
+// EventController
+Route::get('events','EventController@get');
+Route::post('newEvent','EventController@store');
+Route::post('eventUpdate','EventController@update');
+Route::get('showEvent/{eventID}','EventController@show');
+Route::post('searchEvent','EventController@search');
+Route::post('optEvent, ','EventController@opt');
+Route::get('deleteEvent/{id}','EventController@delete');
+Route::get('getCalendar','EventController@getCalendar');
+Route::get('storeCalendar/{eventID}','EventController@storeCalendar');
+Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
+
+//AppeanceController
+Route::post('newAppearance','AppearanceController@store');
+Route::get('appearances','AppearanceController@get');
+Route::get('countAppearances/{sort}/{eventID?}/{spaceID?}','AppearanceController@getCount');
+Route::get('appearance/{userID}','AppearanceController@show');
+Route::get('storeInvite','AppearanceController@stroreInvite');
+Route::get('getInvite','AppearanceController@getInvite');
+
 // test
 Route::get('test', function() {
   return Response::json('wtf');

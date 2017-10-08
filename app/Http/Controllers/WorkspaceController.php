@@ -45,7 +45,6 @@ class WorkspaceController extends Controller {
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
-
     if ($validator->fails()) {
       return Response::json(['error' => 'You must fill out all fields.']);
     }
