@@ -16,13 +16,13 @@ class Bookings extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
+            $table->integer('spaceID');
             $table->integer('bookablesID');
             $table->dateTime('start');
             $table->dateTime('end');
             //$table->dateTimeTz('start'); TODO// Timezone or naa?
             //$table->dateTimeTz('end');
             $table->timestamps();
-
         });
     }
 
