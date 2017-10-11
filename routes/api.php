@@ -63,10 +63,15 @@ Route::get('appearance/{userID}','AppearanceController@show');
 Route::get('storeInvite','AppearanceController@stroreInvite');
 Route::get('getInvite','AppearanceController@getInvite');
 
-// test
-Route::get('test', function() {
-  return Response::json('wtf');
-}); // show logged in user
+// BookableController
+Route::post('newBookable','BookableController@store');
+Route::get('bookables','BookableController@get');
+Route::get('bookables/{spaceID}','BookableController@getSpace');
+Route::get('countBookings/{sort}/{eventID?}/{spaceID?}','BookableController@getCount');
+Route::get('bookable/{userID}','BookableController@show');
+Route::get('getBookings','BookableController@getBookings');
+Route::get('deleteBookable/{id}','BookableController@delete');
+Route::get('deleteBookings/{id}','BookableController@deleteBooking');
 
 // MainController
 Route::any('{path?}', 'MainController@index')->where("path", ".+");
