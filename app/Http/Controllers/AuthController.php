@@ -15,270 +15,301 @@ use App\Skill;
 
 class AuthController extends Controller {
 
-  /* JWTAuth for Routes 
-   * @param void 
-   * @return void 
-  */
-  public function __construct() {
-    $this->middleware('jwt.auth', ['only' => [
-      'getUsers',
-      'ban'
-    ]]);
-  }
-
-  /** SIGN UP
-   * Persist user to database after sign up.
-   * @param Illuminate\Support\Facades\Request::class
-   * @return  Illuminate\Support\Facades\Response::class
-   */
-  public function signUp(Request $request) {
-    // Constants
-    $ADMIN_KEY = 'adminkey';
-    $ORG_KEY = 'organkey';
-    $RES_KEY = 'research';
-    // Validation Rules
-    $rules = [
-      'name' => 'required|string',
-      'password' => 'required|string',
-      'email' => 'required|string',
-      'spaceID' => 'required|string',
-      'searchOpt' => 'required|string'
-    ];
-    // Validate input against rules
-    $validator = Validator::make(Purifier::clean($request->all()), $rules);
-
-    if ($validator->fails()) {
-      return Response::json(['error' => 'You must fill out all fields.']);
+    /* JWTAuth for Routes 
+    * @param void 
+    * @return void 
+    */
+    public function __construct() {
+        $this->middleware('jwt.auth', ['only' => 
+            [
+                'getUsers',
+                'ban'
+            ]
+        ]);
     }
-    // Form Input
-    $name = $request->input('name');
-    $email = $request->input('email');
-    $password = $request->input('password');
-    $spaceID = $request->input('spaceID');
-    // Optional Input
-    $company = $request->input('company');
-    $website = $request->input('website');
-    $phoneNumber = $request->input('phoneNumber');
-    $bio = $request->input('bio');
-    $searchOpt = $request->input('searchOpt');
-    $skill = $request->input('skill');
-    $skills = explode(',', $skill);
 
-    // Check for valid image upload
-    if (!empty($_FILES['avatar'])) {
-      // Check for file upload error
-      if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-          return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-      }
-      // checks for valid image upload
-      $info = getimagesize($_FILES['avatar']['tmp_name']);
+    /** SIGN UP
+     * Persist user to database after sign up.
+     * @param Illuminate\Support\Facades\Request::class
+     * @return  Illuminate\Support\Facades\Response::class
+     */
+    public function signUp(Request $request) {
+        // Constants
+        $ADMIN_KEY = 'adminkey';
+        $ORG_KEY = 'organkey';
+        $RES_KEY = 'research';
 
-      if ($info === FALSE) {
-        return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-      }
+        // Validation Rules
+        $rules = [
+            'name' => 'required|string',
+            'password' => 'required|string',
+            'email' => 'required|string',
+            'spaceID' => 'required|string',
+            'searchOpt' => 'required|string'
+        ];
 
-      // checks for valid image upload
-      if (($info[2] !== IMAGETYPE_GIF) 
-            && ($info[2] !== IMAGETYPE_JPEG) 
-            && ($info[2] !== IMAGETYPE_PNG)) 
-        {
-            return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+        // Validate input against rules
+        $validator = Validator::make( Purifier::clean($request->all() ), $rules);
+
+        if ( $validator->fails() ) {
+            return Response::json(['error' => 'You must fill out all fields.']);
         }
 
-      // Get profile image input
-      $avatar = $request->file('avatar');
-    }
+        // Form Input
+        $name = $request->input('name');
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $spaceID = $request->input('spaceID');
 
-    // Ensure unique email
-    $check = User::where('email', $email)->first();
+        // Optional Input
+        $company = $request->input('company');
+        $website = $request->input('website');
+        $phoneNumber = $request->input('phoneNumber');
+        $bio = $request->input('bio');
+        $searchOpt = $request->input('searchOpt');
+        $skill = $request->input('skill');
+        $skills = explode(',', $skill);
 
-    if (!empty($check)) {
-      return Response::json(['error' => 'Email already in use']);
-    }
+        // Check for valid image upload
+        if ( !empty($_FILES['avatar']) ) {
 
-    // Create new App\User;
-    $user = new User;
-    // Required input
-    $user->name = $name;
-    $user->email = $email;
-    $user->spaceID = $spaceID;
-    $user->searchOpt = $searchOpt;
-    $user->password = Hash::make($password);
-    // Optional Input
-    if (!empty($company)) $user->company = $company;
-    if (!empty($website)) $user->website = $website;
-    
-    if ((!empty($phoneNumber)) 
-      && (is_numeric($phoneNumber)) 
-      && (count(str_split($phoneNumber)) == 7))
-      {
-        $user->phoneNumber = $phoneNumber;
-      } elseif (!empty($phoneNumber)) {
-        return Response::json([ 'error' => 'Invalid phone number' ]);
-      }
+            // Check for file upload error
+            if ( $_FILES['avatar']['error'] !== UPLOAD_ERR_OK ) {
+                return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+            }
 
-    if (!empty($bio)) $user->bio = $bio;
+            // checks for valid image upload
+            $info = getimagesize($_FILES['avatar']['tmp_name']);
+            if ($info === FALSE) {
+                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            }
 
-    // Profile Picture
-    if (!empty($avatar)) {
-      $avatarName = $avatar->getClientOriginalName();
-      $avatar->move('storage/avatar/', $avatarName);
-      $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
-    }
-     
-    // Check if user signed up as Admin
-    $check_key = substr($password, 0, 8);
+            // checks for valid image upload
+            if (($info[2] !== IMAGETYPE_GIF) 
+                    && ($info[2] !== IMAGETYPE_JPEG) 
+                    && ($info[2] !== IMAGETYPE_PNG)) 
+                {
+                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+                }
 
-    // assign role
-    $user->roleID = 4; // default
-    if ($check_key == $ADMIN_KEY) $user->roleID = 1;
-    if ($check_key == $ORG_KEY) $user->roleID = 2;
-    if ($check_key == $RES_KEY) $user->roleID = 3;
-
-    // Persist user to database
-    if (!$user->save()) {
-      return Response::json(['error' => 'Account not created']);
-    }
-
-    // Update App\Skill;  
-    if (!empty($skill)) {
-      $newUser = User::where('email', $email)->first();
-
-      foreach($skills as $key => $skill) {
-        $trimmedSkill = trim($skill);
-        $checkSkill = Skill::where('name', $trimmedSkill)->first();
-
-        if (empty($checkSkill)) {
-          $newSkill = new Skill;
-          $newSkill->name = $trimmedSkill;
-          // Persist App\Skill to database
-          if (!$newSkill->save()) {
-            return Response::json([ 'error' => 'database error' ]);
-          }
+            // Get profile image input
+            $avatar = $request->file('avatar');
         }
-      }
-    }
 
-    // Update App\Userskill;
-    if (!empty($skill)) {
+        // Ensure unique email
+        $check = User::where('email', $email)->first();
 
-      foreach ($skills as $key => $skill) {
-        $trimmedSkill = trim($skill);
-        // get current signed up user
-        $newUser = User::where('email', $email)->first();
-        // get current skill in iteration
-        $skillTag = Skill::where('name', $trimmedSkill)->first();
-        // Create new UserSkill
-        $userSkill = new Userskill;
-        $userSkill->userID = $newUser->id;
-        $userSkill->skillID = $skillTag->id;
-        $userSkill->name = $skillTag->name;
-        // Persist App\Skill to database
-        if(!$userSkill->save()) {
-          return Response::json([ 'error' => 'database error' ]);
+        if ( !empty($check) ) {
+            return Response::json(['error' => 'Email already in use']);
         }
-      }
-    }
-    return Response::json(['success' => 'User created successfully.']);
-  }
 
+        // Create new App\User;
+        $user = new User;
 
-  /** 
-   * Sign In
-   *
-   * @param Illuminate\Support\Facades\Request::class
-   * @return  Illuminate\Support\Facades\Response::class
-  */
-  public function signIn(Request $request) {
-    // required input
-    $rules = [
-      'email' => 'required',
-      'password' => 'required'
-    ];
+        // Check if user signed up as Admin
+        $check_key = substr($password, 0, 8);
+
+        // assign role
+        switch ($check_key) {
+            case $ADMIN_KEY:
+                $user->roleID = 1;
+                break;
+
+            case $ORG_KEY:
+                $user->roleID = 2;
+                break;
+
+            case $RES_KEY:
+                $user->roleID = 3;
+                break;
+            
+            default: 
+                $user->roleID = 4;
+                break;
+        }
+
+        // Required input
+        $user->name = $name;
+        $user->email = $email;
+        $user->spaceID = $spaceID;
+        $user->searchOpt = $searchOpt;
+        $user->password = Hash::make($password);
+
+        // Optional Input
+        if ( !empty($company) ) $user->company = $company;
+        if ( !empty($website) ) $user->website = $website;
+        if ( !empty($bio) ) $user->bio = $bio;
         
-    // Validate and purify input 
-    $validator = Validator::make(Purifier::clean($request->all()), $rules);
-    if ($validator->fails()) {
-      return Response::json(['error' => 'Please fill out all fields.']);
+        if ( (!empty($phoneNumber) ) 
+            && ( is_numeric($phoneNumber) ) 
+            && ( count(str_split($phoneNumber)) == 7))
+            {
+                $user->phoneNumber = $phoneNumber;
+            } 
+            elseif ( !empty($phoneNumber) ) {
+                return Response::json([ 'error' => 'Invalid phone number' ]);
+            }
+
+
+        // Profile Picture
+        if ( !empty($avatar) ) {
+            $avatarName = $avatar->getClientOriginalName();
+            $avatar->move('storage/avatar/', $avatarName);
+            $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+        }
+        
+
+        // Persist user to database
+        if ( !$user->save() ) {
+            return Response::json(['error' => 'Account not created']);
+        }
+
+        // Update App\Skill;  
+        if ( !empty($skill) ) {
+            $newUser = User::where('email', $email)->first();
+
+            foreach( $skills as $key => $skill ) {
+                $trimmedSkill = trim($skill);
+                $checkSkill = Skill::where('name', $trimmedSkill)->first();
+
+                if ( empty($checkSkill) ) {
+                    $newSkill = new Skill;
+                    $newSkill->name = $trimmedSkill;
+                    // Persist App\Skill to database
+                    if ( !$newSkill->save() ) {
+                        return Response::json([ 'error' => 'database error' ]);
+                    }
+                }
+            }
+        }
+
+        // Update App\Userskill;
+        if ( !empty($skill) ) {
+
+            foreach ($skills as $key => $skill) {
+                $trimmedSkill = trim($skill);
+
+                // get current signed up user
+                $newUser = User::where('email', $email)->first();
+
+                // get current skill in iteration
+                $skillTag = Skill::where('name', $trimmedSkill)->first();
+
+                // Create new UserSkill
+                $userSkill = new Userskill;
+                $userSkill->userID = $newUser->id;
+                $userSkill->skillID = $skillTag->id;
+                $userSkill->name = $skillTag->name;
+
+                // Persist App\Skill to database
+                if( !$userSkill->save() ) {
+                    return Response::json([ 'error' => 'database error' ]);
+                }
+            }
+        }
+        return Response::json(['success' => 'User created successfully.']);
     }
 
-    // get user input
-    $email = $request->input('email');
-    $password = $request->input('password');
-      
-    // generate token
-    $credentials = compact("email", "password");
-    $token = JWTAuth::attempt($credentials);
 
-    if ($token == false) { 
-      return Response::json(['error' => 'Wrong Email/Password']);
-    }
-    return Response::json(['token' => $token]);
-  }
+    /** 
+     * Sign In
+     *
+     * @param Illuminate\Support\Facades\Request::class
+     * @return  Illuminate\Support\Facades\Response::class
+     */
+    public function signIn(Request $request) {
+        // required input
+        $rules = [
+            'email' => 'required',
+            'password' => 'required'
+        ];
+            
+        // Validate and purify input 
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+        if ( $validator->fails() ) {
+            return Response::json(['error' => 'Please fill out all fields.']);
+        }
 
-  /** 
-   * Get users
-   * @param spaceID 
-   * @return  Illuminate\Support\Facades\Response::class
-  **/
-  public function getUsers(Request $request) {
-    $rules = [
-      'spaceIDs' => 'nullable|string',
-    ];
+        // get user input
+        $email = $request->input('email');
+        $password = $request->input('password');
+        // generate token
+        $credentials = compact("email", "password");
+        $token = JWTAuth::attempt($credentials);
 
-    $validator = Validator::make(Purifier::clean($request->all()), $rules);
-
-    if ($validator->fails()) {
-      return Response::json(['error' => 'Please fill out all fields.']);
-    }
-    // Ensure user has admin privalages
-    $admin = Auth::user();
-    $id = $admin->roleID;
-    if ($id != 1) {
-      return Response::json(['error' => 'invalid credentials']);
-    }
-    // get form input
-    $spaceIDs = $request->input('spaceIDs');
-
-    // get all users if no spaceIDs specified
-    if (empty($spaceIDs)) {
-      return Response::json(User::all());
+        if ($token == false) { 
+            return Response::json(['error' => 'Wrong Email/Password']);
+        }
+        return Response::json(['token' => $token]);
     }
 
-    // return users by spaceID 
-    $spaceIds = explode(',', $spaceIDs);
-    $res = array(); 
-    foreach($spaceIds as $SpaceID) {
-      $users = User::where('spaceID', $SpaceID)->get();
-      if (count($users) != 0) {
-        array_push($res, $users);
-      }
-    }
-    // if no users in db
-    if (empty($res)) {
-      return Response::json([ 'error' => 'No registered users in selected workspaces' ]);
-    }
-    return Response::json([ 'success' => $res ]);
-  }
+    /** 
+     * Get users
+     * @param spaceID 
+     * @return  Illuminate\Support\Facades\Response::class
+     **/
+    public function getUsers(Request $request) {
+        $rules = [
+            'spaceIDs' => 'nullable|string',
+        ];
 
-  /**
-   * Ban User
-   * @param userID 
-   * @return  Illuminate\Support\Facades\Response::class
-  **/
-  public function ban($id) {
-    $admin = Auth::user();
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+        if ($validator->fails()) {
+            return Response::json(['error' => 'Please fill out all fields.']);
+        }
+        // Ensure user has admin privalages
+        $admin = Auth::user();
+        $id = $admin->roleID;
 
-    if ($admin->roleID != 1) {
-        return Response::json(['error' => 'invalid credintials']);
-    }
-    $bannedUser = User::where('id', $id)->first();
-    $bannedUser->ban = 1;
+        if ( $id != 1 ) {
+            return Response::json(['error' => 'invalid credentials']);
+        }
 
-    if (!$bannedUser->save()) {
-      return Response::json(['error' => 'datebase error']);
+        // get form input
+        $spaceIDs = $request->input('spaceIDs');
+        // get all users if no spaceIDs specified
+
+        if ( empty($spaceIDs) ) {
+            return Response::json(User::all());
+        }
+
+        // return users by spaceID 
+        $spaceIds = explode(',', $spaceIDs);
+
+        $res = array(); 
+
+        foreach($spaceIds as $SpaceID) {
+            $users = User::where('spaceID', $SpaceID)->get();
+            if ( count($users) != 0 ) {
+                array_push($res, $users);
+            }
+        }
+        // if no users in db
+        if ( empty($res) ) {
+            return Response::json([ 'error' => 'No registered users in selected workspaces' ]);
+        }
+        return Response::json([ 'success' => $res ]);
     }
-    return Response::json(['success' => 'user'.$bannedUser->name.' has been banned from MeshNetwork']);
-  }
+
+    /**
+     * Ban User
+     * @param userID 
+     * @return  Illuminate\Support\Facades\Response::class
+     **/
+    public function ban($id) {
+        $admin = Auth::user();
+
+        if ( $admin->roleID != 1 ) {
+            return Response::json(['error' => 'invalid credintials']);
+        }
+
+        $bannedUser = User::where('id', $id)->first();
+        $bannedUser->ban = 1;
+
+        if ( !$bannedUser->save() ) {
+            return Response::json(['error' => 'datebase error']);
+        }
+        return Response::json(['success' => 'user'.$bannedUser->name.' has been banned from MeshNetwork']);
+    }
 
 }
