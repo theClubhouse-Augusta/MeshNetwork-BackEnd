@@ -27,6 +27,123 @@ class DashBoardController extends Controller {
         ]]);
     }
 
+    private function getAllAppearances($spaceId) {
+
+        $sortedAppearances = Appearance::
+                            where('spaceID', $spaceId)
+                            ->orderBy('created_at', 'ASC')
+                            ->get();
+        $appearanceCount = count($sortedAppearances);
+
+        if ( !empty($appearanceCount) ) {
+            $firstAppearance = $sortedAppearances[0]->created_at;
+            $firstYear = $firstAppearance->year;
+            $firstMonth = $firstAppearance->month;
+
+            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
+            $lastYear = $lastAppearance->year;
+            $lastMonth = $lastAppearance->month;
+
+            $yearSpan = (int)$lastYear - (int)$firstYear;
+
+            $res = array();
+            for ($year = 0; $year <= $yearSpan; $year++) {
+                for ($month = 1; $month <= 12; $month++) {
+                    $joinsForMonth = count(
+                                        Appearance::
+                                        where('spaceID', $spaceId)
+                                        ->whereYear('created_at', ( $firstYear + $year ) )
+                                        ->whereMonth('created_at', ( $month ) )
+                                        ->get()
+                                    ); 
+                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
+                }        
+            }
+            return $res;
+        }
+    }
+
+    /**
+     * @param $spaceId
+     * @return events@spaceID
+     */
+    private function getEventAppearances($spaceId) {
+        // event
+        $sortedAppearances = Appearance::
+                            where('spaceID', $spaceId)
+                            ->where('eventID', '!=', NULL )
+                            ->orderBy('created_at', 'ASC')
+                            ->get();
+
+        $appearanceCount = count($sortedAppearances);
+
+        if ( !empty($appearanceCount) ) {
+            $firstAppearance = $sortedAppearances[0]->created_at;
+            $firstYear = $firstAppearance->year;
+            $firstMonth = $firstAppearance->month;
+
+            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
+            $lastYear = $lastAppearance->year;
+            $lastMonth = $lastAppearance->month;
+
+            $yearSpan = (int)$lastYear - (int)$firstYear;
+
+            $res = array();
+            for ($year = 0; $year <= $yearSpan; $year++) {
+                for ($month = 1; $month <= 12; $month++) {
+                    $joinsForMonth = count(
+                                        Appearance::
+                                        where('spaceID', $spaceId)
+                                        ->where('eventID', '!=', NULL)
+                                        ->whereYear('created_at', ( $firstYear + $year ) )
+                                        ->whereMonth('created_at', ( $month ) )
+                                        ->get()
+                                    ); 
+                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
+                }        
+            }
+            return $res;
+        }
+    }
+
+    private function getNonEventAppearances($spaceId, $occasion) {
+
+        $sortedAppearances = Appearance::where('spaceID', $spaceId)
+                                        ->where('occasion', $occasion )
+                                        ->orderBy('created_at', 'ASC')
+                                        ->get();
+
+        $appearanceCount = count($sortedAppearances);
+
+        if ( !empty($appearanceCount) ) {
+            $firstAppearance = $sortedAppearances[0]->created_at;
+            $firstYear = $firstAppearance->year;
+            $firstMonth = $firstAppearance->month;
+
+            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
+            $lastYear = $lastAppearance->year;
+            $lastMonth = $lastAppearance->month;
+
+            $yearSpan = (int)$lastYear - (int)$firstYear;
+
+            $res = array();
+            for ($year = 0; $year <= $yearSpan; $year++) {
+                for ($month = 1; $month <= 12; $month++) {
+                    $joinsForMonth = count(
+                                        Appearance::
+                                        where('spaceID', $spaceId)
+                                        ->where('occasion', $occasion)
+                                        ->whereYear('created_at', ( $firstYear + $year ) )
+                                        ->whereMonth('created_at', ( $month ) )
+                                        ->get()
+                                    ); 
+                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
+                }        
+            }
+            return $res;
+        }
+    }
+
     /**
      * Get all member signUps
      * @param void
@@ -63,88 +180,30 @@ class DashBoardController extends Controller {
         return Response::json($res);
     }
 
+
     /**
      * Get all appearances 
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function spaceAppearances($spaceId, $occasion = false) {
-        // $user = User::find( Auth::id() )->spaceID;
+    public function Appearances($spaceId) {
+        $appearances = array(
+            'all' => $this->getAllAppearances($spaceId), 
+            'event' => $this->getEventAppearances($spaceId),
+            'work' => $this->getNonEventAppearances($spaceId, 'work'),
+            'booking' => $this->getNonEventAppearances($spaceId, 'booking'),
+            'student' => $this->getNonEventAppearances($spaceId, 'student'),
+            'invite' => $this->getNonEventAppearances($spaceId, 'invite')
+        );
+        return Response::json($appearances);
+    }
 
-        // work and event attend
-        if (!$occasion) {
-            $sortedAppearances = Appearance::
-                                where('spaceID', $spaceId)
-                                ->orderBy('created_at', 'ASC')
-                                ->get();
-            $appearanceCount = count($sortedAppearances);
-
-            if ( !empty($appearanceCount) ) {
-                $firstAppearance = $sortedAppearances[0]->created_at;
-                $firstYear = $firstAppearance->year;
-                $firstMonth = $firstAppearance->month;
-
-                $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
-                $lastYear = $lastAppearance->year;
-                $lastMonth = $lastAppearance->month;
-
-                $yearSpan = (int)$lastYear - (int)$firstYear;
-
-                $res = array();
-                for ($year = 0; $year <= $yearSpan; $year++) {
-                    for ($month = 1; $month <= 12; $month++) {
-                        $joinsForMonth = count(
-                                            Appearance::
-                                            where('spaceID', $spaceId)
-                                            ->whereYear('created_at', ( $firstYear + $year ) )
-                                            ->whereMonth('created_at', ( $month ) )
-                                            ->get()
-                                        ); 
-                        if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-                    }        
-                }
-                return Response::json($res);
-            }
-            return Response::json([ 'error' => 'No appearances' ]);
-        } 
-        else {
-            $sortedAppearances = Appearance::
-                                where('spaceID', $spaceId)
-                                ->where('eventID', '!=', NULL )
-                                ->orderBy('created_at', 'ASC')
-                                ->get();
-
-            $appearanceCount = count($sortedAppearances);
-
-            if ( !empty($appearanceCount) ) {
-                $firstAppearance = $sortedAppearances[0]->created_at;
-                $firstYear = $firstAppearance->year;
-                $firstMonth = $firstAppearance->month;
-
-                $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
-                $lastYear = $lastAppearance->year;
-                $lastMonth = $lastAppearance->month;
-
-                $yearSpan = (int)$lastYear - (int)$firstYear;
-
-                $res = array();
-                for ($year = 0; $year <= $yearSpan; $year++) {
-                    for ($month = 1; $month <= 12; $month++) {
-                        $joinsForMonth = count(
-                                            Appearance::
-                                            where('spaceID', $spaceId)
-                                            ->where('eventID', '!=', NULL)
-                                            ->whereYear('created_at', ( $firstYear + $year ) )
-                                            ->whereMonth('created_at', ( $month ) )
-                                            ->get()
-                                        ); 
-                        if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-                    }        
-                }
-                return Response::json($res);
-            }
-            return Response::json([ 'error' => 'No appearances' ]);
-        }
+    // 
+    public function write() {
+        $documentRoot = $_SERVER['DOCUMENT_ROOT'];
+        $fp = fopen("$documentRoot/test/foo.Rmd", 'ab');
+        $outputString = "one"."\t"."two\nthree";
+        fwrite($fp, $outputString, strlen($outputString) );
     }
 
     public function inviteHelper() {
