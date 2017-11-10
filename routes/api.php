@@ -14,6 +14,11 @@ use Illuminate\Http\Request;
 |
 */
 
+// DashboardController
+Route::get('db/joins', 'DashboardController@allUserJoins'); // get all user joins
+Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances'); // TESTING get all user appearances 
+Route::get('db/write', 'DashboardController@write'); // TESTING get all user appearances 
+
 // AuthController
 Route::post('signUp', 'AuthController@signUp');   // sign up
 Route::post('login', 'AuthController@signIn');  // login
