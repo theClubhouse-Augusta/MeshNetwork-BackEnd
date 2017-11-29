@@ -17,6 +17,11 @@ class Notifications extends Migration
             $table->increments('id');
             $table->integer('userID');
             $table->longText('body');
+            // bookables
+            // events
+            // invites
+            // reminders
+            // follow up
             $table->boolean('read')->default(false);
             $table->timestamps();
 

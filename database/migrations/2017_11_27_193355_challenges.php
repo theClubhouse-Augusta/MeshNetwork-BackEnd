@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Lessonfiles extends Migration
+class Challenges extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class Lessonfiles extends Migration
      */
     public function up()
     {
-      Schema::create('lessonfiles', function(Blueprint $table) {
-        $table->increments('id');
-        $table->longtext('filelocation');
-        $table->integer('lessonID');
-        $table->timestamps();
-      });
+        Schema::create('challenges', function (Blueprint $table) 
+        {
+            $table->increments('id');
+            $table->integer('eventID');
+            $table->integer('userID');
+        });
     }
 
     /**
@@ -28,6 +28,6 @@ class Lessonfiles extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('challenges');
     }
 }

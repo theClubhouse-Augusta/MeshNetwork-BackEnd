@@ -13,7 +13,6 @@ class Workspaces extends Migration
      */
     public function up()
     {
-
         Schema::create('workspaces', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
@@ -22,7 +21,9 @@ class Workspaces extends Migration
             $table->string('address');
             $table->string('state');
             $table->integer('zipcode');
-            $table->string('email')->unique();
+            $table->float('lon');
+            $table->float('lat');
+            $table->string('email');
             $table->string('website');
             $table->integer('phone_number');
             $table->longText('description');
@@ -30,7 +31,6 @@ class Workspaces extends Migration
             // if they don't provide one for some reason?
             $table->longtext('logo')->nullable();
             $table->string('status')->default('pending'); //approved, declined
-            $table->string('organizers');
             $table->timestamps();
       });
     }
