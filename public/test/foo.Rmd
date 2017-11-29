@@ -1,0 +1,24 @@
+---
+title: "Dude Sign ups 2015-2019"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: menu
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dygraphs)
+library(xts)
+joinsByMonthYear <- c(2,3,4,3,3,2,2,3,1,4,3,3,2,4,2,5,2,2,1,1,4,3,2,3,4,5,2,3,3,4,1,4,4,3,4,3,2,3,1,5,3,6,5,1,3)
+joinTS <- ts( joinsByMonthYear, start= c(2015,11), end= c(2019,10), frequency = 12)
+joinTS_AS_XTS <- as.xts(joinTS)
+```
+Row {.tabset .tabset-fade}
+-------------------------------------
+### All incubators
+```{r}
+dygraph(joinTS_AS_XTS) %>%
+dyOptions(drawPoints = TRUE, pointSize = 2) %>%
+dyRangeSelector()
+```

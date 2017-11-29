@@ -1,212 +1,97 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Response;
-use Purifier;
-use Hash;
 use Auth;
 use JWTAuth;
-use Carbon\Carbon;
 
+// Service Classes 
+use App\Services\AppearanceService;
+use App\Services\JoinsService;
+use App\Services\RMarkdownService;
+
+// Eloquent Models
 use App\User;
 use App\Appearance;
 
-class DashBoardController extends Controller {
-
-    /** JWTAuth for Routes
-     * @param void
-     * @return void 
-     */
-    public function __construct() {
-        $this->middleware('jwt.auth', ['only' => [
-            // 'allUserJoins',
-            // 'spaceAppearances',
-        ]]);
-    }
-
-    private function getAllAppearances($spaceId) {
-
-        $sortedAppearances = Appearance::
-                            where('spaceID', $spaceId)
-                            ->orderBy('created_at', 'ASC')
-                            ->get();
-        $appearanceCount = count($sortedAppearances);
-
-        if ( !empty($appearanceCount) ) {
-            $firstAppearance = $sortedAppearances[0]->created_at;
-            $firstYear = $firstAppearance->year;
-            $firstMonth = $firstAppearance->month;
-
-            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
-            $lastYear = $lastAppearance->year;
-            $lastMonth = $lastAppearance->month;
-
-            $yearSpan = (int)$lastYear - (int)$firstYear;
-
-            $res = array();
-            for ($year = 0; $year <= $yearSpan; $year++) {
-                for ($month = 1; $month <= 12; $month++) {
-                    $joinsForMonth = count(
-                                        Appearance::
-                                        where('spaceID', $spaceId)
-                                        ->whereYear('created_at', ( $firstYear + $year ) )
-                                        ->whereMonth('created_at', ( $month ) )
-                                        ->get()
-                                    ); 
-                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-                }        
-            }
-            return $res;
-        }
+class DashBoardController extends Controller 
+{
+    protected $appearanceService;
+    protected $joinsService;
+    protected $rmarkdownService;
+    
+    public function __construct(
+        AppearanceService $appearanceService, 
+        JoinsService $joinsService,
+        RMarkdownService $rmarkdownService 
+    ) 
+    {
+        $this->appearanceService = $appearanceService;
+        $this->joinsService = $joinsService;
+        $this->rmarkdownService = $rmarkdownService;
     }
 
     /**
-     * @param $spaceId
-     * @return events@spaceID
-     */
-    private function getEventAppearances($spaceId) {
-        // event
-        $sortedAppearances = Appearance::
-                            where('spaceID', $spaceId)
-                            ->where('eventID', '!=', NULL )
-                            ->orderBy('created_at', 'ASC')
-                            ->get();
-
-        $appearanceCount = count($sortedAppearances);
-
-        if ( !empty($appearanceCount) ) {
-            $firstAppearance = $sortedAppearances[0]->created_at;
-            $firstYear = $firstAppearance->year;
-            $firstMonth = $firstAppearance->month;
-
-            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
-            $lastYear = $lastAppearance->year;
-            $lastMonth = $lastAppearance->month;
-
-            $yearSpan = (int)$lastYear - (int)$firstYear;
-
-            $res = array();
-            for ($year = 0; $year <= $yearSpan; $year++) {
-                for ($month = 1; $month <= 12; $month++) {
-                    $joinsForMonth = count(
-                                        Appearance::
-                                        where('spaceID', $spaceId)
-                                        ->where('eventID', '!=', NULL)
-                                        ->whereYear('created_at', ( $firstYear + $year ) )
-                                        ->whereMonth('created_at', ( $month ) )
-                                        ->get()
-                                    ); 
-                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-                }        
-            }
-            return $res;
-        }
-    }
-
-    private function getNonEventAppearances($spaceId, $occasion) {
-
-        $sortedAppearances = Appearance::where('spaceID', $spaceId)
-                                        ->where('occasion', $occasion )
-                                        ->orderBy('created_at', 'ASC')
-                                        ->get();
-
-        $appearanceCount = count($sortedAppearances);
-
-        if ( !empty($appearanceCount) ) {
-            $firstAppearance = $sortedAppearances[0]->created_at;
-            $firstYear = $firstAppearance->year;
-            $firstMonth = $firstAppearance->month;
-
-            $lastAppearance = $sortedAppearances[( $appearanceCount - 1 )]->created_at;
-            $lastYear = $lastAppearance->year;
-            $lastMonth = $lastAppearance->month;
-
-            $yearSpan = (int)$lastYear - (int)$firstYear;
-
-            $res = array();
-            for ($year = 0; $year <= $yearSpan; $year++) {
-                for ($month = 1; $month <= 12; $month++) {
-                    $joinsForMonth = count(
-                                        Appearance::
-                                        where('spaceID', $spaceId)
-                                        ->where('occasion', $occasion)
-                                        ->whereYear('created_at', ( $firstYear + $year ) )
-                                        ->whereMonth('created_at', ( $month ) )
-                                        ->get()
-                                    ); 
-                    if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-                }        
-            }
-            return $res;
-        }
-    }
-
-    /**
-     * Get all member signUps
-     * @param void
-     * @return Illuminate\Support\Facades\Response::class
-     */
-    public function allUserJoins() {
-        // $user = User::find( Auth::id() )->spaceID;
-
-        $sortedUsers = User::all()->sortBy('created_at');
-        $memberCount = count($sortedUsers);
-
-        $firstUser = $sortedUsers[0]->created_at;
-        $firstYear = $firstUser->year;
-        $firstMonth = $firstUser->month;
-
-        $lastUser = $sortedUsers[( $memberCount - 1 )]->created_at;
-        $lastYear = $lastUser->year;
-        $lastMonth = $lastUser->month;
-
-        $yearSpan = (int)$lastYear - (int)$firstYear;
-
-        $res = array();
-        for ($year = 0; $year <= $yearSpan; $year++) {
-            for ($month = 1; $month <= 12; $month++) {
-                $joinsForMonth = count(
-                                    User::
-                                    whereYear('created_at', ( $firstYear + $year ) )
-                                    ->whereMonth('created_at', ( $month ) )
-                                    ->get()
-                                ); 
-                if ( !empty($joinsForMonth) ) array_push($res, $joinsForMonth);
-            }        
-        }
-        return Response::json($res);
-    }
-
-
-    /**
-     * Get all appearances 
+     * Generate Member Sign up data visualizations using RMarkdown 
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Appearances($spaceId) {
-        $appearances = array(
-            'all' => $this->getAllAppearances($spaceId), 
-            'event' => $this->getEventAppearances($spaceId),
-            'work' => $this->getNonEventAppearances($spaceId, 'work'),
-            'booking' => $this->getNonEventAppearances($spaceId, 'booking'),
-            'student' => $this->getNonEventAppearances($spaceId, 'student'),
-            'invite' => $this->getNonEventAppearances($spaceId, 'invite')
+    public function Joins($spaceId, $year) 
+    {
+        $dataAndDates = $this->joinsService->spaceUserJoins($spaceId, $year);
+        return Response::json($dataAndDates);
+        // insert data and dates into R Markdown File
+        $this->rmarkdownService->generateMemberJoinsRmd(
+            $dataAndDates['firstYear'],
+            $dataAndDates['lastYear'],
+            $dataAndDates['firstMonth'], 
+            $dataAndDates['lastMonth'],
+            $dataAndDates['memberSignUpData']
         );
-        return Response::json($appearances);
     }
 
-    // 
-    public function write() {
-        $documentRoot = $_SERVER['DOCUMENT_ROOT'];
-        $fp = fopen("$documentRoot/test/foo.Rmd", 'ab');
-        $outputString = "one"."\t"."two\nthree";
-        fwrite($fp, $outputString, strlen($outputString) );
+    /**
+     * Generate Appearances visualizations using RMarkdown 
+     * @param $spaceId
+     * @return Illuminate\Support\Facades\Response::class
+     */
+    public function Appearances($spaceId) 
+    {
+
+        // Write head of RMarkdown File
+        $this->rmarkdownService->generateTitle("Appearances!");
+
+        // Get appearances from database by occasion
+        $appearances = array(
+            'all' => $this->appearanceService->getAllAppearances($spaceId), 
+            'event' => $this->appearanceService->getEventAppearances($spaceId),
+            'work' => $this->appearanceService->getNonEventAppearances($spaceId, 'work'),
+            'booking' => $this->appearanceService->getNonEventAppearances($spaceId, 'booking'),
+            'student' => $this->appearanceService->getNonEventAppearances($spaceId, 'student'),
+            'invite' => $this->appearanceService->getNonEventAppearances($spaceId, 'invite')
+        );
+
+        // Create a seperate dataset for each occasion
+        foreach ($appearances as $key => $appearance) 
+        {
+            // Insert data into RMarkdown Script
+            $this->rmarkdownService->generateMemberAppearancesRmd(
+                $appearance['firstYear'],
+                $appearance['lastYear'], 
+                $appearance['firstMonth'], 
+                $appearance['lastMonth'],
+                $appearance['memberAppearancesData'],
+                $key,
+                (count($appearances) - 1) // for keeping track of function calls
+            );
+        }
+        // Generate individual tabs for each dataset
+        // $this->rmarkdownService->generateTabs();
+
     }
 
-    public function inviteHelper() {
+    public function inviteHelper() 
+    {
 
     }
 }

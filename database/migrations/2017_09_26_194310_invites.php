@@ -18,10 +18,13 @@ class Invites extends Migration
             $table->integer('userID');
             $table->integer('spaceID');
             $table->dateTime('date');
-            $table->string('status')->default('sent'); //TODO update would be accepted/rejected
+            $table->string('status')->default('sent');
+            // 'attended',
+            // ''  
             $table->timestamps();
-      });
+        });
     }
+
       /**
      * Reverse the migrations.
      *

@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-
-
+use Illuminate\Support\Facades\Response;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,15 +13,22 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::get('map', function() {
+  $foo = file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=515+Cougar+Dr,+Harlem,+GA&key=AIzaSyAHBDb8v9moONVsn8RBNU1HGFH5W-ak1L8');
+  $bar = json_decode($foo);
+//   return Response::json($bar->results[0]->geometry->location->lng);
+return Response::json($bar);
+});
+
 // DashboardController
-Route::get('db/joins', 'DashboardController@allUserJoins'); // get all user joins
-Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances'); // TESTING get all user appearances 
-Route::get('db/write', 'DashboardController@write'); // TESTING get all user appearances 
+Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
+Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances');
 
 // AuthController
-Route::post('signUp', 'AuthController@signUp');   // sign up
+Route::get('checkAuth', 'AuthController@checkAuth');  // sign up
+Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
-Route::post('getusers', 'AuthController@getUsers');  // admin get users 
+Route::get('getusers', 'AuthController@getUsers');  // admin get users 
 Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
 
 // UserController
@@ -30,8 +36,9 @@ Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user
 Route::post('updateUser', 'UserController@updateUser'); // logged in user profile update   
 Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
 Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
-Route::post('search', 'UserController@search'); // search by skill/SpaceID
+Route::get('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
+Route::get('user/{id}', 'UserController@user'); // get user.id
 
 // RoleController
 Route::post('newrole', 'RoleController@store');
@@ -78,5 +85,3 @@ Route::get('getBookings','BookableController@getBookings');
 Route::get('deleteBookable/{id}','BookableController@delete');
 Route::get('deleteBookings/{id}','BookableController@deleteBooking');
 
-// MainController
-Route::any('{path?}', 'MainController@index')->where("path", ".+");
