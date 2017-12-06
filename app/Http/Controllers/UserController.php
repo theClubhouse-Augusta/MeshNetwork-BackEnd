@@ -367,14 +367,13 @@ class UserController extends Controller
 
         if (!empty($attending))
         {
-
             $upcoming = array();
             foreach ($attending as $attend)
             {
-                $event = Event::find($attend->id);
-                $eDate = new DateTime($event->start);
+                $event = Event::find($attend->eventID);
+                $eDate = new DateTime($event['start']);
                 $diff = $now->diff($eDate);
-                $formattedDiff = $diff->format('%R%a days');
+                $formattedDiff = $diff->format('%R%a');
 
                 if ((int)$formattedDiff > 0) 
                 {
@@ -443,7 +442,7 @@ class UserController extends Controller
             $upcoming = array();
             foreach ($attending as $attend)
             {
-                $event = Event::find($attend->id);
+                $event = Event::find($attend->eventID);
                 $eDate = new DateTime($event->start);
                 $diff = $now->diff($eDate);
                 $formattedDiff = $diff->format('%R%a days');

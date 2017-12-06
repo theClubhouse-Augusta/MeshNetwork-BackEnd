@@ -59,12 +59,12 @@ Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 Route::get('events','EventController@get');
 Route::post('newEvent','EventController@store');
 Route::post('eventUpdate','EventController@update');
-Route::get('showEvent/{eventID}','EventController@show');
+Route::get('event/{eventID}','EventController@show');
 Route::post('searchEvent','EventController@search');
 Route::post('optEvent, ','EventController@opt');
 Route::get('deleteEvent/{id}','EventController@delete');
 Route::get('getCalendar','EventController@getCalendar');
-Route::get('storeCalendar/{eventID}','EventController@storeCalendar');
+Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 
 //AppeanceController

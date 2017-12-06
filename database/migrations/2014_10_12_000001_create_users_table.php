@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->integer('spaceID');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('title'); 
+            $table->string('title')->nullable(); 
             $table->boolean('searchOpt')->default(false);
             $table->string('company')->nullable();
             $table->string('website')->nullable();

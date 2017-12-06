@@ -25,7 +25,7 @@ class Events extends Migration
             $table->string('title'); // unique? //TODO
             $table->longText('description');
             $table->string('type'); //TODO predifned values would be easier to aggredate data
-            $table->longText('tags'); //TODO comma separated string?
+            $table->longText('tags')->nullable(); //TODO comma separated string?
             $table->boolean('local')->default(true);
             $table->timestamps();
       });

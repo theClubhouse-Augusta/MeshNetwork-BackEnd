@@ -9,13 +9,14 @@ use Purifier;
 use Hash;
 use Auth;
 use JWTAuth;
+use DateTime;
 
 use App\Event;
 use App\User;
 use App\Usertoevent;
 use App\Workspace;
 use App\Calendar;
-use App\Opts;
+use App\Opt;
 use App\File;
 
 class EventController extends Controller 
@@ -32,11 +33,11 @@ class EventController extends Controller
             'attend',
           //'store',
           // 'update',
-          'show',
+        //   'show',
           // 'search',
           // 'opt',
           'getCalendar',
-          //'storeCalendar',
+          'storeCalendar',
           // 'deleteCalendar',
           // 'delete'
         ]]);
@@ -82,7 +83,7 @@ class EventController extends Controller
         //   $check = $start - $end;
         //   if (!empty($check)) {
         //     return Response::json([ 'error' => 'Event already taking place during this time' ]);
-        //   }
+        //`   }
 
         // create ne App\Event
         $event = new Event;
@@ -225,7 +226,72 @@ class EventController extends Controller
         {
             return Response::json([ 'error' => 'Could not find event' ]);
         }
-        return Response::json($event);
+
+        $local = $event->local;
+
+        if ($local) 
+        {
+            $upcomingEvents = $this->getUpcoming();
+            $workSpace = Workspace::find($event->spaceID);
+            return Response::json([
+                'event' => $event, 
+                'local' => $workSpace,
+                'upcomingEvents' => $upcomingEvents
+            ]);
+        }
+
+        elseif (!$local) 
+        {
+            $upcomingEvents = $this->getUpcoming();
+            $hostSpace = Workspace::find($event->spaceID);
+            $participatingSpaces = $this->getParticipating($eventID);
+            array_push($participatingSpaces, $hostSpace);
+            return Response::json([
+                'event' => $event, 
+                'hostSpace' => $hostSpace,
+                'nonLocal' => $participatingSpaces ? $participatingSpaces : false,
+                'upcomingEvents' => $upcomingEvents
+            ]);
+        }
+    }
+
+    private function getParticipating($eventID) 
+    {
+        $opts = Opt::where('eventID', $eventID)->get();
+
+        $workSpaces = array();
+        foreach ($opts as $opt) {
+            $space = Workspace::find($opt->spaceID);
+            array_push($workSpaces, $space);
+        }
+        return $workSpaces;
+    }
+    private function getUpcoming() 
+    {
+        $upcoming = array();
+        $events = Event::all();
+        foreach ($events as $event)
+        {
+
+            $now = new DateTime();
+            $eDate = new DateTime($event->start);
+            $diff = $now->diff($eDate);
+            $formattedDiff = $diff->format('%R%a days');
+
+            if ((int)$formattedDiff > 0) 
+            {
+                array_push($upcoming, 
+                    [
+                        "title" => $event->title,
+                        "id" => $event->id,
+                        "start" => $event->start 
+                    ]
+                );
+                if (count($upcoming) === 3) {
+                    return $upcoming;
+                }
+            }
+        }
     }
 
     public function search(Request $request) 
@@ -341,12 +407,18 @@ class EventController extends Controller
 
     public function storeCalendar($eventID) 
     {
-        //$userID = Auth::id();
-        $userID = 1;
+        $userID = Auth::id();
 
         $calendar = new Calendar;
         $calendar->userID = $userID;
         $calendar->eventID = $eventID;
+
+        $check = Calendar::where('eventID', $calendar->eventID)->where('userID', $calendar->userID)->first();
+        
+        if (!empty($check))
+        {
+            return Response::json([ 'duplicate' => 'You already signed up for this event' ]);
+        }
 
         if (!$calendar->save()) 
         {

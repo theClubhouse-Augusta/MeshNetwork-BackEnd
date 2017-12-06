@@ -243,9 +243,9 @@ class AuthController extends Controller {
             foreach ($attending as $attend)
             {
                 $event = Event::find($attend->id);
-                $eDate = new DateTime($event->start);
+                $eDate = new DateTime($event['start']);
                 $diff = $now->diff($eDate);
-                $formattedDiff = $diff->format('%R%a days');
+                $formattedDiff = $diff->format('%R%a');
 
                 if ((int)$formattedDiff > 0) 
                 {
