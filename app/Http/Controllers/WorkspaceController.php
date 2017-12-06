@@ -14,12 +14,14 @@ use App\Workspace;
 use App\Event;
 use App\Bookable;
 
-class WorkspaceController extends Controller {
+class WorkspaceController extends Controller 
+{
     /** JWTAuth for Routes
      * @param void
      * @return void
      */
-    public function __construct() {
+    public function __construct() 
+    {
         $this->middleware('jwt.auth', ['only' => [
         // 'store',
         // 'get',
@@ -30,7 +32,9 @@ class WorkspaceController extends Controller {
         // 'bookables'
         ]]);
     }
-    public function store(Request $request) {
+
+    public function store(Request $request) 
+    {
         $rules = [
             'name' => 'required|string',
             'city' => 'required|string',
@@ -82,15 +86,18 @@ class WorkspaceController extends Controller {
 
         // optional input
         // Check for valid image upload
-        if (!empty($_FILES['logo'])) {
+        if (!empty($_FILES['logo'])) 
+        {
         // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) 
+            {
                 return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE) {
+            if ($info === FALSE) 
+            {
                 return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
             }
 
@@ -106,15 +113,18 @@ class WorkspaceController extends Controller {
             $logo = $request->file('logo');
         }
 
-        if (!empty($_FILES['logo'])) {
+        if (!empty($_FILES['logo'])) 
+        {
             // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) 
+            {
                 return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE) {
+            if ($info === FALSE) 
+            {
                 return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
             }
 
@@ -132,7 +142,8 @@ class WorkspaceController extends Controller {
             // Ensure unique email
             $check = Workspace::where('name', $name)->first();
 
-            if (!empty($check)) {
+            if (!empty($check)) 
+            {
                 return Response::json(['error' => 'Name already in use']);
             }
 
@@ -151,7 +162,8 @@ class WorkspaceController extends Controller {
             $workspace->lon = $lon;
             $workspace->lat = $lat;
 
-            if (!empty($logo)) {
+            if (!empty($logo)) 
+            {
                 $logoName = $logo->getClientOriginalName();
                 $logo->move('storage/logo/', $logoName);
                 $workspace->logo = $request->root().'/storage/logo/'.$logoName;
@@ -192,18 +204,11 @@ class WorkspaceController extends Controller {
 
     public function get() 
     {
-        // Ensure user has admin privalages
-        // $admin = Auth::user();
-        // $id = $admin->roleID;
-        // if ($id != 1 && $id != 2) {
-        //   return Response::json(['error' => 'invalid credentials']);
- // }
-
         return Response::json(Workspace::all());
-            
     }
 
-    public function show($spaceID) {
+    public function show($spaceID) 
+    {
     // Ensure user has admin privalages
   //   $admin = Auth::user();
   //   $id = $admin->roleID;
@@ -211,14 +216,16 @@ class WorkspaceController extends Controller {
   //     return Response::json(['error' => 'invalid credentials']);
   //   }
         $workspace = Workspace::find($spaceID);
-        if (empty($workspace)) {
+        if (empty($workspace)) 
+        {
             return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
         }
-        return Response::json([ 'success' => $workspace ]);
+        return Response::json($workspace);
     }
 
 
-    public function approve($spaceID, $status) {
+    public function approve($spaceID, $status) 
+    {
         // // Ensure user has admin privalages
         // $admin = Auth::user();
         // $id = $admin->roleID;
@@ -227,13 +234,15 @@ class WorkspaceController extends Controller {
         // }
         $workspace = Workspace::where('id', $spaceID)->first();
         $workspace->status = $status;
-        if (!$workspace->save()) {
+        if (!$workspace->save()) 
+        {
             return Response::json([ 'error' => 'Database error' ]);
         }
         return Response::json([ 'success' => 'Workspace status: '.$status ]);
     }
 
-    public function update(Request $request) {
+    public function update(Request $request) 
+    {
         // Ensure user has admin privalages
         // $org = Auth::user();
         // $id = $org->id;
@@ -256,7 +265,8 @@ class WorkspaceController extends Controller {
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) {
+        if ($validator->fails()) 
+        {
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
@@ -272,83 +282,85 @@ class WorkspaceController extends Controller {
         $phone_number = $request->input('phone_number');
         $description = $request->input('description');
 
-    // optional input
-    // Check for valid image upload
-    if (!empty($_FILES['logo'])) {
-      // Check for file upload error
-      if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
-          return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
-      }
-      // checks for valid image upload
-      $info = getimagesize($_FILES['logo']['tmp_name']);
-
-      if ($info === FALSE) {
-        return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-      }
-
-      // checks for valid image upload
-      if (($info[2] !== IMAGETYPE_GIF) 
-            && ($info[2] !== IMAGETYPE_JPEG) 
-            && ($info[2] !== IMAGETYPE_PNG)) 
+        // optional input
+        // Check for valid image upload
+        if (!empty($_FILES['logo'])) 
         {
-            return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+            // Check for file upload error
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) 
+            {
+                return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
+            }
+            // checks for valid image upload
+            $info = getimagesize($_FILES['logo']['tmp_name']);
+
+            if ($info === FALSE) 
+            {
+                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            }
+
+            // checks for valid image upload
+            if (($info[2] !== IMAGETYPE_GIF) 
+                    && ($info[2] !== IMAGETYPE_JPEG) 
+                    && ($info[2] !== IMAGETYPE_PNG)) 
+                {
+                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+                }
+
+            // Get profile image input
+            $logo = $request->file('logo');
         }
 
-      // Get profile image input
-      $logo = $request->file('logo');
-    }
+        $workspace = Workspace::where('id', $spaceID)->first();
 
-    if (!empty($_FILES['logo'])) {
-      // Check for file upload error
-      if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
-          return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
-      }
-      // checks for valid image upload
-      $info = getimagesize($_FILES['logo']['tmp_name']);
+        if(!empty($name)) $workspace->name = $name;
+        if(!empty($city)) $workspace->city = $city;
+        if(!empty($address)) $workspace->address = $address;
+        if(!empty($state)) $workspace->state = $state;
+        if(!empty($zipcode)) $workspace->zipcode = $zipcode;
+        if(!empty($email)) $workspace->email = $email;
+        if(!empty($website)) $workspace->website = $website;
+        if(!empty($phone_number)) $workspace->phone_number = $phone_number;
+        if(!empty($description)) $workspace->description = $description;
 
-      if ($info === FALSE) {
-        return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-      }
-
-      // checks for valid image upload
-      if (($info[2] !== IMAGETYPE_GIF) 
-            && ($info[2] !== IMAGETYPE_JPEG) 
-            && ($info[2] !== IMAGETYPE_PNG)) 
+        if (!empty($logo)) 
         {
-            return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+            $logoName = $logo->getClientOriginalName();
+            $logo->move('storage/logo/', $logoName);
+            $user->logo = $request->root().'/storage/logo/'.$logoName;
         }
 
-      // Get profile image input
-      $logo = $request->file('logo');
-    }
-    $workspace = Workspace::where('id', $spaceID)->first();
-
-    if(!empty($name)) $workspace->name = $name;
-    if(!empty($city)) $workspace->city = $city;
-    if(!empty($address)) $workspace->address = $address;
-    if(!empty($state)) $workspace->state = $state;
-    if(!empty($zipcode)) $workspace->zipcode = $zipcode;
-    if(!empty($email)) $workspace->email = $email;
-    if(!empty($website)) $workspace->website = $website;
-    if(!empty($phone_number)) $workspace->phone_number = $phone_number;
-    if(!empty($description)) $workspace->description = $description;
-
-    if (!empty($logo)) {
-      $logoName = $logo->getClientOriginalName();
-      $logo->move('storage/logo/', $logoName);
-      $user->logo = $request->root().'/storage/logo/'.$logoName;
+        // persist workspace to database
+        if (!$workspace->save()) 
+        {
+            return Response::json(['error' => 'Account not created']);
+        }
+        return Response::json([ 'success' => $workspace->name.' updated!' ]);
     }
 
-    // persist workspace to database
-    if (!$workspace->save()) {
-      return Response::json(['error' => 'Account not created']);
+    public function events($spaceID) 
+    {
+        // Ensure user has admin privalages
+        // $admin = Auth::user();
+        // $id = $admin->roleID;
+        // if ($id != 1 && $id != 2) {
+        //   return Response::json(['error' => 'invalid credentials']);
+        // }
+
+        // TODO provide check for dates or let 
+        // fron-end handle that?
+        $events = Event::where('spaceID', $spaceID)->get();
+
+        if (empty($events)) 
+        {
+            return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
+        }
+        return Response::json([ 'success' => $events ]);
+
     }
-    return Response::json([ 'success' => $workspace->name.' updated!' ]);
 
-
-  }
-
-  public function events($spaceID) {
+  public function bookables($spaceID) 
+  {
     // Ensure user has admin privalages
     // $admin = Auth::user();
     // $id = $admin->roleID;
@@ -356,31 +368,13 @@ class WorkspaceController extends Controller {
     //   return Response::json(['error' => 'invalid credentials']);
     // }
 
-    // TODO provide check for dates or let 
-    // fron-end handle that?
-    $events = Event::where('spaceID', $spaceID)->get();
+        $bookables = Bookable::where('spaceID',$spaceID)->get();
 
-    if (empty($events)) {
-      return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
+        if (empty($bookables)) 
+        {
+            return Response::json([ 'error' => 'No bookables with id: '.$spaceID ]);
+        }
+        return Response::json([ 'success' => $bookables ]);
+
     }
-    return Response::json([ 'success' => $events ]);
-
-  }
-
-  public function bookables($spaceID) {
-    // Ensure user has admin privalages
-    // $admin = Auth::user();
-    // $id = $admin->roleID;
-    // if ($id != 1 && $id != 2) {
-    //   return Response::json(['error' => 'invalid credentials']);
-    // }
-
-    $bookables = Bookable::where('spaceID',$spaceID)->get();
-
-    if (empty($bookables)) {
-      return Response::json([ 'error' => 'No bookables with id: '.$spaceID ]);
-    }
-    return Response::json([ 'success' => $bookables ]);
-
-  }
 }
