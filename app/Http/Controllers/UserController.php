@@ -87,6 +87,7 @@ class UserController extends Controller
           'phoneNumber' => 'nullable|string',
           'deleteSkills' => 'nullable|string',
         ];
+        
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 

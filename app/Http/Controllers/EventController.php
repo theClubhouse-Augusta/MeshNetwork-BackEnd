@@ -12,6 +12,8 @@ use JWTAuth;
 use DateTime;
 
 use App\Event;
+use App\Sponser;
+use App\Sponserevent;
 use App\User;
 use App\Usertoevent;
 use App\Workspace;
@@ -43,6 +45,19 @@ class EventController extends Controller
         ]]);
     }
 
+    public function makeSponser(Request $request)
+    {
+        /* Sponser Info */
+        $name = $request->input('name');
+        $website = $request->input('website');
+        $logo = $request->file('logo');
+        $sponser = new Sponser;
+        $sponser->name = $name;
+        $sponser->website = $website;
+        $sponser->logo = $logo;
+        $sponser->save();
+    }
+
     public function store(Request $request) 
     {
         $rules = [
@@ -53,7 +68,10 @@ class EventController extends Controller
             'type' => 'required|string',
             'tags' => 'required|string',
             'local' => 'nullable|string',
-            'file' => 'nullable|string'
+            'file' => 'nullable|string',
+            // 'name' => 'required_with:logo,website',
+            // 'logo' => 'required_with:name,website',
+            // 'website' => 'required_with:logo,name'
         ];
 
         // Validate input against rules
@@ -67,7 +85,35 @@ class EventController extends Controller
         // user currently signed in
         // $userID = Auth::id();
         //  $spaceID = User::find($userID)->spaceID;
-        // required input
+
+        /* Sponser Info */
+        $names = $request->input('names');
+        $websites = $request->input('websites');
+        $logos = $request->input('logos');
+
+        $sponserIDs = [];
+        if (!empty($names) || !empty($websites) || !empty($logos) ) 
+        {
+            if (!empty($names) && !empty($websites) && !empty($logos) ) 
+            {
+                $length = count($names);
+                for ($i = 0; $i < count; $i++)
+                {
+                    $sponser = new Sponser;
+                    $sponser->name = $names[$i];
+                    $sponser->website = $websites[$i];
+                    $sponser->logo = $logos[$i];
+                    $sponser->save();
+                    array_push($sponserIDs, $sponser->id);
+                }
+            }
+            else
+            {
+                return Response::json([ 'error' => 'Sponsers require name, website, and logo' ]);
+            }
+        }
+
+        /* Event Info */
         $userID = $request->input('userID');
         $spaceID = $request->input('spaceID');
         $start = $request->input('start');
@@ -79,11 +125,7 @@ class EventController extends Controller
         // optional input
         $local = $request->input('local');
         $file = $request->input('file');
-        // check if another event is in time slot
-        //   $check = $start - $end;
-        //   if (!empty($check)) {
-        //     return Response::json([ 'error' => 'Event already taking place during this time' ]);
-        //`   }
+
 
         // create ne App\Event
         $event = new Event;
@@ -98,10 +140,22 @@ class EventController extends Controller
 
         //optional input
         if (!empty($local)) $event->local = $local;
+        if (!empty($sp)) $event->local = $local;
 
         if (!$event->save()) 
         {
             return Response::json([ 'error' => 'Database error' ]);  
+        }
+        $eventID = $event->id;
+        if (!empty($sponserIDs)) 
+        {
+            foreach ($sponserIDs as $sponserID) 
+            {
+                $sponserevent = new Sponserevent;
+                $sponserevent->eventID = $eventID;
+                $sponserevent->sponserID = $sponserID;
+                $sponserevent->save();
+            }    
         }
 
         // create new App\File;
@@ -129,7 +183,6 @@ class EventController extends Controller
     public function get() 
     {
 
-        return 'foo'; 
         $now = date();
         $events = $Event::where('start' > $now)->get();
 
@@ -221,6 +274,8 @@ class EventController extends Controller
     public function show($eventID) 
     {
         $event = Event::find($eventID);
+        $sponsors = $this->getSponsors($eventID);
+        $upcomingEvents = $this->getUpcoming();
 
         if (empty($event)) 
         {
@@ -231,18 +286,17 @@ class EventController extends Controller
 
         if ($local) 
         {
-            $upcomingEvents = $this->getUpcoming();
             $workSpace = Workspace::find($event->spaceID);
             return Response::json([
                 'event' => $event, 
                 'local' => $workSpace,
-                'upcomingEvents' => $upcomingEvents
+                'upcomingEvents' => $upcomingEvents,
+                'sponsors' => (count($sponsors) != 0) ? $sponsors : false
             ]);
         }
-
         elseif (!$local) 
         {
-            $upcomingEvents = $this->getUpcoming();
+            $sponsors = $this->getSponsors($event->id);
             $hostSpace = Workspace::find($event->spaceID);
             $participatingSpaces = $this->getParticipating($eventID);
             array_push($participatingSpaces, $hostSpace);
@@ -250,7 +304,8 @@ class EventController extends Controller
                 'event' => $event, 
                 'hostSpace' => $hostSpace,
                 'nonLocal' => $participatingSpaces ? $participatingSpaces : false,
-                'upcomingEvents' => $upcomingEvents
+                'upcomingEvents' => $upcomingEvents,
+                'sponsors' => (count($sponsors) != 0) ? $sponser : false
             ]);
         }
     }
@@ -292,6 +347,25 @@ class EventController extends Controller
                 }
             }
         }
+    }
+
+    private function getSponsors($eventID) 
+    {
+        $sponsors = [];
+        $sponsorevents = Sponserevent::where('eventID', $eventID)->get();
+        if (!empty($sponsorevents)) 
+        {
+            foreach($sponsorevents as $sponsorevent)
+            {
+                $sponsor = Sponser::where('id', $sponsorevent->sponserID)->first();
+
+                if (count($sponsor) !== 0) 
+                {
+                    array_push($sponsors, $sponsor);
+                }
+            }
+        }
+        return $sponsors;
     }
 
     public function search(Request $request) 
