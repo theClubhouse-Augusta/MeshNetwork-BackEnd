@@ -56,6 +56,7 @@ Route::get('workevents/{spaceID}', 'WorkspaceController@events');
 Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 
 // EventController
+Route::post('sponser','EventController@makeSponser');
 Route::get('events','EventController@get');
 Route::post('newEvent','EventController@store');
 Route::post('eventUpdate','EventController@update');

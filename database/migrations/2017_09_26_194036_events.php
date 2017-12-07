@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Events extends Migration
+class Event extends Migration
 {
     /**
      * Run the migrations.
@@ -27,6 +27,8 @@ class Events extends Migration
             $table->string('type'); //TODO predifned values would be easier to aggredate data
             $table->longText('tags')->nullable(); //TODO comma separated string?
             $table->boolean('local')->default(true);
+            $table->boolean('challenge')->default(false);
+            $table->boolean('sponserID')->nullable();
             $table->timestamps();
       });
     }
