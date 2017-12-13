@@ -435,7 +435,7 @@ class UserController extends Controller
         // 'SELECT skillID, COUNT(*) AS foo FROM userskills GROUP BY skillID ORDER BY foo DESC LIMIT 6';
     }
 
-    public function user($id) 
+            public function user($id) 
     {
         $user = User::find($id);
 
