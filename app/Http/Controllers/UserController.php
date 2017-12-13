@@ -35,6 +35,7 @@ class UserController extends Controller
             // 'searchName',
             'search',
             'getSkills',
+            'allSkills',
         ]]);
     }
 
@@ -283,6 +284,7 @@ class UserController extends Controller
         $users = User::where('name', 'LIKE', '%'.$query.'%')
                     ->Orwhere('bio', 'LIKE', '%'.$query.'%')
                     ->Orwhere('company', 'LIKE', '%'.$query.'%')
+                    ->Orwhere('email', 'LIKE', '%'.$query.'%')
                     ->get();
         $skills = Userskill::where('name', 'LIKE', '%'.$query.'%')
                            ->select('userskills.userID')
@@ -399,6 +401,20 @@ class UserController extends Controller
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
         ]);   
+    }
+
+
+    public function allSkills() 
+    {
+        $skills = Skill::all();
+        $skillsArray = [];
+        foreach($skills as $skill) 
+        {   array_push($skillsArray, [
+                'label' => $skill->name,
+                'value' => $skill->id,
+            ]);
+        }
+        return Response::json($skillsArray);
     }
 
     public function getSkills() 

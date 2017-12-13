@@ -16,9 +16,9 @@ class Sponsers extends Migration
         Schema::create('sponsers', function (Blueprint $table) 
         {
             $table->increments('id');
-            $table->string('name'); // unique? //TODO
-            $table->string('website'); // unique? //TODO
-            $table->longtext('logo');
+            $table->string('name')->unique(); // unique? //TODO
+            $table->string('website')->nullable(); // unique? //TODO
+            $table->longtext('logo')->nullable();
             $table->timestamps();
         });
     }

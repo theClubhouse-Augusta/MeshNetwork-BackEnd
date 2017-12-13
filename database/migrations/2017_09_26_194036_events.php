@@ -28,7 +28,7 @@ class Event extends Migration
             $table->longText('tags')->nullable(); //TODO comma separated string?
             $table->boolean('local')->default(true);
             $table->boolean('challenge')->default(false);
-            $table->boolean('sponserID')->nullable();
+            $table->string('url')->nullable();
             $table->timestamps();
       });
     }

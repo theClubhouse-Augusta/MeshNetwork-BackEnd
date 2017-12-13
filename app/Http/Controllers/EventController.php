@@ -42,6 +42,7 @@ class EventController extends Controller
           'storeCalendar',
           // 'deleteCalendar',
           // 'delete'
+          'Sponsers'
         ]]);
     }
 
@@ -66,9 +67,10 @@ class EventController extends Controller
             'title' => 'required|string',
             'description' => 'required|string',
             'type' => 'required|string',
-            'tags' => 'required|string',
+                'tags' => 'required|string',
             'local' => 'nullable|string',
             'file' => 'nullable|string',
+            'url' => 'nullable|string',
             // 'name' => 'required_with:logo,website',
             // 'logo' => 'required_with:name,website',
             // 'website' => 'required_with:logo,name'
@@ -124,6 +126,7 @@ class EventController extends Controller
         $tags = $request->input('tags');
         // optional input
         $local = $request->input('local');
+        $url = $request->input('url');
         $file = $request->input('file');
 
 
@@ -406,6 +409,7 @@ class EventController extends Controller
         return Response::json([ 'error' => 'Nothing matched your query' ]);
     }
 
+
     // allow workspaces to opt-in to a remote event at another workspace
     public function opt(Request $request) 
     {
@@ -560,5 +564,9 @@ class EventController extends Controller
         {
             return Response::json([ 'error' => 'database error, try again' ]);
         }
+    }
+    public function Sponsers() 
+    {
+        return Response::json(Sponser::all());
     }
 }

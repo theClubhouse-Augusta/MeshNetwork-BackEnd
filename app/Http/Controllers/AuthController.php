@@ -235,9 +235,8 @@ class AuthController extends Controller {
 
         $attending = Calendar::where('userID', $user->id)->get();
 
-        if (!empty($attending))
+        if (!empty($attending)) 
         {
-
             $now = new DateTime();
             $upcoming = array();
             foreach ($attending as $attend)
@@ -296,7 +295,7 @@ class AuthController extends Controller {
 
     // get all users if no spaceIDs specified
     //if (empty($spaceIDs)) {
-      return Response::json(User::all());
+      return Response::json(User::paginate(3));
    // }
 
     // return users by spaceID 
