@@ -33,6 +33,7 @@ Route::post('searchname', 'UserController@searchName'); // search by name/spaceI
 Route::get('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
 Route::get('user/{id}', 'UserController@user'); // get user.id
+Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
 
 // RoleController
 Route::post('newrole', 'RoleController@store');
@@ -53,7 +54,7 @@ Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 Route::post('sponser','EventController@makeSponser');
 Route::get('sponsors','EventController@Sponsers');
 Route::get('events','EventController@get');
-Route::post('newEvent','EventController@store');
+Route::post('event','EventController@store');
 Route::post('eventUpdate','EventController@update');
 Route::get('event/{eventID}','EventController@show');
 Route::post('searchEvent','EventController@search');
