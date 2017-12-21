@@ -12,7 +12,11 @@ use JWTAuth;
 use DateTime;
 
 use App\Event;
+use App\Eventskill;
+use App\Eventdate;
+use App\Eventorganizer;
 use App\Sponser;
+use App\Skill;
 use App\Sponserevent;
 use App\User;
 use App\Usertoevent;
@@ -31,148 +35,218 @@ class EventController extends Controller
     public function __construct() 
     {
         $this->middleware('jwt.auth', ['only' => [
-            'get',
-            'attend',
-          //'store',
-          // 'update',
-        //   'show',
-          // 'search',
-          // 'opt',
+           'get',
+           'attend',
+           'store',
+          'update',
+          'show',
+          'search',
+          'opt',
           'getCalendar',
           'storeCalendar',
-          // 'deleteCalendar',
-          // 'delete'
+          'deleteCalendar',
+          'delete',
+         'Sponsers',
         ]]);
     }
 
-    public function makeSponser(Request $request)
-    {
-        /* Sponser Info */
-        $name = $request->input('name');
-        $website = $request->input('website');
-        $logo = $request->file('logo');
-        $sponser = new Sponser;
-        $sponser->name = $name;
-        $sponser->website = $website;
-        $sponser->logo = $logo;
-        $sponser->save();
-    }
+    public function store(Request $request) {
+        // user currently signed in
+        $userID = Auth::id();
+        $spaceID = User::find($userID)->spaceID;
 
-    public function store(Request $request) 
-    {
-        $rules = [
-            'start' => 'required|string',
-            'end' => 'required|string',
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'type' => 'required|string',
-            'tags' => 'required|string',
-            'local' => 'nullable|string',
-            'file' => 'nullable|string',
-            // 'name' => 'required_with:logo,website',
-            // 'logo' => 'required_with:name,website',
-            // 'website' => 'required_with:logo,name'
-        ];
+        if ($request->day) {
+            $rules = [
+               'compEvent' => 'required|string',
+               'name' => 'required|string',
+               'url' => 'required|string',
+               'tags' => 'required|string',
+               'organizers' => 'required|string',
+               'sponsors' => 'nullable|string',
+               'newSponsors' => 'nullable|string',
+               'day' => 'required|string',
+               'start' => 'required|string',
+               'end' => 'required|string',
+               'description' => 'required|string',
+            //    'files0' => 'required|string',
+            ];
+        }   else {
+            $rules = [
+                'compEvent' => 'required|string',
+                'name' => 'required|string',
+                'url' => 'required|string',
+                'tags' => 'required|string',
+                'organizers' => 'required|string',
+                'sponsors' => 'nullable|string',
+                'newSponsors' => 'nullable|string',
+                'dateMulti' => 'required|string',
+                'startMulti' => 'required|string',
+                'endMulti' => 'required|string',
+                'description' => 'required|string',
+                // 'files0' => 'required|string',
+            ];
+        }
 
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields!']);
         }
 
-        // user currently signed in
-        // $userID = Auth::id();
-        //  $spaceID = User::find($userID)->spaceID;
-
+        $event = new Event;
         /* Sponser Info */
-        $names = $request->input('names');
-        $websites = $request->input('websites');
-        $logos = $request->input('logos');
-
+        $sponsors = json_decode($request->input('sponsors'));
         $sponserIDs = [];
-        if (!empty($names) || !empty($websites) || !empty($logos) ) 
-        {
-            if (!empty($names) && !empty($websites) && !empty($logos) ) 
-            {
-                $length = count($names);
-                for ($i = 0; $i < count; $i++)
-                {
-                    $sponser = new Sponser;
-                    $sponser->name = $names[$i];
-                    $sponser->website = $websites[$i];
-                    $sponser->logo = $logos[$i];
-                    $sponser->save();
-                    array_push($sponserIDs, $sponser->id);
-                }
-            }
-            else
-            {
-                return Response::json([ 'error' => 'Sponsers require name, website, and logo' ]);
+
+        if (!empty($sponsors))  {
+            foreach($sponsors as $s) {   
+                array_push($sponserIDs, $s->id);
             }
         }
 
+        $newSponsors = json_decode($request->input('newSponsors'));
+        if (!empty($newSponsors)) {
+            foreach ($newSponsors as $key => $s) {  
+                $name = $s->name;
+                $website = $s->website;
+                $sponser = new Sponser;
+                $sponser->name = $name;
+                $sponser->website = $website;
+                $logo = $request->file('logos'.$key);          
+                $logoName = $logo->getClientOriginalName();
+                $logo->move('storage/logo/', $logoName);
+                $sponser->logo = $request->root().'/storage/logo/'.$logoName;
+                $sponser->save();
+                $id = $sponser->id; 
+                array_push($sponserIDs, $id);
+            }
+        }
+        
         /* Event Info */
-        $userID = $request->input('userID');
-        $spaceID = $request->input('spaceID');
-        $start = $request->input('start');
-        $end = $request->input('end');
-        $title = $request->input('title');
+        $challenge = json_decode($request->input('compEvent'));
+        $title = $request->input('name');
         $description = $request->input('description');
-        $type = $request->input('type');
-        $tags = $request->input('tags');
+        $tags = json_decode($request->input('tags'));
+        $organizers = json_decode($request->input('organizers'));
         // optional input
-        $local = $request->input('local');
-        $file = $request->input('file');
-
-
+        $url = $request->input('url');
+        $files = $request->input('file0');
+        
         // create ne App\Event
         $event = new Event;
         $event->userID = $userID;
         $event->spaceID = $spaceID;
-        $event->start = $start;
-        $event->end = $end;
         $event->title = $title;
         $event->description = $description;
-        $event->type = $type;
-        $event->tags = $tags;
-
-        //optional input
-        if (!empty($local)) $event->local = $local;
-        if (!empty($sp)) $event->local = $local;
-
-        if (!$event->save()) 
-        {
-            return Response::json([ 'error' => 'Database error' ]);  
+        $event->challenge = $challenge;
+        $event->url = $url;
+        $day = json_decode($request->input('day'));
+        if (!empty($day)) {
+            $event->multiday = false;
+        }   else {
+            $event->multiday = true;
         }
+
+        if (!$event->save()) return Response::json([ 'error' => 'Database error' ]);  
         $eventID = $event->id;
-        if (!empty($sponserIDs)) 
-        {
-            foreach ($sponserIDs as $sponserID) 
-            {
+
+        // event organizers
+        if (!empty($organizers)) {
+            foreach ($organizers as $organizer) {
+                $eventorganizer = new Eventorganizer;
+                $eventorganizer->eventID = $eventID;
+                $eventorganizer->userID = $organizer->value;
+                if (!$eventorganizer->save()) return Response::json([ 'error' => 'e org' ]);
+            }
+        }
+
+        // Update App\Skill;  
+        if (!empty($tags)) {
+            foreach($tags as $key => $tag) {
+                if (!property_exists($tag, 'id'))  {
+                    $newSkill = new Skill;
+                    $newSkill->name = $tag->value;
+                    // Persist App\Skill to database
+                    if (!$newSkill->save()) return Response::json([ 'error' => 'database error' ]);
+                }
+           }
+        }
+
+        // Update App\Eventskill;
+        if (!empty($tags)) {
+            foreach ($tags as $key => $tag) {
+                $skillTag = Skill::where('name', $tag->value)->first();
+                // Create new EventSkill
+                $eventSkill = new Eventskill;
+                $eventSkill->eventID = $eventID;
+                $eventSkill->skillID = $skillTag->id;
+                $eventSkill->name = $skillTag->name;
+                // Persist App\Skill to database
+                if (!$eventSkill->save())  return Response::json([ 'error' => 'eventSkill database error' ]);
+                
+            }
+        }
+
+        if (!empty($day)) {
+            $start = json_decode($request->input('start'));
+            $end = json_decode($request->input('end'));
+            $ymd = explode('-', $day);
+            $hms = explode(':', $start);
+            $hme = explode(':', $end);
+
+            $startStamp = date('Y-m-d H:i:s', mktime(
+                (int)$hms[0], 
+                (int)$hms[1], 
+                0, 
+                (int)$ymd[1], 
+                (int)$ymd[2], 
+                (int)$ymd[0]
+            ));
+
+            $endStamp = date('Y-m-d H:i:s', mktime(
+                (int)$hme[0], 
+                (int)$hme[1], 
+                0, 
+                (int)$ymd[1], 
+                (int)$ymd[2], 
+                (int)$ymd[0]
+            ));
+            $eventDate = new Eventdate;
+            $eventDate->eventID = $eventID;
+            $dateStart = $startStamp;
+            $dateEnd = $endStamp;
+            $eventDate->start= $dateStart;
+            $eventDate->end = $dateEnd;
+            if (!$eventDate->save()) return Response::json([ 'error' => 'evenDate error' ]);
+            
+        }
+        $dateMulti = $request->input('dateMulti');
+        $startMulti = $request->input('startMulti');
+        $endMulti = $request->input('endMulti');
+
+        if (!empty($sponserIDs)) {
+            foreach ($sponserIDs as $sponserID) {
                 $sponserevent = new Sponserevent;
                 $sponserevent->eventID = $eventID;
                 $sponserevent->sponserID = $sponserID;
-                $sponserevent->save();
+                if (!$sponserevent->save()) return Response::json([ 'error' => 'sponserevent error' ]);
             }    
         }
 
         // create new App\File;
-        if (!empty($file)) 
-        {
-            $eventID = $event->id;
-            $files = explode(',', $file);
-
-            foreach ($files as $key => $file) 
-            {
-                $file = new File;
-                $file->userID = $userID;
-                $file->eventID = $eventID;
-                // $file->path = TODO;
-                if(!$file->save()) 
-                {
-                    return Response::json([ 'error' => 'Database error' ]);                                                            
+        if (count($_FILES) != 0) {
+            $length = count($_FILES);
+            for($i = 0; $i < $length; $i++) {
+                if (array_key_exists("files$i", $_FILES)) {
+                    $file = new File;
+                    $file->userID = $userID;
+                    $file->eventID = $eventID;
+                    $eventFile = $request->file('files'.$i);          
+                    $eventFileName = $eventFile->getClientOriginalName();
+                    $eventFile->move("storage/events/$eventID/", $eventFileName);
+                    $file->path = $request->root()."/storage/events/$eventID/$eventFileName";
+                    if(!$file->save()) return Response::json([ 'error' => 'Database error' ]);                                                            
                 }
             }
             return Response::json([ 'success' => 'database updated' ]);
@@ -252,6 +326,7 @@ class EventController extends Controller
         // create new App\File;
         if (!empty($file)) 
         {
+            
             $eventID = $event->id;
             $userID = Auth::id();
             $files = explode(',', $file);
@@ -275,6 +350,8 @@ class EventController extends Controller
     {
         $event = Event::find($eventID);
         $sponsors = $this->getSponsors($eventID);
+        $organizers = $this->getOrganizers($eventID);
+        $attendees = $this->getAttendees($eventID);
         $upcomingEvents = $this->getUpcoming();
 
         if (empty($event)) 
@@ -282,19 +359,21 @@ class EventController extends Controller
             return Response::json([ 'error' => 'Could not find event' ]);
         }
 
-        $local = $event->local;
+        $challenge = $event->challenge;
 
-        if ($local) 
+        if (!$challenge) 
         {
             $workSpace = Workspace::find($event->spaceID);
             return Response::json([
                 'event' => $event, 
                 'local' => $workSpace,
                 'upcomingEvents' => $upcomingEvents,
-                'sponsors' => (count($sponsors) != 0) ? $sponsors : false
+                'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
+                'organizers' => $organizers,
+                'attendees' => $attendees  
             ]);
         }
-        elseif (!$local) 
+        elseif ($challenge) 
         {
             $sponsors = $this->getSponsors($event->id);
             $hostSpace = Workspace::find($event->spaceID);
@@ -305,7 +384,8 @@ class EventController extends Controller
                 'hostSpace' => $hostSpace,
                 'nonLocal' => $participatingSpaces ? $participatingSpaces : false,
                 'upcomingEvents' => $upcomingEvents,
-                'sponsors' => (count($sponsors) != 0) ? $sponser : false
+                'sponsors' => (count($sponsors) != 0) ? $sponser : false,
+                'attendees' => $attendees,
             ]);
         }
     }
@@ -321,25 +401,26 @@ class EventController extends Controller
         }
         return $workSpaces;
     }
+
     private function getUpcoming() 
     {
         $upcoming = array();
-        $events = Event::all();
-        foreach ($events as $event)
+        $eventdates = Eventdate::all();
+        foreach ($eventdates as $eventdate)
         {
-
             $now = new DateTime();
-            $eDate = new DateTime($event->start);
+            $eDate = new DateTime($eventdate->start);
             $diff = $now->diff($eDate);
             $formattedDiff = $diff->format('%R%a days');
 
             if ((int)$formattedDiff > 0) 
             {
+                $event = Event::find($eventdate->eventID);
                 array_push($upcoming, 
                     [
                         "title" => $event->title,
                         "id" => $event->id,
-                        "start" => $event->start 
+                        "start" => $eventdate->start 
                     ]
                 );
                 if (count($upcoming) === 3) {
@@ -366,6 +447,36 @@ class EventController extends Controller
             }
         }
         return $sponsors;
+    }
+
+    private function getOrganizers($eventID) 
+    {
+        $organizers= [];
+        $eventorganizers = Eventorganizer::where('eventID', $eventID)->get();
+        if (!empty($eventorganizers)) 
+        {
+            foreach($eventorganizers as $eventorganizer )
+            {
+                $organizer = User::find($eventorganizer->userID);
+                array_push($organizers, $organizer);
+            }
+        }
+        return $organizers;
+    }
+
+    private function getAttendees($eventID) 
+    {
+        $attendees = [];
+        $eventattendees = Calendar::where('eventID', $eventID)->get();
+        if (!empty($eventattendees)) 
+        {
+            foreach($eventattendees as $eventattendee)
+            {
+                $attendee = User::find($eventattendee->userID);
+                array_push($attendees, $attendee);
+            }
+        }
+        return $attendees;
     }
 
     public function search(Request $request) 
@@ -405,6 +516,7 @@ class EventController extends Controller
         }        
         return Response::json([ 'error' => 'Nothing matched your query' ]);
     }
+
 
     // allow workspaces to opt-in to a remote event at another workspace
     public function opt(Request $request) 
@@ -560,5 +672,21 @@ class EventController extends Controller
         {
             return Response::json([ 'error' => 'database error, try again' ]);
         }
+    }
+    public function Sponsers() 
+    {
+        $sponsers = Sponser::all();
+        $sponsersArray = [];
+        foreach($sponsers as $sponser) 
+        {
+            array_push($sponsersArray, [
+                'label' => $sponser->name,
+                'value' => $sponser->name,
+                'id' => $sponser->id,
+                'logo'=> $sponser->logo,
+                'website'=> $sponser->website,
+            ]);
+        }
+        return Response::json($sponsersArray);
     }
 }

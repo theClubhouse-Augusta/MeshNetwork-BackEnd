@@ -16,6 +16,7 @@ use App\Calendar;
 use App\Userskill;
 use App\Skill;
 use App\Event;
+use App\Eventdate;
 use App\Workspace;
 
 class UserController extends Controller 
@@ -28,13 +29,15 @@ class UserController extends Controller
     public function __construct() 
     {
         $this->middleware('jwt.auth', [ 'only' => [
-            //    'updateUser',
-            'delete',
-            'showUser',
-            'user',
-            // 'searchName',
-            'search',
-            'getSkills',
+               'updateUser',
+           'delete',
+           'showUser',
+           'user',
+            'searchName',
+           'search',
+        //    'getSkills',
+            // 'allSkills',
+            'Organizers'
         ]]);
     }
 
@@ -283,6 +286,7 @@ class UserController extends Controller
         $users = User::where('name', 'LIKE', '%'.$query.'%')
                     ->Orwhere('bio', 'LIKE', '%'.$query.'%')
                     ->Orwhere('company', 'LIKE', '%'.$query.'%')
+                    ->Orwhere('email', 'LIKE', '%'.$query.'%')
                     ->get();
         $skills = Userskill::where('name', 'LIKE', '%'.$query.'%')
                            ->select('userskills.userID')
@@ -401,6 +405,21 @@ class UserController extends Controller
         ]);   
     }
 
+
+    public function allSkills() 
+    {
+        $skills = Skill::all();
+        $skillsArray = [];
+        foreach($skills as $skill) 
+        {   array_push($skillsArray, [
+                'label' => $skill->name,
+                'value' => $skill->name,
+                'id' => $skill->id
+            ]);
+        }
+        return Response::json($skillsArray);
+    }
+
     public function getSkills() 
     {
         $userskills = DB::table('userskills')
@@ -430,11 +449,13 @@ class UserController extends Controller
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
+        // $space = Workspace::find($user->spaceID)['name'];                          
+        // return $space;
         $now = new DateTime();
-        $events = Event::where('start', '>', $now->format('Y-m-d'))
-                       ->select('title', 'id')
-                       ->get();
-
+        $events = Eventdate::where('start', '>', $now->format('Y-m-d'))
+        ->select('eventID')
+        ->get();
+        
         $attending = Calendar::where('userID', $id)->get();
 
         if (!empty($attending))
@@ -443,7 +464,8 @@ class UserController extends Controller
             $upcoming = array();
             foreach ($attending as $attend)
             {
-                $event = Event::find($attend->eventID);
+                $event = Eventdate::find($attend->eventID);
+                $eventTitle = Event::find($attend->eventID)['title'];
                 $eDate = new DateTime($event->start);
                 $diff = $now->diff($eDate);
                 $formattedDiff = $diff->format('%R%a days');
@@ -452,7 +474,7 @@ class UserController extends Controller
                 {
                     array_push($upcoming, 
                         [
-                            "title" => $event->title,
+                            "title" => $eventTitle,
                             "id" => $event->id 
                         ]
                     );
@@ -471,5 +493,21 @@ class UserController extends Controller
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
         ]);   
+    }
+
+    public function Organizers() 
+    {
+        $organizers = User::all();
+        $organizersArray = [];
+        foreach($organizers as $organizer) 
+        {
+            array_push($organizersArray, [
+                'label' => $organizer->email,
+                'value' => $organizer->id,
+                'avatar'=> $organizer->avatar,
+                'name' => $organizer->name
+            ]);
+        }
+        return Response::json($organizersArray);
     }
 }

@@ -46,8 +46,7 @@ class AuthController extends Controller {
       'name' => 'required|string',
       'password' => 'required|string',
       'email' => 'required|string',
-      'spaceID' => 'required|string',
-      'roleID' => 'required|string',
+      'workspace' => 'required|string',
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -59,16 +58,17 @@ class AuthController extends Controller {
     $name = $request->input('name');
     $email = $request->input('email');
     $password = $request->input('password');
-    $spaceID = $request->input('spaceID');
+    $workspace = $request->input('workspace');
+    $findWorkSpace = Workspace::where('name', $workspace)->first();
+    $spaceID = $findWorkSpace->id;
     $roleID = $request->input('roleID');
     // Optional Input
     $company = $request->input('company');
     $website = $request->input('website');
     $phoneNumber = $request->input('phoneNumber');
-    $bio = $request->input('bio');
+    $bio = $request->input('description');
     $searchOpt = $request->input('searchOpt');
-    $skill = $request->input('skill');
-    $skills = explode(',', $skill);
+    $tags = json_decode($request->input('tags'));
 
     // Check for valid image upload
     if (!empty($_FILES['avatar'])) {
@@ -108,8 +108,8 @@ class AuthController extends Controller {
     $user->name = $name;
     $user->email = $email;
     $user->spaceID = $spaceID;
-    $user->roleID = $roleID;
-    $user->searchOpt = $searchOpt;
+    $user->roleID = 4;
+    $user->searchOpt = 1;
     $user->password = Hash::make($password);
     // Optional Input
     if (!empty($company)) $user->company = $company;
@@ -141,44 +141,32 @@ class AuthController extends Controller {
       return Response::json(['error' => 'Account not created']);
     }
 
+    $userID = $user->id;
     // Update App\Skill;  
-    if (!empty($skill)) {
-      $newUser = User::where('email', $email)->first();
-
-        foreach($skills as $key => $skill) {
-            $trimmedSkill = trim($skill);
-            $checkSkill = Skill::where('name', $trimmedSkill)->first();
-
-            if (empty($checkSkill)) {
+    if (!empty($tags)) {
+        foreach($tags as $key => $tag) {
+            if (!property_exists($tag, 'id'))  {
                 $newSkill = new Skill;
-                $newSkill->name = $trimmedSkill;
+                $newSkill->name = $tag->value;
                 // Persist App\Skill to database
-                if (!$newSkill->save()) {
-                    return Response::json([ 'error' => 'database error' ]);
-                }
+                if (!$newSkill->save()) return Response::json([ 'error' => 'database error' ]);
             }
         }
     }
 
-    // Update App\Userskill;
-    if (!empty($skill)) {
-
-      foreach ($skills as $key => $skill) {
-        $trimmedSkill = trim($skill);
-        // get current signed up user
-        $newUser = User::where('email', $email)->first();
-        // get current skill in iteration
-        $skillTag = Skill::where('name', $trimmedSkill)->first();
-        // Create new UserSkill
-        $userSkill = new Userskill;
-        $userSkill->userID = $newUser->id;
-        $userSkill->skillID = $skillTag->id;
-        $userSkill->name = $skillTag->name;
-        // Persist App\Skill to database
-        if(!$userSkill->save()) {
-          return Response::json([ 'error' => 'database error' ]);
+    // Update App\Eventskill;
+    if (!empty($tags)) {
+        foreach ($tags as $key => $tag) {
+            $skillTag = Skill::where('name', $tag->value)->first();
+            // Create new EventSkill
+            $userSkill = new Userskill;
+            $userSkill->userID = $userID;
+            $userSkill->skillID = $skillTag->id;
+            $userSkill->name = $skillTag->name;
+            // Persist App\Skill to database
+            if (!$userSkill->save())  return Response::json([ 'error' => 'eventSkill database error' ]);
+            
         }
-      }
     }
     return Response::json(['success' => 'User created successfully.']);
   }
@@ -229,15 +217,14 @@ class AuthController extends Controller {
                           ->select('name')
                           ->first();
 
-        $events = Event::where('local', true)
+        $events = Event::where('challenge', true)
                           ->select('title', 'id')
                           ->get();
 
         $attending = Calendar::where('userID', $user->id)->get();
 
-        if (!empty($attending))
+        if (!empty($attending)) 
         {
-
             $now = new DateTime();
             $upcoming = array();
             foreach ($attending as $attend)
@@ -296,7 +283,7 @@ class AuthController extends Controller {
 
     // get all users if no spaceIDs specified
     //if (empty($spaceIDs)) {
-      return Response::json(User::all());
+      return Response::json(User::paginate(3));
    // }
 
     // return users by spaceID 
