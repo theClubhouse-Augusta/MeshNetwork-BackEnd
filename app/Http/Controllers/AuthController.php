@@ -178,8 +178,7 @@ class AuthController extends Controller {
    * @param Illuminate\Support\Facades\Request::class
    * @return  Illuminate\Support\Facades\Response::class
   */
-    public function signIn(Request $request) 
-    {
+    public function signIn(Request $request) {
         // required input
         $rules = [
           'email' => 'required',
@@ -223,8 +222,7 @@ class AuthController extends Controller {
 
         $attending = Calendar::where('userID', $user->id)->get();
 
-        if (!empty($attending)) 
-        {
+        if (!empty($attending)) {
             $now = new DateTime();
             $upcoming = array();
             foreach ($attending as $attend)
