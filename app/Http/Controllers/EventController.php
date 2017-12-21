@@ -39,7 +39,6 @@ class EventController extends Controller
            'attend',
            'store',
           'update',
-          'show',
           'search',
           'opt',
           'getCalendar',
@@ -249,8 +248,8 @@ class EventController extends Controller
                     if(!$file->save()) return Response::json([ 'error' => 'Database error' ]);                                                            
                 }
             }
-            return Response::json([ 'success' => 'database updated' ]);
         }
+        return Response::json($eventID);
     }
 
     // all events all spaces  
@@ -349,6 +348,7 @@ class EventController extends Controller
     public function show($eventID) 
     {
         $event = Event::find($eventID);
+        $tags = $this->getTags($eventID);
         $sponsors = $this->getSponsors($eventID);
         $organizers = $this->getOrganizers($eventID);
         $attendees = $this->getAttendees($eventID);
@@ -370,7 +370,8 @@ class EventController extends Controller
                 'upcomingEvents' => $upcomingEvents,
                 'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
                 'organizers' => $organizers,
-                'attendees' => $attendees  
+                'attendees' => $attendees,
+                'tags' => $tags  
             ]);
         }
         elseif ($challenge) 
@@ -384,8 +385,10 @@ class EventController extends Controller
                 'hostSpace' => $hostSpace,
                 'nonLocal' => $participatingSpaces ? $participatingSpaces : false,
                 'upcomingEvents' => $upcomingEvents,
-                'sponsors' => (count($sponsors) != 0) ? $sponser : false,
+                'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
+                'organizers' => $organizers,
                 'attendees' => $attendees,
+                'tags' => $tags  
             ]);
         }
     }
@@ -428,6 +431,7 @@ class EventController extends Controller
                 }
             }
         }
+        return $upcoming;
     }
 
     private function getSponsors($eventID) 
@@ -462,6 +466,20 @@ class EventController extends Controller
             }
         }
         return $organizers;
+    }
+
+    private function getTags($eventID) 
+    {
+        $tags = [];
+        $eventTags = Eventskill::where('eventID', $eventID)->get();
+        if (!empty($eventTags)) 
+        {
+            foreach($eventTags as $eventTag )
+            {
+                array_push($tags, $eventTag->name);
+            }
+        }
+        return $tags;
     }
 
     private function getAttendees($eventID) 
