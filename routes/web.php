@@ -11,3 +11,4 @@
 |
 */
 
+Route::any('{path?}', 'MainController@index')->where("path", ".+");
