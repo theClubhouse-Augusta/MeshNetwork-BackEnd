@@ -510,4 +510,16 @@ class UserController extends Controller
         }
         return Response::json($organizersArray);
     }
+
+    public function usersFromSpace($spaceID) {
+        $users = User::where('spaceID', $spaceID)->get();
+        $usersArray = [];
+        foreach($users as $user) {
+            array_push($usersArray, [
+                'label' => $user->name.'-'.$user->email,
+                'value' => $user->email
+            ]);
+        }
+        return Response::json($usersArray);
+    }
 }

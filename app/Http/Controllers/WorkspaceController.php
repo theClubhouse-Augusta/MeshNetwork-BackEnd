@@ -10,6 +10,7 @@ use Auth;
 use JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use App\User;
+use App\Kiosk;
 use App\Workspace;
 use App\Event;
 use App\Bookable;
@@ -88,7 +89,7 @@ class WorkspaceController extends Controller
         // Check for valid image upload
         if (!empty($_FILES['logo'])) 
         {
-        // Check for file upload error
+            // Check for file upload error
             if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) 
             {
                 return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
@@ -161,22 +162,28 @@ class WorkspaceController extends Controller
             $workspace->description = $description;
             $workspace->lon = $lon;
             $workspace->lat = $lat;
-
-            if (!empty($logo)) 
-            {
+            if (!empty($logo)) {
                 $logoName = $logo->getClientOriginalName();
                 $logo->move('storage/logo/', $logoName);
                 $workspace->logo = $request->root().'/storage/logo/'.$logoName;
             }
+            // persist workspace to database
+            $success = $workspace->save(); 
+            if (!$success) 
+            {
+                return Response::json(['error' => 'Account not created']);
+            }
+            $kiosk = new Kiosk;
+            $kiosk->spaceID = $workspace->id;
+            $kiosk->inputPlaceholder = 'Find yourself ☮';
+            $kiosk->primaryColor = '#3399cc';
+            $kiosk->secondaryColor = 'f8991d';
+            $kiosk->userWelcome = 'Hi';
+            $kiosk->userThanks = "Here's what's happening @";
 
-        // persist workspace to database
-
-        if (!$workspace->save()) 
-        {
-            return Response::json(['error' => 'Account not created']);
+            return Response::json([ 'success' => 'Worksapce created!' ]);
         }
-        return Response::json([ 'success' => 'Worksapce created!' ]);
-    }
+        
 
     private function getGeoLocation($address, $city, $state) 
     {

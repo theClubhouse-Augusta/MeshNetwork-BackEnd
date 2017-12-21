@@ -434,6 +434,11 @@ class EventController extends Controller
         return $upcoming;
     }
 
+    public function upcoming() {
+        $events = $this->getUpcoming();
+        return Response::json($events);
+    }
+
     private function getSponsors($eventID) 
     {
         $sponsors = [];
