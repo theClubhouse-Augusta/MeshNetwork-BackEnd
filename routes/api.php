@@ -21,12 +21,12 @@ Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances');
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
-Route::get('users', 'AuthController@getUsers');  // admin get users 
+Route::get('users', 'AuthController@getUsers');  // admin get users
 Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
 
 // UserController
-Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user 
-Route::post('updateUser', 'UserController@updateUser'); // logged in user profile update   
+Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user
+Route::post('updateUser', 'UserController@updateUser'); // logged in user profile update
 Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
 Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sign up form
 Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
@@ -81,3 +81,5 @@ Route::get('bookable/{userID}','BookableController@show');
 Route::get('getBookings','BookableController@getBookings');
 Route::get('deleteBookable/{id}','BookableController@delete');
 Route::get('deleteBookings/{id}','BookableController@deleteBooking');
+
+Route::any('{path?}', 'MainController@index')->where("path", ".+");
