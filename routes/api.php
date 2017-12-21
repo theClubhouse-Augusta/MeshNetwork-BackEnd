@@ -33,6 +33,7 @@ Route::post('searchname', 'UserController@searchName'); // search by name/spaceI
 Route::get('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
 Route::get('user/{id}', 'UserController@user'); // get user.id
+Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID
 Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
 
 // RoleController
@@ -54,6 +55,7 @@ Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 Route::post('sponser','EventController@makeSponser');
 Route::get('sponsors','EventController@Sponsers');
 Route::get('events','EventController@get');
+Route::get('upcoming','EventController@upcoming');
 Route::post('event','EventController@store');
 Route::post('eventUpdate','EventController@update');
 Route::get('event/{eventID}','EventController@show');
@@ -81,5 +83,8 @@ Route::get('bookable/{userID}','BookableController@show');
 Route::get('getBookings','BookableController@getBookings');
 Route::get('deleteBookable/{id}','BookableController@delete');
 Route::get('deleteBookings/{id}','BookableController@deleteBooking');
+
+// KioskController
+Route::get('kiosk/{spaceID}','KioskController@get');
 
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

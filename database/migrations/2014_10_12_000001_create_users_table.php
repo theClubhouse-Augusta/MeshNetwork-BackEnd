@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('title')->nullable(); 
+            $table->boolean('hireable')->default(false);
             $table->boolean('searchOpt')->default(false);
             $table->string('company')->nullable();
             $table->string('website')->nullable();
