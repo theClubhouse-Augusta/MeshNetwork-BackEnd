@@ -35,17 +35,17 @@ class EventController extends Controller
     public function __construct() 
     {
         $this->middleware('jwt.auth', ['only' => [
-           'get',
-           'attend',
-           'store',
-          'update',
-          'search',
-          'opt',
-          'getCalendar',
-          'storeCalendar',
-          'deleteCalendar',
-          'delete',
-         'Sponsers',
+            'get',
+            'attend',
+            'store',
+            'update',
+            'search',
+            'opt',
+            'getCalendar',
+            'storeCalendar',
+            'deleteCalendar',
+            'delete',
+            'Sponsers',
         ]]);
     }
 

@@ -82,11 +82,11 @@ class KioskController extends Controller
     }
 
     public function get($spaceID) {
-        $workspace = Workspace::find($spaceID)['name'];
+        $workspace = Workspace::find($spaceID);
         $kiosk = Kiosk::findOrFail($spaceID);
         return Response::json([ 
             'styles' => $kiosk,
-            'workspace' => $workspace
+            'workspace' => $workspace->name,
         ]);
     }
 }
