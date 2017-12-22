@@ -55,7 +55,7 @@ Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 Route::post('sponser','EventController@makeSponser');
 Route::get('sponsors','EventController@Sponsers');
 Route::get('events','EventController@get');
-Route::get('upcoming','EventController@upcoming');
+Route::get('upcoming/{spaceID}','EventController@upcoming');
 Route::post('event','EventController@store');
 Route::post('eventUpdate','EventController@update');
 Route::get('event/{eventID}','EventController@show');
@@ -73,6 +73,7 @@ Route::get('countAppearances/{sort}/{eventID?}/{spaceID?}','AppearanceController
 Route::get('appearance/{userID}','AppearanceController@show');
 Route::get('storeInvite','AppearanceController@stroreInvite');
 Route::get('getInvite','AppearanceController@getInvite');
+Route::get('occasions','AppearanceController@getValidOccasions');
 
 // BookableController
 Route::post('newBookable','BookableController@store');

@@ -15,65 +15,66 @@ use App\Appearance;
 use App\Invite;
 
 class AppearanceController extends Controller {
-  /** JWTAuth for Routes
-   * @param void
-   * @return void
-   */
-  public function __construct() {
-    $this->middleware('jwt.auth', ['only' => [
-      'get',
-      'store',
-      'show',
-      'getInvite',
-      'storeInvite'
-    ]]);
-  }
 
-  public function store(Request $request) {
-    $rules = [
-      'userid' => 'required|string',
-      'spaceid' => 'required|string',
-      'eventid' => 'nullable|string',
-      // 'work' => 'nullable|string'
-    ];
-
-    // Validate input against rules
-    $validator = Validator::make(Purifier::clean($request->all()), $rules);
-    if ($validator->fails()) {
-      return Response::json(['error' => 'You must fill out all fields.']);
+    /** JWTAuth for Routes
+     * @param void
+     * @return void
+     */
+    public function __construct() {
+        $this->middleware('jwt.auth', ['only' => [
+            'get',
+            'store',
+            'show',
+            'getInvite',
+            'storeInvite'
+        ]]);
     }
 
-    //form input
-    $userID = $request->input('userID');
-    $eventID = $request->input('eventID');
-    $spaceID = $request->input('spaceID');
-    // $work = $request->input('work');
+    public function store(Request $request) {
+        $rules = [
+            'userid' => 'required|string',
+            'spaceid' => 'required|string',
+            'eventid' => 'nullable|string',
+            // 'work' => 'nullable|string'
+        ];
 
-    // create new App\Appearance
-    $appearance = new Appearance;
+        // Validate input against rules
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+        if ($validator->fails()) {
+            return Response::json(['error' => 'You must fill out all fields.']);
+        }
 
-    // required input
-    $appearance->userID = $userID;
-    $appearance->spaceID = $spaceID;
+        //form input
+        $userID = $request->input('userID');
+        $eventID = $request->input('eventID');
+        $spaceID = $request->input('spaceID');
+        // $work = $request->input('work');
 
-    // optional input
-    if (!empty($eventID)) {
-      $appearance->eventID = $eventID;
-      $appearance->work = 0;
+        // create new App\Appearance
+        $appearance = new Appearance;
+
+        // required input
+        $appearance->userID = $userID;
+        $appearance->spaceID = $spaceID;
+
+        // optional input
+        if (!empty($eventID)) {
+            $appearance->eventID = $eventID;
+            $appearance->work = 0;
+        }
+
+        if (!$appearance->save()) {
+            return Response::json([ 'error' => 'database error' ]);
+        }
+        return Response::json([ 'success' => 'Appearnace saved!' ]);
     }
 
-    if(!$appearance->save()) {
-      return Response::json([ 'error' => 'database error' ]);
+    public function get() {
+        return Response::json([ 'success' => Appearance::all() ]); 
     }
-    return Response::json([ 'success' => 'Appearnace saved!' ]);
-  }
 
-  public function get() {
-    return Response::json([ 'success' => Appearance::all() ]); 
-  }
-
-  // get appearances of user
-  public function getCount($sort, $eventID=NULL, $spaceID=NULL) {
+    // get appearances of user
+    public function getCount($sort, $eventID=NULL, $spaceID=NULL) {
     /* TODO Auth
     * 
     *
@@ -177,12 +178,23 @@ class AppearanceController extends Controller {
     return Response::json([ 'success' => 'Invite updated!' ]);
   }
 
-  public function getInvite() {
-    $userID = Auth::id();
+    public function getInvite() {
+        $userID = Auth::id();
 
-    $invite = Invite::where('userID', $userID)->get();
-    // TODO:
-    // sort invites so that return value only has
-    // no invite dates in past
-  }
+        $invite = Invite::where('userID', $userID)->get();
+        // TODO:
+        // sort invites so that return value only has
+        // no invite dates in past
+    }
+
+    public function getValidOccasions() {
+       return Response::json([
+           'work',
+           'student',
+           'event',
+           'book room/equipment',
+           'book a mentor',
+       ]); 
+    }
 }
+

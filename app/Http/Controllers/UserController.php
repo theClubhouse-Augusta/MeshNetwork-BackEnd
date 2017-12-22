@@ -248,36 +248,29 @@ class UserController extends Controller
      * @param Illuminate\Support\Facades\Request
      * @return  Illuminate\Support\Facades\Response
     **/
-    public function search(Request $request) 
-    { 
+    public function search(Request $request) { 
         // url query params
         $query = $request->query('query');
         $tag = $request->query('tag');
 
         // handle skill tag button click
-        if (!empty($tag)) 
-        {
+        if (!empty($tag)) {
             $skills = Userskill::where('name', $tag)->select('userskills.userID')->get();
-            if (count($skills) == 0) 
-            {
+            if (count($skills) == 0) {
                 return Response::json([ 'error' => 'No users found with skill' ]);
             }
 
             $users = array();
-            foreach ($skills as $key => $skill) 
-            {
+            foreach ($skills as $key => $skill)  {
                 $match = User::where('id', $skill['userID'])->where('searchOpt', false)->first();
-                if (!empty($match)) 
-                {
+                if (!empty($match)) {
                     array_push($users, $match);
                 }
             }
-            if (!empty($users)) 
-            {
+
+            if (!empty($users)) {
                 return Response::json($users);
-            }
-            else 
-            {
+            }   else {
                 return Response::json([ 'error' => 'no user matched tag' ]);
             }
         }
@@ -410,8 +403,8 @@ class UserController extends Controller
     {
         $skills = Skill::all();
         $skillsArray = [];
-        foreach($skills as $skill) 
-        {   array_push($skillsArray, [
+        foreach($skills as $skill) {   
+            array_push($skillsArray, [
                 'label' => $skill->name,
                 'value' => $skill->name,
                 'id' => $skill->id
@@ -420,8 +413,7 @@ class UserController extends Controller
         return Response::json($skillsArray);
     }
 
-    public function getSkills() 
-    {
+    public function getSkills() {
         $userskills = DB::table('userskills')
         ->select(DB::raw('COUNT(*) AS foo, skillID'))
         ->groupBY('skillID')
@@ -430,22 +422,18 @@ class UserController extends Controller
         ->get();
 
         $res = array();
-        foreach ($userskills as $userskill) 
-        {
+        foreach ($userskills as $userskill) {
             array_push($res, Skill::find($userskill->skillID));
         }
         return Response::json($res);
         // 'SELECT skillID, COUNT(*) AS foo FROM userskills GROUP BY skillID ORDER BY foo DESC LIMIT 6';
     }
 
-    public function user($id) 
-    {
+    public function user($id) {
         $user = User::find($id);
-
         $skills = Userskill::where('userID', $id)
                            ->select('name')
                            ->get();
-
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
@@ -455,23 +443,18 @@ class UserController extends Controller
         $events = Eventdate::where('start', '>', $now->format('Y-m-d'))
         ->select('eventID')
         ->get();
-        
         $attending = Calendar::where('userID', $id)->get();
 
-        if (!empty($attending))
-        {
-
+        if (!empty($attending)) {
             $upcoming = array();
-            foreach ($attending as $attend)
-            {
-                $event = Eventdate::find($attend->eventID);
+            foreach ($attending as $attend) {
+                $event = Eventdate::where('eventID', $attend->eventID)->first();
                 $eventTitle = Event::find($attend->eventID)['title'];
                 $eDate = new DateTime($event->start);
                 $diff = $now->diff($eDate);
                 $formattedDiff = $diff->format('%R%a days');
 
-                if ((int)$formattedDiff > 0) 
-                {
+                if ((int)$formattedDiff > 0) {
                     array_push($upcoming, 
                         [
                             "title" => $eventTitle,
@@ -482,8 +465,7 @@ class UserController extends Controller
             }
         }
 
-       if (empty($user) || $user->searchOpt) 
-       {
+       if (empty($user) || $user->searchOpt) {
           return Response::json([ 'error' => 'User does not exist' ]); 
        }
         return Response::json([
@@ -495,12 +477,10 @@ class UserController extends Controller
         ]);   
     }
 
-    public function Organizers() 
-    {
+    public function Organizers() {
         $organizers = User::all();
         $organizersArray = [];
-        foreach($organizers as $organizer) 
-        {
+        foreach($organizers as $organizer) {
             array_push($organizersArray, [
                 'label' => $organizer->email,
                 'value' => $organizer->id,
@@ -516,7 +496,7 @@ class UserController extends Controller
         $usersArray = [];
         foreach($users as $user) {
             array_push($usersArray, [
-                'label' => $user->name.'-'.$user->email,
+                'label' => $user->name.' - '.$user->email,
                 'value' => $user->email
             ]);
         }
