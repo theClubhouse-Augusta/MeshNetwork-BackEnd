@@ -516,7 +516,7 @@ class UserController extends Controller
         $usersArray = [];
         foreach($users as $user) {
             array_push($usersArray, [
-                'label' => $user->name.'-'.$user->email,
+                'label' => $user->name.' - '.$user->email,
                 'value' => $user->email
             ]);
         }

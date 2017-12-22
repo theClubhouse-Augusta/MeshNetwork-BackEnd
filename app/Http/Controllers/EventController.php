@@ -405,25 +405,23 @@ class EventController extends Controller
         return $workSpaces;
     }
 
-    private function getUpcoming() 
-    {
+    private function getUpcoming() {
         $upcoming = array();
         $eventdates = Eventdate::all();
-        foreach ($eventdates as $eventdate)
-        {
+        foreach ($eventdates as $eventdate) {
             $now = new DateTime();
             $eDate = new DateTime($eventdate->start);
             $diff = $now->diff($eDate);
             $formattedDiff = $diff->format('%R%a days');
 
-            if ((int)$formattedDiff > 0) 
-            {
+            if ((int)$formattedDiff > 0) {
                 $event = Event::find($eventdate->eventID);
                 array_push($upcoming, 
                     [
                         "title" => $event->title,
                         "id" => $event->id,
-                        "start" => $eventdate->start 
+                        "start" => $eventdate->start,
+                        "end" => $eventdate->end, 
                     ]
                 );
                 if (count($upcoming) === 3) {
@@ -434,8 +432,37 @@ class EventController extends Controller
         return $upcoming;
     }
 
-    public function upcoming() {
-        $events = $this->getUpcoming();
+    private function getUp($spaceID) {
+        $upcoming = array();
+        $eventdates = Eventdate::all();
+        foreach ($eventdates as $key => $eventdate) {
+            $now = new DateTime();
+            $eDate = new DateTime($eventdate->start);
+            $diff = $now->diff($eDate);
+            $formattedDiff = $diff->format('%R%a days');
+
+            if ((int)$formattedDiff > 0) {
+                $event = Event::where('id', $eventdate->eventID)
+                              ->where('spaceID', $spaceID)
+                              ->first();
+                array_push($upcoming, 
+                    [
+                        "title" => $event->title,
+                        "id" => $event->id,
+                        "start" => $eventdate->start,
+                        "end" => $eventdate->end,
+                    ]
+                );
+                if (count($upcoming) === 3) {
+                    return $upcoming;
+                }
+            }
+        }
+        return $upcoming;
+    }
+
+    public function upcoming($spaceID) {
+        $events = $this->getUp($spaceID);
         return Response::json($events);
     }
 

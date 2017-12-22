@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use App\Kiosk;
+use App\Workspace;
 
 class KioskController extends Controller
 {
@@ -80,7 +82,11 @@ class KioskController extends Controller
     }
 
     public function get($spaceID) {
+        $workspace = Workspace::find($spaceID)['name'];
         $kiosk = Kiosk::findOrFail($spaceID);
-        return $kiosk;
+        return Response::json([ 
+            'styles' => $kiosk,
+            'workspace' => $workspace
+        ]);
     }
 }
