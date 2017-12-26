@@ -13,7 +13,6 @@ use App\User;
 use App\Kiosk;
 use App\Workspace;
 use App\Event;
-use App\Bookable;
 
 class WorkspaceController extends Controller 
 {
@@ -209,8 +208,7 @@ class WorkspaceController extends Controller
 
         }
 
-    public function get() 
-    {
+    public function get() {
         return Response::json(Workspace::all());
     }
 
@@ -366,22 +364,4 @@ class WorkspaceController extends Controller
 
     }
 
-  public function bookables($spaceID) 
-  {
-    // Ensure user has admin privalages
-    // $admin = Auth::user();
-    // $id = $admin->roleID;
-    // if ($id != 1 && $id != 2) {
-    //   return Response::json(['error' => 'invalid credentials']);
-    // }
-
-        $bookables = Bookable::where('spaceID',$spaceID)->get();
-
-        if (empty($bookables)) 
-        {
-            return Response::json([ 'error' => 'No bookables with id: '.$spaceID ]);
-        }
-        return Response::json([ 'success' => $bookables ]);
-
-    }
 }

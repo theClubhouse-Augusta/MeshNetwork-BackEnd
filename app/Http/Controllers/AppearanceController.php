@@ -29,13 +29,12 @@ class AppearanceController extends Controller {
             'storeInvite'
         ]]);
     }
-
     public function store(Request $request) {
         $rules = [
-            'userid' => 'required|string',
-            'spaceid' => 'required|string',
-            'eventid' => 'nullable|string',
-            // 'work' => 'nullable|string'
+            'userID' => 'required|string',
+            'spaceID' => 'required|string',
+            'eventID' => 'nullable|string',
+            'occasion' => 'required|string'
         ];
 
         // Validate input against rules
@@ -48,14 +47,14 @@ class AppearanceController extends Controller {
         $userID = $request->input('userID');
         $eventID = $request->input('eventID');
         $spaceID = $request->input('spaceID');
-        // $work = $request->input('work');
+        $osccasion = $request->input('osccasion');
 
-        // create new App\Appearance
         $appearance = new Appearance;
 
         // required input
         $appearance->userID = $userID;
         $appearance->spaceID = $spaceID;
+        $appearance->occasion = $occasion;
 
         // optional input
         if (!empty($eventID)) {
@@ -66,7 +65,7 @@ class AppearanceController extends Controller {
         if (!$appearance->save()) {
             return Response::json([ 'error' => 'database error' ]);
         }
-        return Response::json([ 'success' => 'Appearnace saved!' ]);
+        return Response::json([ 'success' => 'Appearance saved!' ]);
     }
 
     public function get() {

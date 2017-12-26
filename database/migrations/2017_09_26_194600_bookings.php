@@ -4,24 +4,24 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Bookings extends Migration
-{
+class Bookings extends Migration {
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('bookings', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('userID');
+            $table->string('name');
+            $table->string('email');
             $table->integer('spaceID');
-            $table->integer('bookablesID');
-            $table->dateTime('start');
-            $table->dateTime('end');
-            //$table->dateTimeTz('start'); TODO// Timezone or naa?
-            //$table->dateTimeTz('end');
+            $table->string('type');
+            $table->string('day');
+            $table->string('start');
+            $table->string('end');
+            $table->string('token');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
@@ -31,9 +31,7 @@ class Bookings extends Migration
      *
      * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('bookings');
-
     }
 }

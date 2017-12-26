@@ -17,10 +17,7 @@ class Appearances extends Migration
             $table->integer('userID');
             $table->integer('spaceID');
             $table->integer('eventID')->nullable();
-            $table->string('occasion')->nullable();
-            //   other options: 'work', 'event',booking', 'invite', 'student', 'teacher' 
-            //TODO: if eventID is not null then work = false?
-            // $table->boolean('work')->default(true);
+            $table->string('occasion');
             $table->timestamps();
         });
     }
