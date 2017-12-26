@@ -141,13 +141,14 @@ class EventController extends Controller
         $event->challenge = $challenge;
         $event->url = $url;
         $day = json_decode($request->input('day'));
+
         if (!empty($day)) {
             $event->multiday = false;
         }   else {
             $event->multiday = true;
         }
 
-        if (!$event->save()) return Response::json([ 'error' => 'Database error' ]);  
+        if (!$event->save()) return Response::json([ 'error' => 'Database error' ]);
         $eventID = $event->id;
 
         // event organizers
@@ -283,8 +284,7 @@ class EventController extends Controller
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
@@ -300,8 +300,7 @@ class EventController extends Controller
 
         // check if another event is in time slot
         // $check = $start - $end;
-        if (!$empty(check)) 
-        {
+        if (!$empty(check)) {
             return Response::json([ 'error' => 'Event already taking place during this time' ]);
         }
 
@@ -345,8 +344,7 @@ class EventController extends Controller
     }
 
     // show event.id 
-    public function show($eventID) 
-    {
+    public function show($eventID) {
         $event = Event::find($eventID);
         $tags = $this->getTags($eventID);
         $sponsors = $this->getSponsors($eventID);
@@ -354,15 +352,13 @@ class EventController extends Controller
         $attendees = $this->getAttendees($eventID);
         $upcomingEvents = $this->getUpcoming();
 
-        if (empty($event)) 
-        {
+        if (empty($event)) {
             return Response::json([ 'error' => 'Could not find event' ]);
         }
 
         $challenge = $event->challenge;
 
-        if (!$challenge) 
-        {
+        if (!$challenge) {
             $workSpace = Workspace::find($event->spaceID);
             return Response::json([
                 'event' => $event, 
@@ -373,9 +369,7 @@ class EventController extends Controller
                 'attendees' => $attendees,
                 'tags' => $tags  
             ]);
-        }
-        elseif ($challenge) 
-        {
+        }   elseif ($challenge) {
             $sponsors = $this->getSponsors($event->id);
             $hostSpace = Workspace::find($event->spaceID);
             $participatingSpaces = $this->getParticipating($eventID);
@@ -451,6 +445,7 @@ class EventController extends Controller
                         "id" => $event->id,
                         "start" => $eventdate->start,
                         "end" => $eventdate->end,
+                        "description" => $event->description
                     ]
                 );
                 if (count($upcoming) === 3) {

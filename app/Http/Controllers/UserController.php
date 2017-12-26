@@ -347,20 +347,16 @@ class UserController extends Controller
     {
          $user = Auth::user();
          $id = Auth::id();
-
         $skills = Userskill::where('userID', $id)
                            ->select('name')
                            ->get();
-
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
-
         $now = new DateTime();
         $events = Event::where('start', '>', $now->format('Y-m-d'))
                           ->select('title', 'id')
                           ->get();
-
         $attending = Calendar::where('userID', $id)->get();
 
         if (!empty($attending))
@@ -399,8 +395,7 @@ class UserController extends Controller
     }
 
 
-    public function allSkills() 
-    {
+    public function allSkills() {
         $skills = Skill::all();
         $skillsArray = [];
         foreach($skills as $skill) {   

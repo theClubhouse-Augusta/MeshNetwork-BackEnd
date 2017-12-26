@@ -49,7 +49,6 @@ Route::post('spaceupdate', 'WorkspaceController@update');
 Route::get('workspaces', 'WorkspaceController@get');
 Route::get('workspace/{spaceID}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
-Route::get('workbookables/{spaceID}', 'WorkspaceController@bookables');
 
 // EventController
 Route::post('sponser','EventController@makeSponser');
@@ -66,8 +65,8 @@ Route::get('getCalendar','EventController@getCalendar');
 Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 
-//AppeanceController
-Route::post('newAppearance','AppearanceController@store');
+// AppeanceController
+Route::post('appearance','AppearanceController@store');
 Route::get('appearances','AppearanceController@get');
 Route::get('countAppearances/{sort}/{eventID?}/{spaceID?}','AppearanceController@getCount');
 Route::get('appearance/{userID}','AppearanceController@show');
@@ -75,15 +74,11 @@ Route::get('storeInvite','AppearanceController@stroreInvite');
 Route::get('getInvite','AppearanceController@getInvite');
 Route::get('occasions','AppearanceController@getValidOccasions');
 
-// BookableController
-Route::post('newBookable','BookableController@store');
-Route::get('bookables','BookableController@get');
-Route::get('bookables/{spaceID}','BookableController@getSpace');
-Route::get('countBookings/{sort}/{eventID?}/{spaceID?}','BookableController@getCount');
-Route::get('bookable/{userID}','BookableController@show');
-Route::get('getBookings','BookableController@getBookings');
-Route::get('deleteBookable/{id}','BookableController@delete');
-Route::get('deleteBookings/{id}','BookableController@deleteBooking');
+// BookingController
+Route::post('booking','BookingController@store');
+Route::get('booking/approve/{token}','BookingController@approve');
+Route::get('booking/deny/{token}','BookingController@deny');
+
 
 // KioskController
 Route::get('kiosk/{spaceID}','KioskController@get');
