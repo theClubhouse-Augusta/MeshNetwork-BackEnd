@@ -19,7 +19,6 @@ use App\Sponser;
 use App\Skill;
 use App\Sponserevent;
 use App\User;
-use App\Usertoevent;
 use App\Workspace;
 use App\Calendar;
 use App\Opt;
@@ -157,6 +156,13 @@ class EventController extends Controller
                 $eventorganizer->eventID = $eventID;
                 $eventorganizer->userID = $organizer->value;
                 if (!$eventorganizer->save()) return Response::json([ 'error' => 'e org' ]);
+                $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
+                if (empty($check)) {
+                    $calendar = new Calendar;
+                    $calendar->userID = $eventorganizer->userID;
+                    $calendar->eventID = $eventID;
+                    $calendar->save();
+                }
             }
         }
 
@@ -282,6 +288,14 @@ class EventController extends Controller
                     if(!$file->save()) return Response::json([ 'error' => 'Database error' ]);                                                            
                 }
             }
+        }
+
+        $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
+        if (empty($check)) {
+            $calendar = new Calendar;
+            $calendar->userID = $userID;
+            $calendar->eventID = $eventID;
+            $calendar->save();
         }
         return Response::json($eventID);
     }
@@ -744,7 +758,7 @@ class EventController extends Controller
         $user = User::find($userID);
         $event = Event::find($eventID);
 
-        $attendEvent = new Usertoevent;
+        $attendEvent = new Calendar;
         $attendEvent->eventID = $eventID;
         $attendEvent->userID = $userID;
 

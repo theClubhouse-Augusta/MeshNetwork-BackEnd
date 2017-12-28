@@ -73,10 +73,8 @@ class UserController extends Controller
      * @param Illuminate\Support\Facades\Request::class
      * @return  Illuminate\Support\Facades\Response::class
      */
-    public function updateUser(Request $request) 
-    {
+    public function updateUser(Request $request) {
         //constants
-        $userId = Auth::id();
         $rules = [
           'name' => 'nullable|string',
           'password' => 'nullable|string',
@@ -84,26 +82,27 @@ class UserController extends Controller
           'spaceID' => 'nullable|string',
           'company' => 'nullable|string',
           'website' => 'nullable|string',
-          'bio' => 'nullable|string',
+        //   'bio' => 'nullable|string',
           'avatar' => 'nullable|string',
-          'skills' => 'nullable|string',
+          'tags' => 'nullable|string',
           'phoneNumber' => 'nullable|string',
           'deleteSkills' => 'nullable|string',
+          'facebook' => 'nullable|string',
+          'twitter' => 'nullable|string',
+          'instagram' => 'nullable|string',
+          'linkedin' => 'nullable|string',
+          'github' => 'nullable|string',
+          'dribble' => 'nullable|string',
+          'behnace' => 'nullable|string',
+          'angellist' => 'nullable|string'
         ];
         
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ( $validator->fails() ) 
-        {
+        if ( $validator->fails() ) {
             return Response::json(['error' => 'Invalid form input.']);
         }
-
-        // TODO
-        // $input = $request->all();
-        // if (empty($input)) {
-            
-        // }
 
         // Form Input
         $name = $request->input('name');
@@ -112,13 +111,21 @@ class UserController extends Controller
         $company = $request->input('company');
         $website = $request->input('website');
         $phoneNumber = $request->input('phoneNumber');
-        $bio = $request->input('bio');
+        $facbook = $request->input('facbook');
+        $twitter = $request->input('twitter');
+        $instagram = $request->input('instagram');
+        $linkedin = $request->input('linkedin');
+        $github = $request->input('github');
+        $dribble = $request->input('dribble');
+        $behance = $request->input('behance');
+        $angellist = $request->input('angellist');
+
+        // $bio = $request->input('bio');
         // User Skills
-        $skills = explode(',',$request->input('skills'));
-        $deleteSkills = explode(',',$request->input('deleteSkills'));
+        $tags = json_decode($request->input('tags'));
+        $deleteSkills = explode(',', $request->input('deleteSkills'));
         // Avatar Input
-        if (!empty($_FILES['avatar'])) 
-        {
+        if (!empty($_FILES['avatar'])) {
             // Check for file upload error
             if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) 
             {
@@ -143,11 +150,9 @@ class UserController extends Controller
             $avatar = $request->file('avatar');
         }
         // Ensure unique email
-        if (!empty($email)) 
-        {
+        if (!empty($email)) {
             $check = User::where('email', $email)->first();
-            if (!empty($check)) 
-            {
+            if (!empty($check)) {
                 return Response::json(['error' => 'Email already in use']);
             }
         }
@@ -155,92 +160,76 @@ class UserController extends Controller
         $user = Auth::user();
         if (!empty($name)) $user->name = $name;
         if (!empty($email)) $user->email = $email;
+        if (!empty($phoneNumber)) $user->email = $phoneNumber;
         if (!empty($spaceID)) $user->spaceID = $spaceID;
         if (!empty($password)) $user->password = Hash::make($password);
         if (!empty($company)) $user->company = $company;
         if (!empty($website)) $user->website = $website;
+        if (!empty($facebook)) $user->facebook = $facebook;
+        if (!empty($twitter)) $user->twitter = $twitter;
+        if (!empty($instagram)) $user->instagram = $instagram;
+        if (!empty($linkedin)) $user->linkedin = $linkedin;
+        if (!empty($github)) $user->github = $github;
+        if (!empty($dribble)) $user->dribble = $dribble;
+        if (!empty($behance)) $user->behance = $behance;
+        if (!empty($angellist)) $user->angellist = $angellist;
 
-        if ((!empty($phoneNumber)) 
-            && (is_numeric($phoneNumber)) 
-            && (count(str_split($phoneNumber)) == 10))
-        {
-            $user->phoneNumber = $phoneNumber;
-        } 
-        elseif (!empty($phoneNumber)) 
-        {
-            return Response::json([ 'error' => 'Invalid phone number' ]);
+        if (!empty($bio)) $user->bio = $bio;
+        // Profile Picture
+        if (!empty($avatar)) {
+            $avatarName = $avatar->getClientOriginalName();
+            $avatar->move('storage/avatar/', $avatarName);
+            $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+        }   
+        // Persist changes to database
+        if (!$user->save()) {
+           return Response::json(['error' => 'Account not created']);
         }
 
-    if (!empty($bio)) $user->bio = $bio;
-      // Profile Picture
-    if (!empty($avatar)) {
-      $avatarName = $avatar->getClientOriginalName();
-      $avatar->move('storage/avatar/', $avatarName);
-      $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
-    }
-    // Persist changes to database
-    if (!$user->save()) {
-       return Response::json(['error' => 'Account not created']);
-    }
-
-    // delete skills
-    if (!empty($deleteSkills)) 
-    {
-        foreach ($deleteSkills as $key => $deleteSkill) 
-        {
-            Userskill::where('name', $deleteSkill)->where('userID', $userId)->delete();
-        }
-    }
-
-    // check for and create new skill tags
-    if (!empty($skills)) 
-    {
-        // create new Skills if not in database 
-        foreach($skills as $key => $skill) 
-        {
-            // trim white space from input
-            $trimmedSkill = trim($skill);
-            $checkSkill = Skill::where('name', $trimmedSkill)->first();
-
-            if (empty($checkSkill)) 
-            {
-                $newSkill = new Skill;
-                $newSkill->name = $trimmedSkill;
-                // Persist App\Skill to database
-                if (!$newSkill->save()) 
-                {
-                    return Response::json([ 'error' => 'database error' ]);
-                }     
+        // delete skills
+        if (!empty($deleteSkills)) {
+            foreach ($deleteSkills as $key => $deleteSkill) {
+                Userskill::where('name', $deleteSkill)->where('userID', $userId)->delete();
             }
         }
-    }
 
-    // update App\Userskill;
-    foreach ($skills as $key => $skill) 
-    {
-        // trim white space from input
-        $trimmedSkill = trim($skill);
-        // get current skill in iteration
-        $skillTag = Skill::where('name', $trimmedSkill)->first();
-        $checkUserSkill = Userskill::where('userID', $userId)
+        // check for and create new skill tags
+        if (!empty($tags)) {
+            foreach($tags as $key => $tag) {
+                if (!property_exists($tag, 'id'))  {
+                    $check = Skill::where('name', $tag->value)->first();
+                    if (empty($check)) {
+                        $newSkill = new Skill;
+                        $newSkill->name = $tag->value;
+                        // Persist App\Skill to database
+                        $success = $newSkill->save();
+                        if (!$success) return Response::json([ 'error' => 'database error' ]);
+                    }
+                }
+            }
+        }
+
+        // update App\Userskill;
+        foreach($tags as $key => $skill) {
+            // get current skill in iteration
+            $skillTag = Skill::where('name', $skill)->first();
+            $checkUserSkill = Userskill::where('userID', $userId)
                                    ->where('skillID', $skillTag->id)
-                                   ->first();;
+                                   ->first();
 
-        if (empty($checkUserSkill)) 
-        {
-            // Create new UserSkill
-            $userSkill = new Userskill;
-            $userSkill->userID = $userId;
-            $userSkill->skillID = $skillTag->id;
-            $userSkill->name = $skillTag->name;
+            if (empty($checkUserSkill)) {
+                // Create new UserSkill
+                $userSkill = new Userskill;
+                $userSkill->userID = $userId;
+                $userSkill->skillID = $skillTag->id;
+                $userSkill->name = $skillTag->name;
 
-            if (!$userSkill->save()) 
-            {
-                return Response::json([ 'error' => 'database error' ]);
+                if (!$userSkill->save()) {
+                    return Response::json([ 'error' => 'database error' ]);
+                }
             }
         }
-    }
-    return Response::json(['success' => 'User updated successfully.']);
+        return Response::json(['success' => 'User updated successfully.']);
     }
 
     /** 
@@ -262,7 +251,7 @@ class UserController extends Controller
 
             $users = array();
             foreach ($skills as $key => $skill)  {
-                $match = User::where('id', $skill['userID'])->where('searchOpt', false)->first();
+                $match = User::where('id', $skill['userID'])->first();
                 if (!empty($match)) {
                     array_push($users, $match);
                 }
@@ -291,9 +280,7 @@ class UserController extends Controller
             $res = array();
             foreach ($skills as $key => $skill) 
             {
-                $match = User::where('id', $skill['userID'])
-                             ->where('searchOpt', false)
-                             ->first();
+                $match = User::where('id', $skill['userID'])->first();
 
                 if (!empty($match)) 
                 {
@@ -309,9 +296,7 @@ class UserController extends Controller
             $res = array();
             foreach ($skills as $key => $skill) 
             {
-                $match = User::where('id', $skill['userID'])
-                             ->where('searchOpt', false)
-                             ->first();
+                $match = User::where('id', $skill['userID'])->first();
 
                 if (!empty($match)) 
                 {
@@ -327,10 +312,7 @@ class UserController extends Controller
             $res = array();
             foreach ($users as $user) 
             {
-                if ($user->searchOpt == false) 
-                {
-                    array_push($res, $user);
-                }
+                array_push($res, $user);
             }
             return Response::json($res);
         }
@@ -468,7 +450,7 @@ class UserController extends Controller
         $events = $this->getUpcomingEvents();
         $upcoming = $this->getAttendingEvents($user->id);
 
-        if (empty($user) || $user->searchOpt) {
+        if (empty($user)) {
             return Response::json([ 'error' => 'User does not exist' ]); 
         }
         return Response::json([
