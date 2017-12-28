@@ -29,13 +29,13 @@ class UserController extends Controller
     public function __construct() 
     {
         $this->middleware('jwt.auth', [ 'only' => [
-               'updateUser',
+           'updateUser',
            'delete',
            'showUser',
            'user',
             'searchName',
            'search',
-        //    'getSkills',
+        //   'getSkills',
             // 'allSkills',
             'Organizers'
         ]]);
@@ -343,55 +343,86 @@ class UserController extends Controller
    * @param void 
    * @return  Illuminate\Support\Facades\Response::class
   */
-    public function showUser(Request $request) 
-    {
-         $user = Auth::user();
-         $id = Auth::id();
-        $skills = Userskill::where('userID', $id)
+    public function showUser(Request $request) {
+        $user = Auth::user();
+        $id = Auth::id();
+
+        $skills = Userskill::where('userID', $user->id)
                            ->select('name')
                            ->get();
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
-        $now = new DateTime();
-        $events = Event::where('start', '>', $now->format('Y-m-d'))
-                          ->select('title', 'id')
-                          ->get();
-        $attending = Calendar::where('userID', $id)->get();
+        $events = $this->getUpcomingEvents();
+        $upcoming = $this->getAttendingEvents($user->id);
 
-        if (!empty($attending))
-        {
-            $upcoming = array();
-            foreach ($attending as $attend)
-            {
-                $event = Event::find($attend->eventID);
-                $eDate = new DateTime($event['start']);
-                $diff = $now->diff($eDate);
-                $formattedDiff = $diff->format('%R%a');
-
-                if ((int)$formattedDiff > 0) 
-                {
-                    array_push($upcoming, 
-                        [
-                            "title" => $event->title,
-                            "id" => $event->id 
-                        ]
-                    );
-                }
-            }
+        if (empty($user)) {
+            return Response::json([ 'error' => 'User does not exist' ]); 
         }
 
-       if (empty($user)) 
-       {
-          return Response::json([ 'error' => 'User does not exist' ]); 
-       }
         return Response::json([
             'user' => $user,
             'skills' => !empty($skills) ? $skills : false,
             'space' => !empty($space) ? $space : false,
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
-        ]);   
+        ]);
+    } 
+
+    private function getUpcomingEvents() {
+        $now = new DateTime();
+        $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
+
+        $eventIDs = array();
+        foreach ($eventdates as $key => $event) {
+            if ($key == 0) {
+                $id = $event->eventID;
+                array_push($eventIDs, $id);
+            }
+            if ($key != 0) {   
+                $check = $event->eventID;
+                if ($id != $check) {
+                    $id = $check;
+                    array_push($eventIDs, $id);
+                }
+            }
+        }
+        $events = array();
+        foreach ($eventIDs as $id) {
+            $event = Event::find($id);
+            array_push($events, $event);
+        }
+        return $events;
+
+    }
+
+    private function getAttendingEvents($userID) {
+        $now = new DateTime();
+        $attending = Calendar::where('userID', $userID)->get();
+        $upcoming = array();
+        if (!empty($attending)) {
+            foreach ($attending as $attend) {
+                $eventdate = Eventdate::where('eventID', $attend->eventID)->first();
+                if (!empty($eventdate)) {
+                    $event = Event::find($attend->eventID);
+                    $title = $event->title;
+                    $id = $event->id;
+                    $eDate = new DateTime($eventdate->start);
+                    $diff = $now->diff($eDate);
+                    $formattedDiff = $diff->format('%R%a');
+
+                    if ((int)$formattedDiff > 0) {
+                        array_push($upcoming, 
+                            [
+                                "title" => $title,
+                                "id" => $id
+                            ]
+                        );
+                    }
+                }
+            }
+        }
+        return $upcoming;
     }
 
 
@@ -429,40 +460,17 @@ class UserController extends Controller
         $skills = Userskill::where('userID', $id)
                            ->select('name')
                            ->get();
+
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
-        // $space = Workspace::find($user->spaceID)['name'];                          
-        // return $space;
-        $now = new DateTime();
-        $events = Eventdate::where('start', '>', $now->format('Y-m-d'))
-        ->select('eventID')
-        ->get();
-        $attending = Calendar::where('userID', $id)->get();
 
-        if (!empty($attending)) {
-            $upcoming = array();
-            foreach ($attending as $attend) {
-                $event = Eventdate::where('eventID', $attend->eventID)->first();
-                $eventTitle = Event::find($attend->eventID)['title'];
-                $eDate = new DateTime($event->start);
-                $diff = $now->diff($eDate);
-                $formattedDiff = $diff->format('%R%a days');
+        $events = $this->getUpcomingEvents();
+        $upcoming = $this->getAttendingEvents($user->id);
 
-                if ((int)$formattedDiff > 0) {
-                    array_push($upcoming, 
-                        [
-                            "title" => $eventTitle,
-                            "id" => $event->id 
-                        ]
-                    );
-                }
-            }
+        if (empty($user) || $user->searchOpt) {
+            return Response::json([ 'error' => 'User does not exist' ]); 
         }
-
-       if (empty($user) || $user->searchOpt) {
-          return Response::json([ 'error' => 'User does not exist' ]); 
-       }
         return Response::json([
             'user' => $user,
             'skills' => !empty($skills) ? $skills : false,
@@ -476,7 +484,7 @@ class UserController extends Controller
         $organizers = User::all();
         $organizersArray = [];
         foreach($organizers as $organizer) {
-            array_push($organizersArray, [
+                array_push($organizersArray, [
                 'label' => $organizer->email,
                 'value' => $organizer->id,
                 'avatar'=> $organizer->avatar,

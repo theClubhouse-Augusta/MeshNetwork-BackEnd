@@ -15,6 +15,7 @@ use App\Userskill;
 use App\Skill;
 use App\Workspace;
 use App\Event;
+use App\Eventdate;
 use App\Calendar;
 
 class AuthController extends Controller {
@@ -47,6 +48,7 @@ class AuthController extends Controller {
       'password' => 'required|string',
       'email' => 'required|string',
       'workspace' => 'required|string',
+      'tags' => 'nullable|string',
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -61,39 +63,39 @@ class AuthController extends Controller {
     $workspace = $request->input('workspace');
     $findWorkSpace = Workspace::where('name', $workspace)->first();
     $spaceID = $findWorkSpace->id;
-    $roleID = $request->input('roleID');
+    // $roleID = $request->input('roleID');
     // Optional Input
-    $company = $request->input('company');
-    $website = $request->input('website');
-    $phoneNumber = $request->input('phoneNumber');
-    $bio = $request->input('description');
-    $searchOpt = $request->input('searchOpt');
+    // $company = $request->input('company');
+    // $website = $request->input('website');
+    // $phoneNumber = $request->input('phoneNumber');
+    // $bio = $request->input('description');
+    // $searchOpt = $request->input('searchOpt');
     $tags = json_decode($request->input('tags'));
 
     // Check for valid image upload
-    if (!empty($_FILES['avatar'])) {
+    // if (!empty($_FILES['avatar'])) {
       // Check for file upload error
-      if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-          return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-      }
+    //   if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+    //       return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+    //   }
       // checks for valid image upload
-      $info = getimagesize($_FILES['avatar']['tmp_name']);
+    //   $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-      if ($info === FALSE) {
-        return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-      }
+    //   if ($info === FALSE) {
+    //     return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+    //   }
 
       // checks for valid image upload
-      if (($info[2] !== IMAGETYPE_GIF) 
-            && ($info[2] !== IMAGETYPE_JPEG) 
-            && ($info[2] !== IMAGETYPE_PNG)) 
-        {
-            return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-        }
+    //   if (($info[2] !== IMAGETYPE_GIF) 
+    //         && ($info[2] !== IMAGETYPE_JPEG) 
+    //         && ($info[2] !== IMAGETYPE_PNG)) 
+    //     {
+    //         return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+    //     }
 
       // Get profile image input
-      $avatar = $request->file('avatar');
-    }
+    //   $avatar = $request->file('avatar');
+    // }
 
     // Ensure unique email
     $check = User::where('email', $email)->first();
@@ -109,35 +111,35 @@ class AuthController extends Controller {
     $user->email = $email;
     $user->spaceID = $spaceID;
     $user->roleID = 4;
-    $user->searchOpt = 1;
     $user->password = Hash::make($password);
     // Optional Input
-    if (!empty($company)) $user->company = $company;
-    if (!empty($website)) $user->website = $website;
+    // if (!empty($company)) $user->company = $company;
+    // if (!empty($website)) $user->website = $website;
     
-    if ((!empty($phoneNumber)) 
-      && (is_numeric($phoneNumber)) 
-      && (count(str_split($phoneNumber)) == 10))
-      {
-        $user->phoneNumber = $phoneNumber;
-      } elseif (!empty($phoneNumber)) {
-        return Response::json([ 'error' => 'Invalid phone number' ]);
-      }
+    // if ((!empty($phoneNumber)) 
+    //   && (is_numeric($phoneNumber)) 
+    //   && (count(str_split($phoneNumber)) == 10))
+    //   {
+        // $user->phoneNumber = $phoneNumber;
+    //   } elseif (!empty($phoneNumber)) {
+        // return Response::json([ 'error' => 'Invalid phone number' ]);
+    //   }
 
-    if (!empty($bio)) $user->bio = $bio;
+    // if (!empty($bio)) $user->bio = $bio;
 
     // Profile Picture
-    if (!empty($avatar)) {
-      $avatarName = $avatar->getClientOriginalName();
-      $avatar->move('storage/avatar/', $avatarName);
-      $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
-    }
+    // if (!empty($avatar)) {
+    //   $avatarName = $avatar->getClientOriginalName();
+    //   $avatar->move('storage/avatar/', $avatarName);
+    //   $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+    // }
      
     // Check if user signed up as Admin
-    $check_key = substr($password, 0, 8);
+    // $check_key = substr($password, 0, 8);
 
     // Persist user to database
-    if (!$user->save()) {
+    $success = $user->save();
+    if (!$success) {
       return Response::json(['error' => 'Account not created']);
     }
 
@@ -149,7 +151,8 @@ class AuthController extends Controller {
                 $newSkill = new Skill;
                 $newSkill->name = $tag->value;
                 // Persist App\Skill to database
-                if (!$newSkill->save()) return Response::json([ 'error' => 'database error' ]);
+                $success = $newSkill->save();
+                if (!$success) return Response::json([ 'error' => 'database error' ]);
             }
         }
     }
@@ -164,8 +167,8 @@ class AuthController extends Controller {
             $userSkill->skillID = $skillTag->id;
             $userSkill->name = $skillTag->name;
             // Persist App\Skill to database
-            if (!$userSkill->save())  return Response::json([ 'error' => 'eventSkill database error' ]);
-            
+            $success = $userSkill->save();
+            if (!$success) return Response::json([ 'error' => 'eventSkill database error' ]);
         }
     }
     return Response::json(['success' => 'User created successfully.']);
@@ -188,8 +191,7 @@ class AuthController extends Controller {
         // Validate and purify input 
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'Please fill out all fields.']);
         }
 
@@ -203,8 +205,7 @@ class AuthController extends Controller {
         $credentials = compact("email", "password");
         $token = JWTAuth::attempt($credentials);
 
-        if ($token == false) 
-        { 
+        if ($token == false) { 
             return Response::json(['error' => 'Wrong Email/Password']);
         }
 
@@ -216,43 +217,74 @@ class AuthController extends Controller {
                           ->select('name')
                           ->first();
 
-        $events = Event::where('challenge', true)
-                          ->select('title', 'id')
-                          ->get();
+        $events = $this->getUpcomingEvents();
+        $upcoming = $this->getAttendingEvents($user->id);
 
-        $attending = Calendar::where('userID', $user->id)->get();
-
-        if (!empty($attending)) {
-            $now = new DateTime();
-            $upcoming = array();
-            foreach ($attending as $attend)
-            {
-                $event = Event::find($attend->id);
-                $eDate = new DateTime($event['start']);
-                $diff = $now->diff($eDate);
-                $formattedDiff = $diff->format('%R%a');
-
-                if ((int)$formattedDiff > 0) 
-                {
-                    array_push($upcoming, 
-                        [
-                            "title" => $event->title,
-                            "id" => $event->id 
-                        ]
-                    );
-                }
-            }
-        }
-
-        return Response::json([ 
+        return Response::json([
             'user' => $user,
             'skills' => !empty($skills) ? $skills : false,
             'space' => !empty($space) ? $space : false,
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
-            'token' => $token
+            'token' => $token,
         ]);
     } 
+
+    private function getUpcomingEvents() {
+        $now = new DateTime();
+        $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
+
+        $eventIDs = array();
+        foreach ($eventdates as $key => $event) {
+            if ($key == 0) {
+                $id = $event->eventID;
+                array_push($eventIDs, $id);
+            }
+            if ($key != 0) {   
+                $check = $event->eventID;
+                if ($id != $check) {
+                    $id = $check;
+                    array_push($eventIDs, $id);
+                }
+            }
+        }
+        $events = array();
+        foreach ($eventIDs as $id) {
+            $event = Event::find($id);
+            array_push($events, $event);
+        }
+        return $events;
+
+    }
+
+    private function getAttendingEvents($userID) {
+        $now = new DateTime();
+        $attending = Calendar::where('userID', $userID)->get();
+        $upcoming = array();
+        if (!empty($attending)) {
+            foreach ($attending as $attend) {
+                $eventdate = Eventdate::where('eventID', $attend->eventID)->first();
+                if (!empty($eventdate)) {
+                    $event = Event::find($attend->eventID);
+                    $title = $event->title;
+                    $id = $event->id;
+                    $eDate = new DateTime($eventdate->start);
+                    $diff = $now->diff($eDate);
+                    $formattedDiff = $diff->format('%R%a');
+
+                    if ((int)$formattedDiff > 0) {
+                        array_push($upcoming, 
+                            [
+                                "title" => $title,
+                                "id" => $id
+                            ]
+                        );
+                    }
+                }
+            }
+        }
+        return $upcoming;
+    }
 
   /** 
    * Get users

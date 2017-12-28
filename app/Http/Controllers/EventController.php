@@ -53,6 +53,7 @@ class EventController extends Controller
         // user currently signed in
         $userID = Auth::id();
         $spaceID = User::find($userID)->spaceID;
+        // return $request->day;
 
         if ($request->day) {
             $rules = [
@@ -67,7 +68,6 @@ class EventController extends Controller
                'start' => 'required|string',
                'end' => 'required|string',
                'description' => 'required|string',
-            //    'files0' => 'required|string',
             ];
         }   else {
             $rules = [
@@ -82,7 +82,6 @@ class EventController extends Controller
                 'startMulti' => 'required|string',
                 'endMulti' => 'required|string',
                 'description' => 'required|string',
-                // 'files0' => 'required|string',
             ];
         }
 
@@ -220,10 +219,44 @@ class EventController extends Controller
             $eventDate->end = $dateEnd;
             if (!$eventDate->save()) return Response::json([ 'error' => 'evenDate error' ]);
             
+        }   else {
+            $dateMulti = json_decode($request->input('dateMulti'));
+            $startMulti = json_decode($request->input('startMulti'));
+            $endMulti = json_decode($request->input('endMulti'));
+
+            foreach ($dateMulti as $key => $day) {
+                $start = $startMulti[$key];
+                $end = $endMulti[$key];
+                $ymd = explode('-', $day->day);
+                $hms = explode(':', $start->start);
+                $hme = explode(':', $end->end);
+
+                $startStamp = date('Y-m-d H:i:s', mktime(
+                    (int)$hms[0], 
+                    (int)$hms[1], 
+                    0, 
+                    (int)$ymd[1], 
+                    (int)$ymd[2], 
+                    (int)$ymd[0]
+                ));
+
+                $endStamp = date('Y-m-d H:i:s', mktime(
+                    (int)$hme[0], 
+                    (int)$hme[1], 
+                    0, 
+                    (int)$ymd[1], 
+                    (int)$ymd[2], 
+                    (int)$ymd[0]
+                ));
+                $eventDate = new Eventdate;
+                $eventDate->eventID = $eventID;
+                $dateStart = $startStamp;
+                $dateEnd = $endStamp;
+                $eventDate->start= $dateStart;
+                $eventDate->end = $dateEnd;
+                if (!$eventDate->save()) return Response::json([ 'error' => 'evenDate error' ]);
+            }
         }
-        $dateMulti = $request->input('dateMulti');
-        $startMulti = $request->input('startMulti');
-        $endMulti = $request->input('endMulti');
 
         if (!empty($sponserIDs)) {
             foreach ($sponserIDs as $sponserID) {
