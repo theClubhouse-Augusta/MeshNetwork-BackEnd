@@ -24,7 +24,6 @@ class CreateUsersTable extends Migration
             $table->boolean('searchOpt')->default(false);
             $table->string('company')->nullable();
             $table->string('website')->nullable();
-            $table->integer('phoneNumber')->nullable();
             $table->longText('bio')->nullable();
             $table->longText('avatar')->nullable();
             $table->boolean('ban')->default(false);

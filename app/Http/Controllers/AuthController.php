@@ -47,7 +47,7 @@ class AuthController extends Controller {
       'name' => 'required|string',
       'password' => 'required|string',
       'email' => 'required|string',
-      'workspace' => 'required|string',
+      'spaceID' => 'required|string',
       'tags' => 'nullable|string',
     ];
     // Validate input against rules
@@ -60,14 +60,11 @@ class AuthController extends Controller {
     $name = $request->input('name');
     $email = $request->input('email');
     $password = $request->input('password');
-    $workspace = $request->input('workspace');
-    $findWorkSpace = Workspace::where('name', $workspace)->first();
-    $spaceID = $findWorkSpace->id;
+    $spaceID = $request->input('spaceID');
     // $roleID = $request->input('roleID');
     // Optional Input
     // $company = $request->input('company');
     // $website = $request->input('website');
-    // $phoneNumber = $request->input('phoneNumber');
     // $bio = $request->input('description');
     // $searchOpt = $request->input('searchOpt');
     $tags = json_decode($request->input('tags'));
@@ -116,14 +113,6 @@ class AuthController extends Controller {
     // if (!empty($company)) $user->company = $company;
     // if (!empty($website)) $user->website = $website;
     
-    // if ((!empty($phoneNumber)) 
-    //   && (is_numeric($phoneNumber)) 
-    //   && (count(str_split($phoneNumber)) == 10))
-    //   {
-        // $user->phoneNumber = $phoneNumber;
-    //   } elseif (!empty($phoneNumber)) {
-        // return Response::json([ 'error' => 'Invalid phone number' ]);
-    //   }
 
     // if (!empty($bio)) $user->bio = $bio;
 

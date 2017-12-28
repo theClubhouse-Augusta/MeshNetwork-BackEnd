@@ -472,15 +472,17 @@ class EventController extends Controller
                 $event = Event::where('id', $eventdate->eventID)
                               ->where('spaceID', $spaceID)
                               ->first();
-                array_push($upcoming, 
-                    [
-                        "title" => $event->title,
-                        "id" => $event->id,
-                        "start" => $eventdate->start,
-                        "end" => $eventdate->end,
-                        "description" => $event->description
-                    ]
-                );
+                if (!empty($event)) {              
+                    array_push($upcoming, 
+                        [
+                            "title" => $event->title,
+                            "id" => $event->id,
+                            "start" => $eventdate->start,
+                            "end" => $eventdate->end,
+                            "description" => $event->description
+                        ]
+                    );
+                }
                 if (count($upcoming) === 3) {
                     return $upcoming;
                 }
