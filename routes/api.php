@@ -27,6 +27,7 @@ Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
 // UserController
 Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user
 Route::post('updateUser', 'UserController@updateUser'); // logged in user profile update
+Route::get('userskills', 'UserController@userSkills'); // to populate tags in sign up form
 Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
 Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sign up form
 Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
@@ -81,6 +82,7 @@ Route::get('booking/deny/{token}','BookingController@deny');
 
 
 // KioskController
+Route::get('kiosk/{spaceID}','KioskController@get');
 Route::get('kiosk/{spaceID}','KioskController@get');
 
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

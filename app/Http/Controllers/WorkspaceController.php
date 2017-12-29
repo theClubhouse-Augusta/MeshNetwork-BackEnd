@@ -33,8 +33,7 @@ class WorkspaceController extends Controller
         ]]);
     }
 
-    public function store(Request $request) 
-    {
+    public function store(Request $request) {
         $rules = [
             'name' => 'required|string',
             'city' => 'required|string',
@@ -43,21 +42,17 @@ class WorkspaceController extends Controller
             'zipcode' => 'required|string',
             'email' => 'required|string',
             'website' => 'required|string',
-            'phone_number' => 'required|string',
             'description' => 'required|string',
             'logo' => 'nullable|string'
         ];
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
         // test input
-        $userID = $request->input('userID');
-        $roleID = $request->input('roleID');
         
         // production input
         // Logged in user
@@ -123,8 +118,7 @@ class WorkspaceController extends Controller
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE) 
-            {
+            if ($info === FALSE) {
                 return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
             }
 
@@ -142,14 +136,12 @@ class WorkspaceController extends Controller
             // Ensure unique email
             $check = Workspace::where('name', $name)->first();
 
-            if (!empty($check)) 
-            {
+            if (!empty($check)) {
                 return Response::json(['error' => 'Name already in use']);
             }
 
             // create new App\Workspace;
             $workspace = new Workspace;
-            $workspace->userID = $userID;
             $workspace->name = $name;
             $workspace->city = $city;
             $workspace->address = $address;
@@ -168,6 +160,7 @@ class WorkspaceController extends Controller
             }
             // persist workspace to database
             $success = $workspace->save(); 
+
             if (!$success) 
             {
                 return Response::json(['error' => 'Account not created']);
@@ -179,6 +172,7 @@ class WorkspaceController extends Controller
             $kiosk->secondaryColor = 'f8991d';
             $kiosk->userWelcome = 'Hi';
             $kiosk->userThanks = "Here's what's happening @";
+            $kiosk->save();
 
             return Response::json([ 'success' => 'Worksapce created!' ]);
         }

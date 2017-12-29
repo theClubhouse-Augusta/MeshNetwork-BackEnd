@@ -15,7 +15,6 @@ class Workspaces extends Migration
     {
         Schema::create('workspaces', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('userID');
             $table->string('name'); // unique? //TODO
             $table->string('city');
             $table->string('address');
@@ -25,7 +24,7 @@ class Workspaces extends Migration
             $table->float('lat');
             $table->string('email');
             $table->string('website');
-            $table->integer('phone_number');
+            $table->string('phone_number');
             $table->longText('description');
             //TODO: should we insert a generic logo deafult
             // if they don't provide one for some reason?

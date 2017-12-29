@@ -19,7 +19,6 @@ use App\Sponser;
 use App\Skill;
 use App\Sponserevent;
 use App\User;
-use App\Usertoevent;
 use App\Workspace;
 use App\Calendar;
 use App\Opt;
@@ -157,6 +156,13 @@ class EventController extends Controller
                 $eventorganizer->eventID = $eventID;
                 $eventorganizer->userID = $organizer->value;
                 if (!$eventorganizer->save()) return Response::json([ 'error' => 'e org' ]);
+                $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
+                if (empty($check)) {
+                    $calendar = new Calendar;
+                    $calendar->userID = $eventorganizer->userID;
+                    $calendar->eventID = $eventID;
+                    $calendar->save();
+                }
             }
         }
 
@@ -283,6 +289,14 @@ class EventController extends Controller
                 }
             }
         }
+
+        $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
+        if (empty($check)) {
+            $calendar = new Calendar;
+            $calendar->userID = $userID;
+            $calendar->eventID = $eventID;
+            $calendar->save();
+        }
         return Response::json($eventID);
     }
 
@@ -399,7 +413,7 @@ class EventController extends Controller
                 'upcomingEvents' => $upcomingEvents,
                 'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
                 'organizers' => $organizers,
-                'attendees' => $attendees,
+                'attendees' => !empty($attendees) ? $attendees : false,
                 'tags' => $tags  
             ]);
         }   elseif ($challenge) {
@@ -414,7 +428,7 @@ class EventController extends Controller
                 'upcomingEvents' => $upcomingEvents,
                 'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
                 'organizers' => $organizers,
-                'attendees' => $attendees,
+                'attendees' => !empty($attendees) ? $attendees : false,
                 'tags' => $tags  
             ]);
         }
@@ -443,12 +457,14 @@ class EventController extends Controller
 
             if ((int)$formattedDiff > 0) {
                 $event = Event::find($eventdate->eventID);
+                $space = Workspace::find($event->spaceID);
                 array_push($upcoming, 
                     [
                         "title" => $event->title,
                         "id" => $event->id,
                         "start" => $eventdate->start,
                         "end" => $eventdate->end, 
+                        'name' => $space->name
                     ]
                 );
                 if (count($upcoming) === 3) {
@@ -472,15 +488,17 @@ class EventController extends Controller
                 $event = Event::where('id', $eventdate->eventID)
                               ->where('spaceID', $spaceID)
                               ->first();
-                array_push($upcoming, 
-                    [
-                        "title" => $event->title,
-                        "id" => $event->id,
-                        "start" => $eventdate->start,
-                        "end" => $eventdate->end,
-                        "description" => $event->description
-                    ]
-                );
+                if (!empty($event)) {              
+                    array_push($upcoming, 
+                        [
+                            "title" => $event->title,
+                            "id" => $event->id,
+                            "start" => $eventdate->start,
+                            "end" => $eventdate->end,
+                            "description" => $event->description
+                        ]
+                    );
+                }
                 if (count($upcoming) === 3) {
                     return $upcoming;
                 }
@@ -551,7 +569,9 @@ class EventController extends Controller
             foreach($eventattendees as $eventattendee)
             {
                 $attendee = User::find($eventattendee->userID);
-                array_push($attendees, $attendee);
+                if (!empty($attendee)) {
+                    array_push($attendees, $attendee);
+                }
             }
         }
         return $attendees;
@@ -742,7 +762,7 @@ class EventController extends Controller
         $user = User::find($userID);
         $event = Event::find($eventID);
 
-        $attendEvent = new Usertoevent;
+        $attendEvent = new Calendar;
         $attendEvent->eventID = $eventID;
         $attendEvent->userID = $userID;
 
