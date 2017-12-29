@@ -413,7 +413,7 @@ class EventController extends Controller
                 'upcomingEvents' => $upcomingEvents,
                 'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
                 'organizers' => $organizers,
-                'attendees' => $attendees,
+                'attendees' => !empty($attendees) ? $attendees : false,
                 'tags' => $tags  
             ]);
         }   elseif ($challenge) {
@@ -428,7 +428,7 @@ class EventController extends Controller
                 'upcomingEvents' => $upcomingEvents,
                 'sponsors' => (count($sponsors) != 0) ? $sponsors : false,
                 'organizers' => $organizers,
-                'attendees' => $attendees,
+                'attendees' => !empty($attendees) ? $attendees : false,
                 'tags' => $tags  
             ]);
         }
@@ -457,12 +457,14 @@ class EventController extends Controller
 
             if ((int)$formattedDiff > 0) {
                 $event = Event::find($eventdate->eventID);
+                $space = Workspace::find($event->spaceID);
                 array_push($upcoming, 
                     [
                         "title" => $event->title,
                         "id" => $event->id,
                         "start" => $eventdate->start,
                         "end" => $eventdate->end, 
+                        'name' => $space->name
                     ]
                 );
                 if (count($upcoming) === 3) {
@@ -567,7 +569,9 @@ class EventController extends Controller
             foreach($eventattendees as $eventattendee)
             {
                 $attendee = User::find($eventattendee->userID);
-                array_push($attendees, $attendee);
+                if (!empty($attendee)) {
+                    array_push($attendees, $attendee);
+                }
             }
         }
         return $attendees;
