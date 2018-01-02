@@ -19,7 +19,7 @@ use App\Event;
 use App\Eventdate;
 use App\Workspace;
 
-class UserController extends Controller 
+class UserController extends Controller
 {
     /**
     * Apply jwt middleware to specific routes.
@@ -60,7 +60,7 @@ class UserController extends Controller
         if ($user->delete()) {
             return Response::json(['success' => 'Account Deleted']);
         }
-        // handle database error  
+        // handle database error
         return Response::json(['error' => 'Account could not be deleted']);
     }
 
@@ -97,7 +97,7 @@ class UserController extends Controller
           'behnace' => 'nullable|string',
           'angellist' => 'nullable|string'
         ];
-        
+
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
@@ -130,21 +130,21 @@ class UserController extends Controller
         // Avatar Input
         if (!empty($_FILES['avatar'])) {
             // Check for file upload error
-            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) 
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK)
             {
                 return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-            if ($info === FALSE) 
+            if ($info === FALSE)
             {
                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
             }
 
-            if ( ($info[2] !== IMAGETYPE_GIF) 
-               && ($info[2] !== IMAGETYPE_JPEG) 
-               && ($info[2] !== IMAGETYPE_PNG)) 
+            if ( ($info[2] !== IMAGETYPE_GIF)
+               && ($info[2] !== IMAGETYPE_JPEG)
+               && ($info[2] !== IMAGETYPE_PNG))
             {
                 return Response::json([ "error" => "Not a gif/jpeg/png" ]);
             }
@@ -188,7 +188,7 @@ class UserController extends Controller
             $avatarName = $avatar->getClientOriginalName();
             $avatar->move('storage/avatar/', $avatarName);
             $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
-        }   
+        }
         // Persist changes to database
         if (!$user->save()) {
            return Response::json(['error' => 'Account not created']);
@@ -244,12 +244,12 @@ class UserController extends Controller
         return Response::json(['success' => 'Account updated!']);
     }
 
-    /** 
+    /**
      * Search Users by skill/spaceid
      * @param Illuminate\Support\Facades\Request
      * @return  Illuminate\Support\Facades\Response
     **/
-    public function search(Request $request) { 
+    public function search(Request $request) {
         // url query params
         $query = $request->query('query');
         $tag = $request->query('tag');
@@ -298,17 +298,17 @@ class UserController extends Controller
             }
 
             return $res;
-        } 
+        }
 
         // App\Skill match
-        if ( count($users) == 0 && count($skills) != 0 ) 
+        if ( count($users) == 0 && count($skills) != 0 )
         {
             $res = array();
-            foreach ($skills as $key => $skill) 
+            foreach ($skills as $key => $skill)
             {
                 $match = User::where('id', $skill['userID'])->first();
 
-                if (!empty($match)) 
+                if (!empty($match))
                 {
                     array_push($res, $match);
                 }
@@ -317,10 +317,10 @@ class UserController extends Controller
         }
 
         // App\User match
-        if ( count($users) != 0 && count($skills) == 0 ) 
+        if ( count($users) != 0 && count($skills) == 0 )
         {
             $res = array();
-            foreach ($users as $user) 
+            foreach ($users as $user)
             {
                 array_push($res, $user);
             }
@@ -332,7 +332,7 @@ class UserController extends Controller
 
   /**
    * Show logged in user.
-   * @param void 
+   * @param void
    * @return  Illuminate\Support\Facades\Response::class
   */
     public function showUser(Request $request) {
@@ -349,7 +349,7 @@ class UserController extends Controller
         $upcoming = $this->getAttendingEvents($user->id);
 
         if (empty($user)) {
-            return Response::json([ 'error' => 'User does not exist' ]); 
+            return Response::json([ 'error' => 'User does not exist' ]);
         }
 
         return Response::json([
@@ -359,7 +359,7 @@ class UserController extends Controller
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
         ]);
-    } 
+    }
 
     private function getUpcomingEvents() {
         $now = new DateTime();
@@ -371,7 +371,7 @@ class UserController extends Controller
                 $id = $event->eventID;
                 array_push($eventIDs, $id);
             }
-            if ($key != 0) {   
+            if ($key != 0) {
                 $check = $event->eventID;
                 if ($id != $check) {
                     $id = $check;
@@ -404,7 +404,7 @@ class UserController extends Controller
                     $formattedDiff = $diff->format('%R%a');
 
                     if ((int)$formattedDiff > 0) {
-                        array_push($upcoming, 
+                        array_push($upcoming,
                             [
                                 "title" => $title,
                                 "id" => $id
@@ -421,7 +421,7 @@ class UserController extends Controller
     public function allSkills() {
         $skills = Skill::all();
         $skillsArray = [];
-        foreach($skills as $skill) {   
+        foreach($skills as $skill) {
             array_push($skillsArray, [
                 'label' => $skill->name,
                 'value' => $skill->name,
@@ -451,7 +451,7 @@ class UserController extends Controller
         $userID = Auth::id();
         $skills = Userskill::where('userID', $userID)->get();
         $skillsArray = array();
-        foreach($skills as $skill) {   
+        foreach($skills as $skill) {
             array_push($skillsArray, [
                 'label' => $skill->name,
                 'value' => $skill->name,
@@ -478,7 +478,7 @@ class UserController extends Controller
         $upcoming = $this->getAttendingEvents($user->id);
 
         if (empty($user)) {
-            return Response::json([ 'error' => 'User does not exist' ]); 
+            return Response::json([ 'error' => 'User does not exist' ]);
         }
         return Response::json([
             'user' => $user,
@@ -486,7 +486,7 @@ class UserController extends Controller
             'space' => !empty($space) ? $space : false,
             'events' => !empty($events) ? $events : false,
             'upcoming' => !empty($upcoming) ? $upcoming : false,
-        ]);   
+        ]);
     }
 
     public function Organizers() {
@@ -509,7 +509,9 @@ class UserController extends Controller
         foreach($users as $user) {
             array_push($usersArray, [
                 'label' => $user->name.' - '.$user->email,
-                'value' => $user->email
+                'value' => $user->id,
+                'avatar'=> $organizer->avatar,
+                'name' => $organizer->name
             ]);
         }
         return Response::json($usersArray);
