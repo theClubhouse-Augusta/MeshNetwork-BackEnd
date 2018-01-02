@@ -24,7 +24,7 @@ class Workspaces extends Migration
             $table->float('lat')->nullable();
             $table->string('email');
             $table->string('website');
-            $table->integer('phone_number');
+            $table->string('phone_number');
             $table->longText('description');
             $table->longtext('logo')->nullable();
             $table->string('status')->default('pending'); //approved, declined
