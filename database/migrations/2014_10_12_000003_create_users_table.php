@@ -25,7 +25,7 @@ class CreateUsersTable extends Migration
             $table->boolean('hireable')->default(false);
             $table->string('company')->nullable();
             $table->string('website')->nullable();
-            // $table->longText('bio')->nullable();
+            $table->longText('bio')->nullable();
             $table->longText('avatar')->nullable();
             $table->string('facebook')->nullable(); 
             $table->string('twitter')->nullable(); 

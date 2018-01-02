@@ -47,8 +47,8 @@ class AuthController extends Controller {
             'name' => 'required|string',
             'password' => 'required|string',
             'email' => 'required|string',
-            // 'spaceID' => 'required|string',
-            'workspace' => 'required|string', 
+            'spaceID' => 'required|string',
+            // 'workspace' => 'required|string', 
             'tags' => 'nullable|string',
         ];
         // Validate input against rules
@@ -61,36 +61,37 @@ class AuthController extends Controller {
         $name = $request->input('name');
         $email = $request->input('email');
         $password = $request->input('password');
-        // $spaceID = $request->input('spaceID');
-        $workspace = $request->input('workspace');
-        $space = Workspace::where('name', $workspace)->first();
-        $spaceID = $space->id;
+        $spaceID = $request->input('spaceID');
+        $bio = $request->input('bio');
+        // $workspace = $request->input('workspace');
+        // $space = Workspace::where('name', $workspace)->first();
+        // $spaceID = $space->id;
         $tags = json_decode($request->input('tags'));
 
         // Check for valid image upload
-        // if (!empty($_FILES['avatar'])) {
+        if (!empty($_FILES['avatar'])) {
         // Check for file upload error
-        //   if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-        //       return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-        //   }
+          if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+              return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+          }
         // checks for valid image upload
-        //   $info = getimagesize($_FILES['avatar']['tmp_name']);
+          $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-        //   if ($info === FALSE) {
-        //     return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-        //   }
+          if ($info === FALSE) {
+            return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+          }
 
         // checks for valid image upload
-        //   if (($info[2] !== IMAGETYPE_GIF) 
-        //         && ($info[2] !== IMAGETYPE_JPEG) 
-        //         && ($info[2] !== IMAGETYPE_PNG)) 
-        //     {
-        //         return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-        //     }
+          if (($info[2] !== IMAGETYPE_GIF) 
+                && ($info[2] !== IMAGETYPE_JPEG) 
+                && ($info[2] !== IMAGETYPE_PNG)) 
+            {
+                return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+            }
 
         // Get profile image input
-        //   $avatar = $request->file('avatar');
-        // }
+          $avatar = $request->file('avatar');
+        }
 
         // Ensure unique email
         $check = User::where('email', $email)->first();
@@ -103,6 +104,7 @@ class AuthController extends Controller {
         $user = new User;
         // Required input
         $user->name = $name;
+        $user->bio = $bio;
         $user->email = $email;
         $user->spaceID = $spaceID;
         $user->roleID = 4;
@@ -115,11 +117,11 @@ class AuthController extends Controller {
         // if (!empty($bio)) $user->bio = $bio;
 
         // Profile Picture
-        // if (!empty($avatar)) {
-        //   $avatarName = $avatar->getClientOriginalName();
-        //   $avatar->move('storage/avatar/', $avatarName);
-        //   $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
-        // }
+        if (!empty($avatar)) {
+          $avatarName = $avatar->getClientOriginalName();
+          $avatar->move('storage/avatar/', $avatarName);
+          $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+        }
         
         // Check if user signed up as Admin
         // $check_key = substr($password, 0, 8);
@@ -161,7 +163,13 @@ class AuthController extends Controller {
                 if (!$success) return Response::json([ 'error' => 'eventSkill database error' ]);
             }
         }
-        return Response::json(['success' => 'User created successfully.']);
+
+        $credentials = compact("email", "password");
+        $token = JWTAuth::attempt($credentials);
+        return Response::json([
+            'id' => $user->id,
+            'token' => $token
+        ]);
     }
 
 
