@@ -161,8 +161,7 @@ class WorkspaceController extends Controller
             // persist workspace to database
             $success = $workspace->save(); 
 
-            if (!$success) 
-            {
+            if (!$success) {
                 return Response::json(['error' => 'Account not created']);
             }
             $kiosk = new Kiosk;
@@ -174,7 +173,7 @@ class WorkspaceController extends Controller
             $kiosk->userThanks = "Here's what's happening @";
             $kiosk->save();
 
-            return Response::json([ 'success' => 'Worksapce created!' ]);
+            return Response::json($workspace->id);
         }
         
 
