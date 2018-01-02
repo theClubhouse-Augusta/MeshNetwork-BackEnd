@@ -50,20 +50,22 @@ class BookingController extends Controller {
         $success = $booking->save();
 
         if (!$success) {
-            // handle error
-        }    
+          return Response::json(['error' => 'Could not Book at this time.']);
+        }
 
-        // send email to admin
+        return Response::json(['success' => 'Your request has been submitted. You will receive an email confirmation upon approval.']);
     }
 
     public function approve($token) {
         $booking = Booking::where('token', $token)->first();
-        $booking->status = 'approved'; 
+        $booking->status = 'approved';
+        $booking->save();
     }
 
     public function deny($token) {
         $booking = Booking::where('token', $token)->first();
-        $booking->status = 'denied'; 
+        $booking->status = 'denied';
+        $booking->save();
     }
 
 }

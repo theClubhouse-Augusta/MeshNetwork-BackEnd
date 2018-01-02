@@ -23,7 +23,6 @@ class AppearanceController extends Controller {
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => [
             'get',
-            'store',
             'show',
             'getInvite',
             'storeInvite'
@@ -47,7 +46,7 @@ class AppearanceController extends Controller {
         $userID = $request->input('userID');
         $eventID = $request->input('eventID');
         $spaceID = $request->input('spaceID');
-        $osccasion = $request->input('osccasion');
+        $occasion = $request->input('occasion');
 
         $appearance = new Appearance;
 
@@ -69,13 +68,13 @@ class AppearanceController extends Controller {
     }
 
     public function get() {
-        return Response::json([ 'success' => Appearance::all() ]); 
+        return Response::json([ 'success' => Appearance::all() ]);
     }
 
     // get appearances of user
     public function getCount($sort, $eventID=NULL, $spaceID=NULL) {
     /* TODO Auth
-    * 
+    *
     *
     */
 
@@ -124,12 +123,12 @@ class AppearanceController extends Controller {
     }
   }
 
-  // show appearances for user.id 
+  // show appearances for user.id
   public function show($userID) {
     $appearances = Appearance::where('userID', $userID)->get();
     if (empty($appearances)) {
       return Response::json([ 'error' => 'User has no appearances.' ]);
-    }    
+    }
     return Response::json([ 'success' => $appearances ]);
   }
 
@@ -193,7 +192,6 @@ class AppearanceController extends Controller {
            'event',
            'book room/equipment',
            'book a mentor',
-       ]); 
+       ]);
     }
 }
-
