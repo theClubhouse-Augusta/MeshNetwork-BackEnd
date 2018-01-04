@@ -30,8 +30,8 @@ class UserController extends Controller
         $this->middleware('jwt.auth', [ 'only' => [
            'updateUser',
            'delete',
-           'showUser',
-           'user',
+           //'showUser',
+           //'user',
             //'searchName',
            //'search',
            //'userSkills',
@@ -513,8 +513,8 @@ class UserController extends Controller
             array_push($usersArray, [
                 'label' => $user->name.' - '.$user->email,
                 'value' => $user->id,
-                'avatar'=> $organizer->avatar,
-                'name' => $organizer->name
+                'avatar'=> $user->avatar,
+                'name' => $user->name
             ]);
         }
         return Response::json($usersArray);
