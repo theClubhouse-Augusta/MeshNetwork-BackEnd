@@ -30,11 +30,11 @@ class UserController extends Controller
         $this->middleware('jwt.auth', [ 'only' => [
            'updateUser',
            'delete',
-           'showUser',
-           'user',
-            'searchName',
-           'search',
-           'userSkills',
+           //'showUser',
+           //'user',
+            //'searchName',
+           //'search',
+           //'userSkills',
         //   'getSkills',
             // 'allSkills',
             'Organizers'
@@ -436,15 +436,18 @@ class UserController extends Controller
         ->select(DB::raw('COUNT(*) AS foo, skillID'))
         ->groupBY('skillID')
         ->orderBy('foo', 'desc')
-        ->limit(6)
+        ->limit(12)
         ->get();
 
         $res = array();
         foreach ($userskills as $userskill) {
             array_push($res, Skill::find($userskill->skillID));
         }
+
+        if(count($res) == 0) {
+          $res = Skill::take(12)->get();
+        }
         return Response::json($res);
-        // 'SELECT skillID, COUNT(*) AS foo FROM userskills GROUP BY skillID ORDER BY foo DESC LIMIT 6';
     }
 
     public function userSkills() {
@@ -510,8 +513,8 @@ class UserController extends Controller
             array_push($usersArray, [
                 'label' => $user->name.' - '.$user->email,
                 'value' => $user->id,
-                'avatar'=> $organizer->avatar,
-                'name' => $organizer->name
+                'avatar'=> $user->avatar,
+                'name' => $user->name
             ]);
         }
         return Response::json($usersArray);
