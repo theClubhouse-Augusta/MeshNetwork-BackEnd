@@ -16,9 +16,9 @@ class Opts extends Migration
         Schema::create('opts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('spaceID');
-            $table->integer('eventID');
+            $table->integer('eventID')->unsigned();
             $table->timestamps();
-
+            $table->foreign('eventID')->references('id')->on('events')->onDelete('cascade');
         });
     }
     

@@ -67,6 +67,7 @@ class EventController extends Controller
                'start' => 'required|string',
                'end' => 'required|string',
                'description' => 'required|string',
+               'image' => 'required|string',
             ];
         }   else {
             $rules = [
@@ -81,6 +82,8 @@ class EventController extends Controller
                 'startMulti' => 'required|string',
                 'endMulti' => 'required|string',
                 'description' => 'required|string',
+                'image' => 'required|string',
+
             ];
         }
 
@@ -129,15 +132,20 @@ class EventController extends Controller
         // optional input
         $url = $request->input('url');
         $files = $request->input('file0');
+        $image = $request->file('image');          
+        $imageName = $image->getClientOriginalName();
+        $image->move('/storage/events/images', $imageName);
         
         // create ne App\Event
         $event = new Event;
         $event->userID = $userID;
         $event->spaceID = $spaceID;
         $event->title = $title;
+
         $event->description = $description;
         $event->challenge = $challenge;
         $event->url = $url;
+        $event->image = $request->root().'/storage/events/images/'.$imageName;
         $day = json_decode($request->input('day'));
 
         if (!empty($day)) {
@@ -499,7 +507,7 @@ class EventController extends Controller
                         ]
                     );
                 }
-                if (count($upcoming) === 3) {
+                if (count($upcoming) === 5) {
                     return $upcoming;
                 }
             }

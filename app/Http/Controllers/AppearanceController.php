@@ -30,7 +30,7 @@ class AppearanceController extends Controller {
     }
     public function store(Request $request) {
         $rules = [
-            'userID' => 'required|string',
+            'userID' => 'required|string'   ,
             'spaceID' => 'required|string',
             'eventID' => 'nullable|string',
             'occasion' => 'required|string'
@@ -58,7 +58,6 @@ class AppearanceController extends Controller {
         // optional input
         if (!empty($eventID)) {
             $appearance->eventID = $eventID;
-            $appearance->work = 0;
         }
 
         if (!$appearance->save()) {
@@ -187,11 +186,10 @@ class AppearanceController extends Controller {
 
     public function getValidOccasions() {
        return Response::json([
-           'work',
-           'student',
-           'event',
-           'book room/equipment',
-           'book a mentor',
+           'work' => 'Work',
+           'meetup' => 'Meet-Up',
+           'student' => 'Class',
+           'event' => 'Event',
        ]);
     }
 }

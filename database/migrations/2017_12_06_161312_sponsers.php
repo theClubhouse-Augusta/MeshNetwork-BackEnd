@@ -18,7 +18,7 @@ class Sponsers extends Migration
             $table->increments('id');
             $table->string('name')->unique(); // unique? //TODO
             $table->string('website')->nullable(); // unique? //TODO
-            $table->longtext('logo')->nullable();
+            $table->mediumText('logo')->nullable();
             $table->timestamps();
         });
     }

@@ -16,8 +16,9 @@ class Eventorganizers extends Migration
         Schema::create('eventorganizers', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->integer('eventID');
+            $table->integer('eventID')->unsigned();
             $table->timestamps();
+            $table->foreign('eventID')->references('id')->on('events')->onDelete('cascade');
         });
     }
 

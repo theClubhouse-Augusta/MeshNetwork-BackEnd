@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Kiosks extends Migration
+class Subscriptionplans extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,11 @@ class Kiosks extends Migration
      */
     public function up()
     {
-        Schema::create('kiosks', function (Blueprint $table) {
+        Schema::create('subscriptionplans', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('spaceID');
-            $table->string('inputPlaceholder');
-            $table->longText('logo')->nullable();
-            $table->string('primaryColor');
-            $table->string('secondaryColor');
-            $table->string('userWelcome');
-            $table->string('userThanks');
+            $table->string('name');
+            $table->text('description');
             $table->timestamps();
         });
     }
@@ -33,6 +29,7 @@ class Kiosks extends Migration
      */
     public function down()
     {
-       Schema::dropIfExists('kiosks');
+        Schema::dropIfExists('subscriptionplans');
     }
 }
+

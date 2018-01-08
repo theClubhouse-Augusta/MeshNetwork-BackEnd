@@ -20,13 +20,13 @@ class Events extends Migration
             $table->boolean('multiday');
             $table->string('status')->default('pending'); //TODO needs approval? hence false??
             $table->string('title'); // unique? //TODO
-            $table->longText('description');
+            $table->text('description');
+            $table->mediumText('image');
             $table->boolean('challenge');
             $table->string('url')->nullable();
             $table->timestamps();
       });
     }
-
     /**
      * Reverse the migrations.
      *

@@ -510,8 +510,8 @@ class UserController extends Controller
             array_push($usersArray, [
                 'label' => $user->name.' - '.$user->email,
                 'value' => $user->id,
-                'avatar'=> $organizer->avatar,
-                'name' => $organizer->name
+                'avatar'=> $user->avatar,
+                'name' => $user->name
             ]);
         }
         return Response::json($usersArray);
