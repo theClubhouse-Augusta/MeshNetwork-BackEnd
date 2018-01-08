@@ -72,6 +72,7 @@ Route::get('getCalendar','EventController@getCalendar');
 Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 Route::get('eventOrganizers/{id}', 'EventsController@EventOrganizers');
+Route::get('eventDates/{id}', 'EventsController@EventDates');
 
 // AppeanceController
 Route::post('appearance','AppearanceController@store');
