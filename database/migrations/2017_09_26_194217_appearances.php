@@ -15,10 +15,11 @@ class Appearances extends Migration
         Schema::create('appearances', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->integer('spaceID');
+            $table->integer('spaceID')->unsigned();
             $table->integer('eventID')->nullable();
             $table->string('occasion');
             $table->timestamps();
+            $table->foreign('spaceID')->references('id')->on('workspaces')->onDelete('cascade');
         });
     }
 

@@ -15,10 +15,11 @@ class Eventskills extends Migration
     {
         Schema::create('eventskills', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('eventID');
+            $table->integer('eventID')->unsigned();
             $table->integer('skillID');
             $table->string('name');
             $table->timestamps();
+            $table->foreign('eventID')->references('id')->on('events')->onDelete('cascade');
         });
     }
 

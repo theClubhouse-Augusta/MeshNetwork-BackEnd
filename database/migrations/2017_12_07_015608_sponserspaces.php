@@ -16,9 +16,11 @@ class Sponserspaces extends Migration
         Schema::create('sponserspaces', function (Blueprint $table) 
         {
             $table->increments('id');
-            $table->integer('spaceID');
-            $table->integer('sponserID');
+            $table->integer('spaceID')->unsigned();
+            $table->integer('sponserID')->unsigned();
             $table->timestamps();
+            $table->foreign('spaceID')->references('id')->on('workspaces')->onDelete('cascade');
+            $table->foreign('sponserID')->references('id')->on('sponsers')->onDelete('cascade');
         });
     }
 

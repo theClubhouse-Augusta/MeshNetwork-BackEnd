@@ -20,14 +20,23 @@ class Workspaces extends Migration
             $table->string('address');
             $table->string('state');
             $table->integer('zipcode');
-            $table->float('lon')->nullable();
-            $table->float('lat')->nullable();
+            $table->float('lon');
+            $table->float('lat');
             $table->string('email');
             $table->string('website');
             $table->string('phone_number');
-            $table->longText('description');
-            $table->longtext('logo')->nullable();
+            $table->text('description');
+            $table->mediumText('logo')->nullable();
             $table->string('status')->default('pending'); //approved, declined
+            $table->string('stripe')->nullable(); 
+            $table->string('facebook')->nullable(); 
+            $table->string('twitter')->nullable(); 
+            $table->string('instagram')->nullable(); 
+            $table->string('linkedin')->nullable(); 
+            $table->string('github')->nullable(); 
+            $table->string('dribble')->nullable(); 
+            $table->string('behance')->nullable(); 
+            $table->string('angellist')->nullable(); 
             $table->timestamps();
       });
     }

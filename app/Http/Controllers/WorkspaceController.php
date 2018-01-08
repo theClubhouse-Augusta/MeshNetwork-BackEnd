@@ -10,9 +10,9 @@ use Auth;
 use JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use App\User;
-use App\Kiosk;
 use App\Workspace;
 use App\Event;
+use App\Subscriptionplan;
 
 class WorkspaceController extends Controller 
 {
@@ -20,8 +20,7 @@ class WorkspaceController extends Controller
      * @param void
      * @return void
      */
-    public function __construct() 
-    {
+    public function __construct() {
         $this->middleware('jwt.auth', ['only' => [
         // 'store',
         // 'get',
@@ -164,14 +163,6 @@ class WorkspaceController extends Controller
             if (!$success) {
                 return Response::json(['error' => 'Account not created']);
             }
-            $kiosk = new Kiosk;
-            $kiosk->spaceID = $workspace->id;
-            $kiosk->inputPlaceholder = 'Find yourself ☮';
-            $kiosk->primaryColor = '#3399cc';
-            $kiosk->secondaryColor = 'f8991d';
-            $kiosk->userWelcome = 'Hi';
-            $kiosk->userThanks = "Here's what's happening @";
-            $kiosk->save();
 
             return Response::json($workspace->id);
         }
@@ -259,12 +250,22 @@ class WorkspaceController extends Controller
             'phone_number' => 'nullable|string',
             'description' => 'nullable|string',
             'logo' => 'nullable|string',
+            'stripe' => 'nullable|string',
+            'facebook' => 'nullable|string',
+            'logo' => 'nullable|string',
+            'twitter' => 'nullable|string',
+            'instagram' => 'nullable|string',
+            'github' => 'nullable|string',
+            'dribble' => 'nullable|string',
+            'linkedin' => 'nullable|string',
+            'behance' => 'nullable|string',
+            'angelist' => 'nullable|string',
+            'key' => 'nullable|string',
         ];
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ($validator->fails()) 
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
@@ -278,7 +279,16 @@ class WorkspaceController extends Controller
         $email = $request->input('email');
         $website = $request->input('website');
         $phone_number = $request->input('phone_number');
-        $description = $request->input('description');
+        $description = json_decode($request->input('description'));
+        $facebook = $request->input('facebook');
+        $twitter = $request->input('twitter');
+        $instagram = $request->input('instagram');
+        $github = $request->input('gitthub');
+        $dribble = $request->input('dribble');
+        $linkedin = $request->input('linkedin');
+        $behance = $request->input('behance');
+        $angellist = $request->input('angelist');
+        $key = $request->input('key');
 
         // optional input
         // Check for valid image upload
@@ -320,20 +330,24 @@ class WorkspaceController extends Controller
         if(!empty($website)) $workspace->website = $website;
         if(!empty($phone_number)) $workspace->phone_number = $phone_number;
         if(!empty($description)) $workspace->description = $description;
-
-        if (!empty($logo)) 
-        {
+        if (!empty($facebook)) $workspace->facebook = $facebook;
+        if (!empty($twitter)) $workspace->twitter = $twitter;
+        if (!empty($instagram)) $workspace->instagram = $instagram;
+        if (!empty($linkedin)) $workspace->linkedin = $linkedin;
+        if (!empty($github)) $workspace->github = $github;
+        if (!empty($dribble)) $workspace->dribble = $dribble;
+        if (!empty($behance)) $workspace->behance = $behance;
+        if (!empty($angellist)) $workspace->angellist = $angellist;
+        if (!empty($key)) $workspace->stripe = $key;
+        if (!empty($logo)) {
             $logoName = $logo->getClientOriginalName();
             $logo->move('storage/logo/', $logoName);
-            $user->logo = $request->root().'/storage/logo/'.$logoName;
+            $workspace->logo = $request->root().'/storage/logo/'.$logoName;
         }
 
         // persist workspace to database
-        if (!$workspace->save()) 
-        {
-            return Response::json(['error' => 'Account not created']);
-        }
-        return Response::json([ 'success' => $workspace->name.' updated!' ]);
+        if (!$workspace->save()) return Response::json(['error' => 'Account not created']);
+        else return Response::json([ 'success' => $workspace->name.' updated!' ]);
     }
 
     public function events($spaceID) 
@@ -349,12 +363,45 @@ class WorkspaceController extends Controller
         // fron-end handle that?
         $events = Event::where('spaceID', $spaceID)->get();
 
-        if (empty($events)) 
-        {
-            return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
-        }
-        return Response::json([ 'success' => $events ]);
+        if (empty($events)) return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
+        else return Response::json([ 'success' => $events ]);
 
+    }
+
+    public function addSubscription(Request $request) {
+        $rules = [
+            'plan' => 'required|string',
+            'description' => 'required|string',
+            'spaceID' => 'required|string',
+        ];
+        // Validate input against rules
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+
+        if ($validator->fails()) return Response::json(['error' => 'You must fill out all fields.']);
+
+        $name = $request['name'];
+        $spaceID = $request['spaceID'];
+        $description = $request['description'];
+        $check = Subscriptionplan::where('name', $name)->where('spaceID', $spaceID)->first();
+        if (!empty($check)) return Response::json(['error' => 'error addSubscruption']);
+
+        $plan = new Subscriptionplan;
+
+        $plan->name = $name;
+        $plan->spaceID = $spaceID;
+        $plan->description = $description;
+
+        $success = $plan->save();
+        if ($success) return Response::json(['success' => 'Plan added']);
+        else return Response::json(['error' => 'error addSubscruption']);
+
+    }
+
+
+    public function getSubscriptions($spaceID) {
+       $plans = Subscriptionplan::where('spaceID', $spaceID)->get();
+       if (count($plans) != 0) return Response::json($plans);
+       else return Response::json(['error' => 'No plans available']);
     }
 
 }

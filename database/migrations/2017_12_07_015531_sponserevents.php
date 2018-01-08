@@ -16,9 +16,11 @@ class Sponserevents extends Migration
         Schema::create('sponserevents', function (Blueprint $table) 
         {
             $table->increments('id');
-            $table->integer('eventID');
-            $table->integer('sponserID');
+            $table->integer('eventID')->unsigned();
+            $table->integer('sponserID')->unsigned();
             $table->timestamps();
+            $table->foreign('eventID')->references('id')->on('events')->onDelete('cascade');
+            $table->foreign('sponserID')->references('id')->on('sponsers')->onDelete('cascade');
         });
     }
 

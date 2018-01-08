@@ -16,13 +16,15 @@ class Invites extends Migration
         Schema::create('invites', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->integer('spaceID');
+            $table->integer('spaceID')->unsigned();
             $table->dateTime('date');
             $table->string('status')->default('sent');
             // 'attended',
             // ''  
             $table->timestamps();
+            $table->foreign('spaceID')->references('id')->on('workspaces')->onDelete('cascade');
         });
+
     }
 
       /**

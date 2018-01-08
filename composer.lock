@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "23d0495caaa8b73a76c08e93791dacbd",
+    "content-hash": "413297a01fb7afc54f84ee492f3f652a",
     "packages": [
         {
             "name": "barryvdh/laravel-cors",
@@ -1469,6 +1469,61 @@
             "time": "2017-03-26T20:37:53+00:00"
         },
         {
+            "name": "stripe/stripe-php",
+            "version": "v5.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stripe/stripe-php.git",
+                "reference": "bb3d932721977d1110b766b842f72cb32712b7f1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/bb3d932721977d1110b766b842f72cb32712b7f1",
+                "reference": "bb3d932721977d1110b766b842f72cb32712b7f1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "satooshi/php-coveralls": "~0.6.1",
+                "squizlabs/php_codesniffer": "~2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Stripe\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stripe and contributors",
+                    "homepage": "https://github.com/stripe/stripe-php/contributors"
+                }
+            ],
+            "description": "Stripe PHP Library",
+            "homepage": "https://stripe.com/",
+            "keywords": [
+                "api",
+                "payment processing",
+                "stripe"
+            ],
+            "time": "2017-12-20T21:47:27+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.7",
             "source": {
@@ -1640,33 +1695,32 @@
         },
         {
             "name": "symfony/debug",
-            "version": "v3.2.8",
+            "version": "v3.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/debug.git",
-                "reference": "fd6eeee656a5a7b384d56f1072243fe1c0e81686"
+                "reference": "543deab3ffff94402440b326fc94153bae2dfa7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/debug/zipball/fd6eeee656a5a7b384d56f1072243fe1c0e81686",
-                "reference": "fd6eeee656a5a7b384d56f1072243fe1c0e81686",
+                "url": "https://api.github.com/repos/symfony/debug/zipball/543deab3ffff94402440b326fc94153bae2dfa7a",
+                "reference": "543deab3ffff94402440b326fc94153bae2dfa7a",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9",
+                "php": "^5.5.9|>=7.0.8",
                 "psr/log": "~1.0"
             },
             "conflict": {
                 "symfony/http-kernel": ">=2.3,<2.3.24|~2.4.0|>=2.5,<2.5.9|>=2.6,<2.6.2"
             },
             "require-dev": {
-                "symfony/class-loader": "~2.8|~3.0",
-                "symfony/http-kernel": "~2.8|~3.0"
+                "symfony/http-kernel": "~2.8|~3.0|~4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -1693,31 +1747,34 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "https://symfony.com",
-            "time": "2017-04-19T20:17:50+00:00"
+            "time": "2017-12-12T08:27:14+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
-            "version": "v3.2.8",
+            "version": "v3.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
-                "reference": "b8a401f733b43251e1d088c589368b2a94155e40"
+                "reference": "b869cbf8a15ca6261689de2c28a7d7f2d0706835"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/b8a401f733b43251e1d088c589368b2a94155e40",
-                "reference": "b8a401f733b43251e1d088c589368b2a94155e40",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/b869cbf8a15ca6261689de2c28a7d7f2d0706835",
+                "reference": "b869cbf8a15ca6261689de2c28a7d7f2d0706835",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9"
+                "php": "^5.5.9|>=7.0.8"
+            },
+            "conflict": {
+                "symfony/dependency-injection": "<3.3"
             },
             "require-dev": {
                 "psr/log": "~1.0",
-                "symfony/config": "~2.8|~3.0",
-                "symfony/dependency-injection": "~2.8|~3.0",
-                "symfony/expression-language": "~2.8|~3.0",
-                "symfony/stopwatch": "~2.8|~3.0"
+                "symfony/config": "~2.8|~3.0|~4.0",
+                "symfony/dependency-injection": "~3.3|~4.0",
+                "symfony/expression-language": "~2.8|~3.0|~4.0",
+                "symfony/stopwatch": "~2.8|~3.0|~4.0"
             },
             "suggest": {
                 "symfony/dependency-injection": "",
@@ -1726,7 +1783,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -1753,7 +1810,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2017-05-01T14:58:48+00:00"
+            "time": "2017-12-14T19:40:10+00:00"
         },
         {
             "name": "symfony/finder",
@@ -1806,29 +1863,30 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v3.2.8",
+            "version": "v3.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "9de6add7f731e5af7f5b2e9c0da365e43383ebef"
+                "reference": "59bf131b5460227a2f583a7dbe6b179f98f9e0a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/9de6add7f731e5af7f5b2e9c0da365e43383ebef",
-                "reference": "9de6add7f731e5af7f5b2e9c0da365e43383ebef",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/59bf131b5460227a2f583a7dbe6b179f98f9e0a5",
+                "reference": "59bf131b5460227a2f583a7dbe6b179f98f9e0a5",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9",
-                "symfony/polyfill-mbstring": "~1.1"
+                "php": "^5.5.9|>=7.0.8",
+                "symfony/polyfill-mbstring": "~1.1",
+                "symfony/polyfill-php70": "~1.6"
             },
             "require-dev": {
-                "symfony/expression-language": "~2.8|~3.0"
+                "symfony/expression-language": "~2.8|~3.0|~4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -1855,20 +1913,20 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-05-01T14:55:58+00:00"
+            "time": "2017-12-14T19:40:10+00:00"
         },
         {
             "name": "symfony/http-kernel",
-            "version": "v3.2.8",
+            "version": "v3.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-kernel.git",
-                "reference": "46e8b209abab55c072c47d72d5cd1d62c0585e05"
+                "reference": "18ec42e19ec676d7da5ddff13f1eed68d88fb460"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/46e8b209abab55c072c47d72d5cd1d62c0585e05",
-                "reference": "46e8b209abab55c072c47d72d5cd1d62c0585e05",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/18ec42e19ec676d7da5ddff13f1eed68d88fb460",
+                "reference": "18ec42e19ec676d7da5ddff13f1eed68d88fb460",
                 "shasum": ""
             },
             "require": {
@@ -1879,7 +1937,8 @@
                 "symfony/http-foundation": "~2.8.13|~3.1.6|~3.2"
             },
             "conflict": {
-                "symfony/config": "<2.8"
+                "symfony/config": "<2.8",
+                "twig/twig": "<1.34|<2.4,>=2"
             },
             "require-dev": {
                 "symfony/browser-kit": "~2.8|~3.0",
@@ -1937,20 +1996,20 @@
             ],
             "description": "Symfony HttpKernel Component",
             "homepage": "https://symfony.com",
-            "time": "2017-05-01T17:46:48+00:00"
+            "time": "2017-08-01T09:40:19+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.3.0",
+            "version": "v1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "e79d363049d1c2128f133a2667e4f4190904f7f4"
+                "reference": "2ec8b39c38cb16674bbf3fea2b6ce5bf117e1296"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/e79d363049d1c2128f133a2667e4f4190904f7f4",
-                "reference": "e79d363049d1c2128f133a2667e4f4190904f7f4",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/2ec8b39c38cb16674bbf3fea2b6ce5bf117e1296",
+                "reference": "2ec8b39c38cb16674bbf3fea2b6ce5bf117e1296",
                 "shasum": ""
             },
             "require": {
@@ -1962,7 +2021,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.3-dev"
+                    "dev-master": "1.6-dev"
                 }
             },
             "autoload": {
@@ -1996,7 +2055,66 @@
                 "portable",
                 "shim"
             ],
-            "time": "2016-11-14T01:06:16+00:00"
+            "time": "2017-10-11T12:05:26+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php70",
+            "version": "v1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php70.git",
+                "reference": "0442b9c0596610bd24ae7b5f0a6cdbbc16d9fcff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php70/zipball/0442b9c0596610bd24ae7b5f0a6cdbbc16d9fcff",
+                "reference": "0442b9c0596610bd24ae7b5f0a6cdbbc16d9fcff",
+                "shasum": ""
+            },
+            "require": {
+                "paragonie/random_compat": "~1.0|~2.0",
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php70\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ],
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 7.0+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "time": "2017-10-11T12:05:26+00:00"
         },
         {
             "name": "symfony/process",
@@ -2124,16 +2242,16 @@
         },
         {
             "name": "symfony/translation",
-            "version": "v3.2.8",
+            "version": "v3.2.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "f4a04d2df710f81515df576b2de06bdeee518b83"
+                "reference": "df36a48672b929bf3995eb62c58d83004b1d0d50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/f4a04d2df710f81515df576b2de06bdeee518b83",
-                "reference": "f4a04d2df710f81515df576b2de06bdeee518b83",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/df36a48672b929bf3995eb62c58d83004b1d0d50",
+                "reference": "df36a48672b929bf3995eb62c58d83004b1d0d50",
                 "shasum": ""
             },
             "require": {
@@ -2184,7 +2302,7 @@
             ],
             "description": "Symfony Translation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-04-12T14:13:17+00:00"
+            "time": "2017-06-24T16:45:17+00:00"
         },
         {
             "name": "symfony/var-dumper",

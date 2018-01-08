@@ -19,28 +19,27 @@ use App\Eventdate;
 use App\Calendar;
 
 class AuthController extends Controller {
-  /* JWTAuth for Routes 
-   * @param void 
-   * @return void 
-  */
-  public function __construct() {
-    $this->middleware('jwt.auth', ['only' => [
-     // 'getUsers',
-      'ban',
-      'checkAuth',
-    ]]);
-  }
+    /* JWTAuth for Routes
+     * @param void
+     * @return void
+    */
+    public function __construct() {
+        $this->middleware('jwt.auth', ['only' => [
+            // 'getUsers',
+            'ban',
+            'checkAuth',
+        ]]);
+    }
 
-    public function checkAuth() 
-    {
+    public function checkAuth() {
         return Response::json(Auth::check());
     }
 
-  /** SIGN UP
-   * Persist user to database after sign up.
-   * @param Illuminate\Support\Facades\Request::class
-   * @return  Illuminate\Support\Facades\Response::class
-   */
+    /** SIGN UP
+     * Persist user to database after sign up.
+     * @param Illuminate\Support\Facades\Request::class
+     * @return  Illuminate\Support\Facades\Response::class
+     */
     public function signUp(Request $request) {
         // Validation Rules
         $rules = [
@@ -48,7 +47,7 @@ class AuthController extends Controller {
             'password' => 'required|string',
             'email' => 'required|string',
             'spaceID' => 'required|string',
-            // 'workspace' => 'required|string', 
+            'plan' => 'nullable|string',
             'tags' => 'nullable|string',
         ];
         // Validate input against rules
@@ -106,12 +105,9 @@ class AuthController extends Controller {
         $user->name = $name;
         $user->bio = $bio;
         $user->email = $email;
-        $user->spaceID = $spaceID;
+        if (!empty($spaceID)) $user->spaceID = $spaceID;
         $user->roleID = 4;
         $user->password = Hash::make($password);
-        // Optional Input
-        // if (!empty($company)) $user->company = $company;
-        // if (!empty($website)) $user->website = $website;
         
 
         // if (!empty($bio)) $user->bio = $bio;
@@ -122,10 +118,32 @@ class AuthController extends Controller {
           $avatar->move('storage/avatar/', $avatarName);
           $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
         }
-        
-        // Check if user signed up as Admin
-        // $check_key = substr($password, 0, 8);
 
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $key = $space->stripe;
+        \Stripe\Stripe::setApiKey($key);
+
+        $plan = $request['plan'];
+        $cardToken = $request['customerToken'];
+
+        if (!empty($plan)) {
+            // create customer
+            $customer = \Stripe\Customer::create(array(
+                "source" => $cardToken, // obtained with Stripe.js
+                "email" => $email
+            ));
+
+            // subscription
+            \Stripe\Subscription::create(array(
+                "customer" => $customer['id'],
+                "items" => array(
+                    array(
+                        "plan" => $plan,
+                    ),
+                )
+            ));
+        }
+        
         // Persist user to database
         $success = $user->save();
         if (!$success) {
@@ -173,12 +191,12 @@ class AuthController extends Controller {
     }
 
 
-  /** 
-   * Sign In
-   *
-   * @param Illuminate\Support\Facades\Request::class
-   * @return  Illuminate\Support\Facades\Response::class
-  */
+    /**
+     * Sign In
+     *
+     * @param Illuminate\Support\Facades\Request::class
+     * @return  Illuminate\Support\Facades\Response::class
+    */
     public function signIn(Request $request) {
         // required input
         $rules = [
@@ -193,6 +211,7 @@ class AuthController extends Controller {
             return Response::json(['error' => 'Please fill out all fields.']);
         }
 
+        $password = $request->input('password');
         // get user input
         $email = $request->input('email');
         $password = $request->input('password');
@@ -291,7 +310,7 @@ class AuthController extends Controller {
   **/
     public function getUsers() {
         $organizer = Auth::user();             
-        if ($admin->roleID != 2) {
+        if ($organizer->roleID != 2) {
             return Response::json([ 'error' => 'invalid role' ]);
         }
 

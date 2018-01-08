@@ -17,7 +17,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->integer('roleID');
-            $table->integer('spaceID');
+            $table->integer('spaceID')->nullable();
             $table->string('email')->unique();
             $table->string('password');
             $table->string('title')->nullable(); 
@@ -25,8 +25,8 @@ class CreateUsersTable extends Migration
             $table->boolean('hireable')->default(false);
             $table->string('company')->nullable();
             $table->string('website')->nullable();
-            $table->longText('bio')->nullable();
-            $table->longText('avatar')->nullable();
+            $table->text('bio')->nullable();
+            $table->mediumText('avatar')->nullable();
             $table->string('facebook')->nullable(); 
             $table->string('twitter')->nullable(); 
             $table->string('instagram')->nullable(); 

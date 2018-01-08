@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Response;
 |
 */
 
+Route::get('foo', function() {
+    return "foo";
+});
+
 // DashboardController
 Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
 Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances');
@@ -50,6 +54,8 @@ Route::post('spaceupdate', 'WorkspaceController@update');
 Route::get('workspaces', 'WorkspaceController@get');
 Route::get('workspace/{spaceID}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
+Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
+Route::post('plan', 'WorkspaceController@addSubscription');
 
 // EventController
 Route::post('sponser','EventController@makeSponser');
@@ -79,10 +85,5 @@ Route::get('occasions','AppearanceController@getValidOccasions');
 Route::post('booking','BookingController@store');
 Route::get('booking/approve/{token}','BookingController@approve');
 Route::get('booking/deny/{token}','BookingController@deny');
-
-
-// KioskController
-Route::get('kiosk/{spaceID}','KioskController@get');
-Route::get('kiosk/{spaceID}','KioskController@get');
 
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

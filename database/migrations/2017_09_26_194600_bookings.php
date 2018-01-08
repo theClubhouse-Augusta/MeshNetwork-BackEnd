@@ -15,7 +15,7 @@ class Bookings extends Migration {
             $table->increments('id');
             $table->string('name');
             $table->string('email');
-            $table->integer('spaceID');
+            $table->integer('spaceID')->unsigned();
             $table->string('type');
             $table->string('day');
             $table->string('start');
@@ -23,7 +23,9 @@ class Bookings extends Migration {
             $table->string('token');
             $table->string('status')->default('pending');
             $table->timestamps();
+            $table->foreign('spaceID')->references('id')->on('workspaces')->onDelete('cascade');
         });
+
     }
 
     /**

@@ -16,10 +16,10 @@ class Files extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->integer('eventID');
-            $table->longText('path');
+            $table->integer('eventID')->unsigned();
+            $table->mediumText('path');
             $table->timestamps();
-
+            $table->foreign('eventID')->references('id')->on('events')->onDelete('cascade');
         });
     }
 

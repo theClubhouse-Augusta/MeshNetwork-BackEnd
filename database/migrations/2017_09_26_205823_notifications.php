@@ -16,7 +16,7 @@ class Notifications extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->longText('body');
+            $table->string('body', 1000);
             // bookables
             // events
             // invites
