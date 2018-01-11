@@ -11,8 +11,7 @@ class Subscriptionplans extends Migration
      *
      * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('subscriptionplans', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('spaceID');

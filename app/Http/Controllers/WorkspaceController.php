@@ -178,14 +178,10 @@ class WorkspaceController extends Controller
         $URIparam = '';
         for ($i = 0; $i < $length; $i++) 
         {
-            if ( $i != ($length - 1) ) 
-            {
+            if ( $i != ($length - 1) )
                 $URIparam .= $address_array[$i].'+';
-            } 
-            else 
-            {
+            else
                 $URIparam .= $address_array[$i];
-            }
         }
 
             return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$URIparam.',+'.$city.',+'.$state.'&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
@@ -279,7 +275,7 @@ class WorkspaceController extends Controller
         $email = $request->input('email');
         $website = $request->input('website');
         $phone_number = $request->input('phone_number');
-        $description = json_decode($request->input('description'));
+        $description = $request['description'];
         $facebook = $request->input('facebook');
         $twitter = $request->input('twitter');
         $instagram = $request->input('instagram');
@@ -399,9 +395,12 @@ class WorkspaceController extends Controller
 
 
     public function getSubscriptions($spaceID) {
-       $plans = Subscriptionplan::where('spaceID', $spaceID)->get();
-       if (count($plans) != 0) return Response::json($plans);
-       else return Response::json(['error' => 'No plans available']);
+       $space = Workspace::find($spaceID)->makeVisible('stripe');
+        \Stripe\Stripe::setApiKey($space->stripe);
+        $plans = \Stripe\Plan::all();
+        return Response::json($plans);
+
+
     }
 
 }

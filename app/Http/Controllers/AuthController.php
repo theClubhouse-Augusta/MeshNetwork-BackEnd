@@ -47,7 +47,9 @@ class AuthController extends Controller {
             'password' => 'required|string',
             'email' => 'required|string',
             'spaceID' => 'required|string',
+            'organizer' => 'required|string',
             'plan' => 'nullable|string',
+            'customerToken' => 'nullable|string',
             'tags' => 'nullable|string',
         ];
         // Validate input against rules
@@ -65,6 +67,7 @@ class AuthController extends Controller {
         // $workspace = $request->input('workspace');
         // $space = Workspace::where('name', $workspace)->first();
         // $spaceID = $space->id;
+        $organizer = json_decode($request['organizer']);
         $tags = json_decode($request->input('tags'));
 
         // Check for valid image upload
@@ -105,8 +108,10 @@ class AuthController extends Controller {
         $user->name = $name;
         $user->bio = $bio;
         $user->email = $email;
+
         if (!empty($spaceID)) $user->spaceID = $spaceID;
-        $user->roleID = 4;
+        if ($organizer) $user->roleID = 2;
+        else $user->roleID = 3;
         $user->password = Hash::make($password);
         
 
@@ -119,21 +124,16 @@ class AuthController extends Controller {
           $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
         }
 
-        $space = Workspace::find($spaceID)->makeVisible('stripe');
-        $key = $space->stripe;
-        \Stripe\Stripe::setApiKey($key);
-
         $plan = $request['plan'];
-        $cardToken = $request['customerToken'];
-
-        if (!empty($plan)) {
-            // create customer
+        if ($plan != "free" && !empty($plan)) {
+            $cardToken = $request['customerToken'];
+            $space = Workspace::find($spaceID)->makeVisible('stripe');
+            $key = $space->stripe;
+            \Stripe\Stripe::setApiKey($key);
             $customer = \Stripe\Customer::create(array(
                 "source" => $cardToken, // obtained with Stripe.js
                 "email" => $email
             ));
-
-            // subscription
             \Stripe\Subscription::create(array(
                 "customer" => $customer['id'],
                 "items" => array(
@@ -142,6 +142,7 @@ class AuthController extends Controller {
                     ),
                 )
             ));
+            $user->subscriber = 1;
         }
         
         // Persist user to database

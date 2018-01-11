@@ -28,11 +28,12 @@ class Workspaces extends Migration
             $table->text('description');
             $table->mediumText('logo')->nullable();
             $table->string('status')->default('pending'); //approved, declined
-            $table->string('stripe')->nullable(); 
-            $table->string('facebook')->nullable(); 
-            $table->string('twitter')->nullable(); 
-            $table->string('instagram')->nullable(); 
-            $table->string('linkedin')->nullable(); 
+            $table->string('stripe')->nullable();
+            $table->string('pub_key')->nullable();
+            $table->string('facebook')->nullable();
+            $table->string('twitter')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('linkedin')->nullable();
             $table->string('github')->nullable(); 
             $table->string('dribble')->nullable(); 
             $table->string('behance')->nullable(); 
