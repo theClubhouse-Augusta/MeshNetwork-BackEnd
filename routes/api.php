@@ -19,7 +19,8 @@ Route::get('foo', function() {
 
 // DashboardController
 Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
-Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances');
+Route::get('appearances/{spaceId}', 'DashboardController@Appearances');
+Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 
 // AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
