@@ -11,16 +11,13 @@ class Invites extends Migration
      *
      * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('invites', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
             $table->integer('spaceID')->unsigned();
             $table->dateTime('date');
             $table->string('status')->default('sent');
-            // 'attended',
-            // ''  
             $table->timestamps();
             $table->foreign('spaceID')->references('id')->on('workspaces')->onDelete('cascade');
         });

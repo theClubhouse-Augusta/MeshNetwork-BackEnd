@@ -187,6 +187,7 @@ class AuthController extends Controller {
         $token = JWTAuth::attempt($credentials);
         return Response::json([
             'id' => $user->id,
+            'roleID' => $user->roleID,
             'token' => $token
         ]);
     }
