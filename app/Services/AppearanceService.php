@@ -9,7 +9,6 @@ use App\Appearance;
 class AppearanceService {
 
     public function getAllAppearances($spaceId) {
-
         $sortedAppearances = Appearance::where('spaceID', $spaceId)->orderBy('created_at', 'ASC')->get();
         $appearanceCount = count($sortedAppearances);
 
@@ -53,7 +52,7 @@ class AppearanceService {
 
     public function getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
         $start = date('Y-m-d', mktime(0, 0, 0, $startMonth, 1, $startYear));
-        $end = date('Y-m-d', mktime(0, 0, 0, $endMonth, 1, $endYear));
+        $end = date('Y-m-d', mktime(0, 0, 0, ($endMonth + 1), 1, $endYear));
 
         $sortedAppearances = Appearance::where('spaceID', $spaceID)
                                   ->whereBetween('created_at', [$start, $end])

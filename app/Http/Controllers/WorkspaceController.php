@@ -364,34 +364,6 @@ class WorkspaceController extends Controller
 
     }
 
-    public function addSubscription(Request $request) {
-        $rules = [
-            'plan' => 'required|string',
-            'description' => 'required|string',
-            'spaceID' => 'required|string',
-        ];
-        // Validate input against rules
-        $validator = Validator::make(Purifier::clean($request->all()), $rules);
-
-        if ($validator->fails()) return Response::json(['error' => 'You must fill out all fields.']);
-
-        $name = $request['name'];
-        $spaceID = $request['spaceID'];
-        $description = $request['description'];
-        $check = Subscriptionplan::where('name', $name)->where('spaceID', $spaceID)->first();
-        if (!empty($check)) return Response::json(['error' => 'error addSubscruption']);
-
-        $plan = new Subscriptionplan;
-
-        $plan->name = $name;
-        $plan->spaceID = $spaceID;
-        $plan->description = $description;
-
-        $success = $plan->save();
-        if ($success) return Response::json(['success' => 'Plan added']);
-        else return Response::json(['error' => 'error addSubscruption']);
-
-    }
 
 
     public function getSubscriptions($spaceID) {
@@ -401,6 +373,11 @@ class WorkspaceController extends Controller
         return Response::json($plans);
 
 
+    }
+
+    public function getKey($spaceID) {
+       $workspace = Workspace::find($spaceID);
+       return $workspace->pub_key; 
     }
 
 }
