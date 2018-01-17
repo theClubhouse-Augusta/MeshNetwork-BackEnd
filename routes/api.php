@@ -57,6 +57,7 @@ Route::get('workspace/{spaceID}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
 Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
 Route::post('plan', 'WorkspaceController@addSubscription');
+Route::get('publickey/{spaceID}', 'WorkspaceController@getKey');
 
 // EventController
 Route::post('sponser','EventController@makeSponser');

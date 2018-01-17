@@ -403,4 +403,9 @@ class WorkspaceController extends Controller
 
     }
 
+    public function getKey($spaceID) {
+       $workspace = Workspace::find($spaceID);
+       return $workspace->pub_key; 
+    }
+
 }
