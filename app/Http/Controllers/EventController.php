@@ -813,4 +813,20 @@ class EventController extends Controller
 
     return Response::json($event);
   }
+
+    public function getTodaysEvents($spaceID) {
+        $date = new DateTime("now");
+        $today = $date->format('Y-m-d');
+        $events = EventDate::all();
+        $eventsArray = [];
+        foreach ($events as $event) {
+            $start = $event->start;
+            $pos = strrpos($start, " ");
+            $formattedDate = substr($start, 0, $pos);
+            if ($today == $formattedDate) {
+                array_push($eventsArray, $event);
+            }
+        }
+        return Response::json($eventsArray);
+    }
 }
