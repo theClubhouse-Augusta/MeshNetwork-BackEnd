@@ -13,6 +13,7 @@ use App\User;
 use App\Workspace;
 use App\Event;
 use App\Subscriptionplan;
+use Mockery\Undefined;
 
 class WorkspaceController extends Controller 
 {
@@ -346,8 +347,7 @@ class WorkspaceController extends Controller
         else return Response::json([ 'success' => $workspace->name.' updated!' ]);
     }
 
-    public function events($spaceID) 
-    {
+    public function events($spaceID) {
         // Ensure user has admin privalages
         // $admin = Auth::user();
         // $id = $admin->roleID;
@@ -365,14 +365,11 @@ class WorkspaceController extends Controller
     }
 
 
-
     public function getSubscriptions($spaceID) {
        $space = Workspace::find($spaceID)->makeVisible('stripe');
         \Stripe\Stripe::setApiKey($space->stripe);
         $plans = \Stripe\Plan::all();
         return Response::json($plans);
-
-
     }
 
     public function getKey($spaceID) {

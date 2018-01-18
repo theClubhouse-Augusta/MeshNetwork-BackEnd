@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Response;
 use Auth;
 use JWTAuth;
+use Illuminate\Support\Facades\Log;
 
 // Service Classes 
 use App\Services\AppearanceService;
@@ -89,8 +90,7 @@ class DashBoardController extends Controller
 
     }
 
-    public function appearanceForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear
-    ) {
+    public function appearanceForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
         $appearances =  $this->appearanceService
                              ->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
@@ -99,5 +99,9 @@ class DashBoardController extends Controller
     public function inviteHelper() 
     {
 
+    }
+
+    public function log($message) {
+        Log::error($message);
     }
 }

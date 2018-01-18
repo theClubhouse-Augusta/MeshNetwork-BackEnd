@@ -19,10 +19,7 @@ use App\Eventdate;
 use App\Calendar;
 
 class AuthController extends Controller {
-    /* JWTAuth for Routes
-     * @param void
-     * @return void
-    */
+
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => [
             // 'getUsers',
@@ -72,27 +69,27 @@ class AuthController extends Controller {
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
-        // Check for file upload error
-          if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-              return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-          }
-        // checks for valid image upload
-          $info = getimagesize($_FILES['avatar']['tmp_name']);
+            // Check for file upload error
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+            }
+            // checks for valid image upload
+            $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-          if ($info === FALSE) {
-            return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-          }
+            if ($info === FALSE) {
+                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            }
 
-        // checks for valid image upload
-          if (($info[2] !== IMAGETYPE_GIF) 
+            // checks for valid image upload
+            if (($info[2] !== IMAGETYPE_GIF) 
                 && ($info[2] !== IMAGETYPE_JPEG) 
                 && ($info[2] !== IMAGETYPE_PNG)) 
             {
                 return Response::json([ "error" => "Not a gif/jpeg/png" ]);
             }
 
-        // Get profile image input
-          $avatar = $request->file('avatar');
+            // Get profile image input
+            $avatar = $request->file('avatar');
         }
 
         // Ensure unique email

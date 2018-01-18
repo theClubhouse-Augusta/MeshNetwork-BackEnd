@@ -13,14 +13,11 @@ use Illuminate\Support\Facades\Response;
 |
 */
 
-Route::get('foo', function() {
-    return "foo";
-});
-
 // DashboardController
 Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
 Route::get('appearances/{spaceId}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
+Route::get('log/{message}', 'DashboardController@log');
 
 // AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
@@ -88,5 +85,4 @@ Route::get('occasions','AppearanceController@getValidOccasions');
 Route::post('booking','BookingController@store');
 Route::get('booking/approve/{token}','BookingController@approve');
 Route::get('booking/deny/{token}','BookingController@deny');
-
 Route::any('{path?}', 'MainController@index')->where("path", ".+");
