@@ -44,7 +44,6 @@ class AuthController extends Controller {
             'password' => 'required|string',
             'email' => 'required|string',
             'spaceID' => 'required|string',
-            'organizer' => 'required|string',
             'plan' => 'nullable|string',
             'customerToken' => 'nullable|string',
             'tags' => 'nullable|string',
@@ -61,29 +60,25 @@ class AuthController extends Controller {
         $password = $request->input('password');
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
-        // $workspace = $request->input('workspace');
-        // $space = Workspace::where('name', $workspace)->first();
-        // $spaceID = $space->id;
-        $organizer = json_decode($request['organizer']);
         $tags = json_decode($request->input('tags'));
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
-            // Check for file upload error
-            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-                return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-            }
-            // checks for valid image upload
-            $info = getimagesize($_FILES['avatar']['tmp_name']);
+        // Check for file upload error
+          if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+              return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+          }
+        // checks for valid image upload
+          $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-            if ($info === FALSE) {
-                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-            }
+          if ($info === FALSE) {
+            return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+          }
 
-            // checks for valid image upload
-            if (($info[2] !== IMAGETYPE_GIF) 
-                && ($info[2] !== IMAGETYPE_JPEG) 
-                && ($info[2] !== IMAGETYPE_PNG)) 
+        // checks for valid image upload
+          if (($info[2] !== IMAGETYPE_GIF)
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG))
             {
                 return Response::json([ "error" => "Not a gif/jpeg/png" ]);
             }
@@ -110,7 +105,7 @@ class AuthController extends Controller {
         if ($organizer) $user->roleID = 2;
         else $user->roleID = 3;
         $user->password = Hash::make($password);
-        
+
 
         // if (!empty($bio)) $user->bio = $bio;
 
@@ -118,8 +113,13 @@ class AuthController extends Controller {
         if (!empty($avatar)) {
           $avatarName = $avatar->getClientOriginalName();
           $avatar->move('storage/avatar/', $avatarName);
-          $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+          $avatar = $request->root().'/storage/avatar/'.$avatarName;
+        } else {
+           $sub = substr($name, 0, 2);
+           $avatar = "https://invatar0.appspot.com/svg/".$sub.".jpg?s=100";
         }
+
+        $user->avatar = $avatar;
 
         $plan = $request['plan'];
         if ($plan != "free" && !empty($plan)) {
@@ -141,7 +141,7 @@ class AuthController extends Controller {
             ));
             $user->subscriber = 1;
         }
-        
+
         // Persist user to database
         $success = $user->save();
         if (!$success) {
@@ -149,7 +149,7 @@ class AuthController extends Controller {
         }
 
         $userID = $user->id;
-        // Update App\Skill;  
+        // Update App\Skill;
         if (!empty($tags)) {
             foreach($tags as $key => $tag) {
                 if (!property_exists($tag, 'id'))  {
@@ -202,8 +202,8 @@ class AuthController extends Controller {
           'email' => 'required',
           'password' => 'required'
         ];
-        
-        // Validate and purify input 
+
+        // Validate and purify input
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
         if ($validator->fails()) {
@@ -216,19 +216,19 @@ class AuthController extends Controller {
         $password = $request->input('password');
 
         $user = User::where('email', $email)->first();
-      
+
         // generate token
         $credentials = compact("email", "password");
         $token = JWTAuth::attempt($credentials);
 
-        if ($token == false) { 
+        if ($token == false) {
             return Response::json(['error' => 'Wrong Email/Password']);
         }
 
         $skills = Userskill::where('userID', $user->id)
                            ->select('name')
                            ->get();
-                           
+
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
                           ->first();
@@ -244,7 +244,7 @@ class AuthController extends Controller {
             'upcoming' => !empty($upcoming) ? $upcoming : false,
             'token' => $token,
         ]);
-    } 
+    }
 
     private function getUpcomingEvents() {
         $now = new DateTime();
@@ -256,7 +256,7 @@ class AuthController extends Controller {
                 $id = $event->eventID;
                 array_push($eventIDs, $id);
             }
-            if ($key != 0) {   
+            if ($key != 0) {
                 $check = $event->eventID;
                 if ($id != $check) {
                     $id = $check;
@@ -289,7 +289,7 @@ class AuthController extends Controller {
                     $formattedDiff = $diff->format('%R%a');
 
                     if ((int)$formattedDiff > 0) {
-                        array_push($upcoming, 
+                        array_push($upcoming,
                             [
                                 "title" => $title,
                                 "id" => $id
@@ -302,13 +302,13 @@ class AuthController extends Controller {
         return $upcoming;
     }
 
-  /** 
+  /**
    * Get users
-   * @param spaceID 
+   * @param spaceID
    * @return  Illuminate\Support\Facades\Response::class
   **/
     public function getUsers() {
-        $organizer = Auth::user();             
+        $organizer = Auth::user();
         if ($organizer->roleID != 2) {
             return Response::json([ 'error' => 'invalid role' ]);
         }
@@ -324,12 +324,12 @@ class AuthController extends Controller {
 
   /**
    * Ban User
-   * @param userID 
+   * @param userID
    * @return  Illuminate\Support\Facades\Response::class
   **/
   public function ban($id) {
     $admin = Auth::user();
-    
+
 
     if ($admin->roleID != 1) {
         return Response::json(['error' => 'invalid credintials']);
