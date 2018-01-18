@@ -15,6 +15,7 @@ class Workspaces extends Migration
         Schema::create('workspaces', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('slug');
             $table->string('city');
             $table->string('address');
             $table->string('state');
@@ -33,10 +34,6 @@ class Workspaces extends Migration
             $table->string('twitter')->nullable();
             $table->string('instagram')->nullable();
             $table->string('linkedin')->nullable();
-            $table->string('github')->nullable(); 
-            $table->string('dribble')->nullable(); 
-            $table->string('behance')->nullable(); 
-            $table->string('angellist')->nullable(); 
             $table->timestamps();
       });
     }
