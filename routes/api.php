@@ -19,7 +19,8 @@ Route::get('foo', function() {
 
 // DashboardController
 Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
-Route::get('db/appearances/{spaceId}', 'DashboardController@Appearances');
+Route::get('appearances/{spaceId}', 'DashboardController@Appearances');
+Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 
 // AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
@@ -55,7 +56,9 @@ Route::get('workspaces', 'WorkspaceController@get');
 Route::get('workspace/{spaceID}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
 Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
-Route::post('plan', 'WorkspaceController@addSubscription');
+Route::get('publickey/{spaceID}', 'WorkspaceController@getKey');
+Route::get('getSpaceBySlug/{slug}', 'WorkspaceController@getSpaceBySlug');
+Route::get('spaceOrganizers/{spaceID}', 'WorkspaceController@spaceOrganizers');
 
 // EventController
 Route::post('sponser','EventController@makeSponser');

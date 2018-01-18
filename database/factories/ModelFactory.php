@@ -13,21 +13,10 @@
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\User::class, function (Faker\Generator $faker) {
-    // constants
-    $USERS = 750;
-    $SPACES = 5;
-    $EVENTS = 200;
-    $OPTS = ($EVENTS * $SPACES);   
-    $APPEARANCES = ($USERS * 10);
-
-    static $password;
-    $check = rand(1,2);
-    $roleDelegator = ($check == 1) ? 1 : rand(1,$SPACES); 
 
     /**
-     * get sensible signUp dates 
+     * get sensible signUp dates
      */
-
     // instantiate new DateTime instance
     $now = new DateTime();
     // range of days relative to current date
@@ -40,100 +29,23 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
     $signUpDate = new DateTime($unixTimeStamp);
     // get timestamp
     $timeStamp = $signUpDate->getTimeStamp();
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => 'password' ,
+        'spaceID' => 1,
+        'roleID' => 1,
+        'title' => $faker->title,
+        'company' => $faker->company,
+        'website' => $faker->domainName,
+        'phoneNumber' => 1234567,
+        'bio' => $faker->sentence($nbWords = 20, $variableNbWords = true),
+        'avatar' => $faker->imageUrl($width = 640, $height = 480),
+        'subscriber' => true,
+        'score' => rand(100,5000),
+        'created_at' => $timeStamp,
+    ];
 
-    switch ($roleDelegator) {
-        case 1:
-        return [
-            'name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'password' => $password ?: $password = bcrypt('secret'),
-            'remember_token' => str_random(10),
-            'spaceID' => rand(1, $SPACES),
-            'roleID' => 1,
-            'searchOpt' => (rand(1,100) < 90 ? false : true),
-            'company' => $faker->company,
-            'website' => $faker->domainName,
-            'phoneNumber' => 777444333,
-            'bio' =>  (rand(1,100) < 75 ? $faker->sentence($nbWords = 20, $variableNbWords = true) : null),
-            'avatar' => (rand(1,100) > 75 ? $faker->imageUrl($width = 640, $height = 480) : null),
-            'ban' => (rand(1,100) > 95 ? false : true ),
-            'subscriber' => true,
-            'score' => rand(100,5000),
-            'created_at' => $timeStamp,
-        ];
-        break;
-
-        case 2:
-        return [
-            'name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'password' => $password ?: $password = bcrypt('secret'),
-            'remember_token' => str_random(10),
-            'spaceID' => rand(1,$SPACES),
-            'roleID' => (rand(1,2) == 1 ? 1 : 2),
-            'searchOpt' => (rand(1,100) < 90 ? false : true),
-            'company' => $faker->company,
-            'website' => $faker->domainName,
-            'phoneNumber' => 777444333,
-            'bio' =>  (rand(1,100) < 75 ? $faker->sentence($nbWords = 20, $variableNbWords = true) : null),
-            'avatar' => (rand(1,100) > 75 ? $faker->imageUrl($width = 640, $height = 480) : null),
-            'created_at' => $timeStamp,
-        ];
-        break;
-
-        case 3:
-        return [
-            'name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'password' => $password ?: $password = bcrypt('secret'),
-            'remember_token' => str_random(10),
-            'spaceID' => rand(1, $SPACES),
-            'roleID' => (rand(1,2) == 1 ? 1 : 3),
-            'searchOpt' => (rand(1,100) < 90 ? false : true),
-            'company' => $faker->company,
-            'website' => $faker->domainName,
-            'phoneNumber' => 777444333,
-            'bio' =>  (rand(1,100) < 75 ? $faker->sentence($nbWords = 20, $variableNbWords = true) : null),
-            'avatar' => (rand(1,100) > 75 ? $faker->imageUrl($width = 640, $height = 480) : null),
-            'created_at' => $timeStamp,
-        ];
-        break;
-
-        case 4:
-        return [
-            'name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'password' => $password ?: $password = bcrypt('secret'),
-            'remember_token' => str_random(10),
-            'spaceID' => rand(1, $SPACES),
-            'roleID' => (rand(1,2) == 1 ? 1 : 4),
-            'searchOpt' => (rand(1,100) < 90 ? false : true),
-            'company' => $faker->company,
-            'website' => $faker->domainName,
-            'phoneNumber' => 777444333,
-            'bio' =>  (rand(1,100) < 75 ? $faker->sentence($nbWords = 20, $variableNbWords = true) : null),
-            'avatar' => (rand(1,100) > 75 ? $faker->imageUrl($width = 640, $height = 480) : null),
-            'created_at' => $timeStamp,
-        ];
-        break;
-
-        case 5:
-        return [
-            'name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'password' => $password ?: $password = bcrypt('secret'),
-            'remember_token' => str_random(10),
-            'spaceID' => rand(1, $SPACES),
-            'roleID' => (rand(1,2) == 1 ? 1 : $SPACES),
-            'searchOpt' => (rand(1,100) < 90 ? false : true),
-            'website' => $faker->domainName,
-            'phoneNumber' => 777444333,
-            'bio' =>  (rand(1,100) < 75 ? $faker->sentence($nbWords = 20, $variableNbWords = true) : null),
-            'avatar' => (rand(1,100) > 75 ? $faker->imageUrl($width = 640, $height = 480) : null),
-            'created_at' => $timeStamp,
-        ];
-        break;
-    }
 });
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
@@ -168,17 +80,15 @@ $factory->define(App\Event::class, function (Faker\Generator $faker) {
     $endDate = date_modify($now, '+'.$addEnd.' hours');
 
     return [
-        'spaceID' => rand(1, $SPACES), 
-        'userID' => rand(1, 10), 
-        'start' => $startDate, 
-        'end' => $endDate,
-        'status' => $faker->randomElement($array = array ('pending','approved')), // 'b'
+        'spaceID' => 1,
+        'userID' => rand(1,750),
+        'multiday' => rand(0, 1),
         'title' => $faker->word(),
         'description' => $faker->sentence($nbWords = 20, $variableNbWords = true),
-        'type' => $faker->randomElement($array = array ('class','meetup','hackathon', 'fundraiser')), // 'b'
-        'tags' => implode($faker->randomElements($array = array('html','css,linux', 'taxes,finance', 'python,marketing', 'writing,fitness', 'education,budgeting', 'health,engineering', 'robotics,cloud'))), // 'b'
-        'local' => $faker->boolean($chanceOfGettingTrue = 75),
+        'challenge' => rand(0,1),
     ];
+
+    //'tags' => implode($faker->randomElements($array = array('html','css,linux', 'taxes,finance', 'python,marketing', 'writing,fitness', 'education,budgeting', 'health,engineering', 'robotics,cloud'))), // 'b'
 });
 
 
@@ -216,11 +126,6 @@ $factory->define(App\Opt::class, function (Faker\Generator $faker) {
 
 $factory->define(App\Appearance::class, function (Faker\Generator $faker) {
     // constants
-    $USERS = 750;
-    $SPACES = 5;
-    $EVENTS = 200;
-    $OPTS = ($EVENTS * $SPACES);   
-    $APPEARANCES = ($USERS * 10);
     // instantiate new DateTime instance
     $now = new DateTime();
     // range of days relative to current date

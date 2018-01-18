@@ -47,7 +47,6 @@ class AuthController extends Controller {
             'password' => 'required|string',
             'email' => 'required|string',
             'spaceID' => 'required|string',
-            'organizer' => 'required|string',
             'plan' => 'nullable|string',
             'customerToken' => 'nullable|string',
             'tags' => 'nullable|string',
@@ -64,10 +63,6 @@ class AuthController extends Controller {
         $password = $request->input('password');
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
-        // $workspace = $request->input('workspace');
-        // $space = Workspace::where('name', $workspace)->first();
-        // $spaceID = $space->id;
-        $organizer = json_decode($request['organizer']);
         $tags = json_decode($request->input('tags'));
 
         // Check for valid image upload
@@ -121,8 +116,13 @@ class AuthController extends Controller {
         if (!empty($avatar)) {
           $avatarName = $avatar->getClientOriginalName();
           $avatar->move('storage/avatar/', $avatarName);
-          $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+          $avatar = $request->root().'/storage/avatar/'.$avatarName;
+        } else {
+           $sub = substr($name, 0, 2);
+           $avatar = "https://invatar0.appspot.com/svg/".$sub.".jpg?s=100";
         }
+
+        $user->avatar = $avatar;
 
         $plan = $request['plan'];
         if ($plan != "free" && !empty($plan)) {
@@ -187,6 +187,7 @@ class AuthController extends Controller {
         $token = JWTAuth::attempt($credentials);
         return Response::json([
             'id' => $user->id,
+            'roleID' => $user->roleID,
             'token' => $token
         ]);
     }

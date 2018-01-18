@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Response;
@@ -9,7 +7,7 @@ use Purifier;
 use Hash;
 use Auth;
 use JWTAuth;
-
+use DateTime;
 use App\User;
 use App\Appearance;
 use App\Invite;
@@ -122,66 +120,63 @@ class AppearanceController extends Controller {
     }
   }
 
-  // show appearances for user.id
-  public function show($userID) {
-    $appearances = Appearance::where('userID', $userID)->get();
-    if (empty($appearances)) {
-      return Response::json([ 'error' => 'User has no appearances.' ]);
-    }
-    return Response::json([ 'success' => $appearances ]);
-  }
-
-  public function storeInvite(Request $request) {
-    $rules = [
-      'userID' => 'required|string',
-      'spaceID' => 'required|string',
-      'date' => 'required|string',
-    ];
-
-    // Validate input against rules
-    $validator = Validator::make(Purifier::clean($request->all()), $rules);
-    if ($validator->fails()) {
-      return Response::json(['error' => 'You must fill out all fields.']);
+    // show appearances for user.id
+    public function show($userID) {
+        $appearances = Appearance::where('userID', $userID)->get();
+        if (empty($appearances)) {
+            return Response::json([ 'error' => 'User has no appearances.' ]);
+        }
+        return Response::json($appearances);
     }
 
-    $userID = $request->input('userID');
-    $spaceID = $request->input('spaceID');
-    $date = $request->input('date');
+    public function storeInvite(Request $request) {
+        $rules = [
+            'userID' => 'required|string',
+            'spaceID' => 'required|string',
+            'date' => 'required|string',
+        ];
 
-    $check = Invite::where('date', $date)->first();
+        // Validate input against rules
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+        if ($validator->fails()) {
+            return Response::json(['error' => 'You must fill out all fields.']);
+        }
 
-    if (!empty($check)) {
-      return Response::json([ 'error' => 'Invite for date: '.$date.' not available ' ]);
+        $userID = $request->input('userID');
+        $spaceID = $request->input('spaceID');
+        $date = $request->input('date');
+
+        $check = Invite::where('date', $date)->first();
+
+        if (!empty($check)) {
+            return Response::json([ 'error' => 'Invite for date: '.$date.' not available ' ]);
+        }
+
+        $invite = new Invite;
+        $invite->userID = $userID;
+        $invite->spaceID = $spaceID;
+        $invite->date = $date;
+
+        if (!$invite->save()) {
+            return Response::json([ 'error' => 'database error' ]);
+        }
+        return Response::json([ 'success' => 'Invite saved!' ]);
     }
-
-    $invite = new Invite;
-    $invite->userID = $userID;
-    $invite->spaceID = $spaceID;
-    $invite->date = $date;
-
-    if (!$invite->save()) {
-      return Response::json([ 'error' => 'database error' ]);
-    }
-    return Response::json([ 'success' => 'Invite saved!' ]);
-  }
 
   public function updateInvite($inviteID, $status) {
     $invite = Invite::where('id', $inviteID)->first();
     $invite->status = $status;
 
     if (!$invite->save()) {
-      return Response::json([ 'error' => 'database error' ]);
+        return Response::json([ 'error' => 'database error' ]);
     }
     return Response::json([ 'success' => 'Invite updated!' ]);
   }
 
     public function getInvite() {
         $userID = Auth::id();
-
         $invite = Invite::where('userID', $userID)->get();
-        // TODO:
-        // sort invites so that return value only has
-        // no invite dates in past
+
     }
 
     public function getValidOccasions() {
