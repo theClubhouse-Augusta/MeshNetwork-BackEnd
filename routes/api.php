@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Response;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 // DashboardController
 Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
 Route::get('appearances/{spaceId}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 Route::get('log/{message}', 'DashboardController@log');
+Route::get('email', 'DashboardController@email');
 
 // AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up

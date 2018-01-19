@@ -824,7 +824,9 @@ class EventController extends Controller
             $pos = strrpos($start, " ");
             $formattedDate = substr($start, 0, $pos);
             if ($today == $formattedDate) {
-                array_push($eventsArray, $event);
+                $findEvent = Event::find($event->eventID);
+                if ($findEvent->spaceID == $spaceID)
+                    array_push($eventsArray, $findEvent);
             }
         }
         return Response::json($eventsArray);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Response;
 use Auth;
 use JWTAuth;
+use Mail;
 use Illuminate\Support\Facades\Log;
 
 // Service Classes 
@@ -103,5 +104,12 @@ class DashBoardController extends Controller
 
     public function log($message) {
         Log::error($message);
+    }
+    public function email() {
+
+    Mail::send('emails.welcome', array('key' => 'value'), function($message) {
+        $message->to('austin.conder@outlook.com', 'Austin Conder')->subject('Welcome!');
+        $message->from('laravel@example.com', 'Laravel');
+        });
     }
 }
