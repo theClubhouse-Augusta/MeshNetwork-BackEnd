@@ -178,7 +178,7 @@ class EventController extends Controller
         // Update App\Skill;
         if (!empty($tags)) {
             foreach($tags as $key => $tag) {
-                if (!property_exists($tag, 'id'))  {
+                if (!property_exists($tag, 'id')) {
                     $newSkill = new Skill;
                     $newSkill->name = $tag->value;
                     // Persist App\Skill to database
