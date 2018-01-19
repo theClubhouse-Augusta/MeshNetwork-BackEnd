@@ -369,14 +369,11 @@ class WorkspaceController extends Controller
     }
 
 
-
     public function getSubscriptions($spaceID) {
        $space = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->select('stripe')->first();
         \Stripe\Stripe::setApiKey($space->stripe);
         $plans = \Stripe\Plan::all();
         return Response::json($plans);
-
-
     }
 
     public function getKey($spaceID) {

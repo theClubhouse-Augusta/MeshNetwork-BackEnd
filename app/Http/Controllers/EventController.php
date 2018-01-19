@@ -178,7 +178,7 @@ class EventController extends Controller
         // Update App\Skill;
         if (!empty($tags)) {
             foreach($tags as $key => $tag) {
-                if (!property_exists($tag, 'id'))  {
+                if (!property_exists($tag, 'id')) {
                     $newSkill = new Skill;
                     $newSkill->name = $tag->value;
                     // Persist App\Skill to database
@@ -833,6 +833,23 @@ class EventController extends Controller
     return Response::json($event);
   }
 
+    public function getTodaysEvents($spaceID) {
+        $date = new DateTime("now");
+        $today = $date->format('Y-m-d');
+        $events = EventDate::all();
+        $eventsArray = [];
+        foreach ($events as $event) {
+            $start = $event->start;
+            $pos = strrpos($start, " ");
+            $formattedDate = substr($start, 0, $pos);
+            if ($today == $formattedDate) {
+                $findEvent = Event::find($event->eventID);
+                if ($findEvent->spaceID == $spaceID)
+                    array_push($eventsArray, $findEvent);
+            }
+        }
+        return Response::json($eventsArray);
+    }
   public function getDashboardEvents($spaceID)
   {
     $events = Event::where('spaceID', $spaceID)->paginate(30);

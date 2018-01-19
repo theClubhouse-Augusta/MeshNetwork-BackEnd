@@ -19,10 +19,7 @@ use App\Eventdate;
 use App\Calendar;
 
 class AuthController extends Controller {
-    /* JWTAuth for Routes
-     * @param void
-     * @return void
-    */
+
     public function __construct() {
         $this->middleware('jwt.auth', ['only' => [
             // 'getUsers',
@@ -86,8 +83,8 @@ class AuthController extends Controller {
                 return Response::json([ "error" => "Not a gif/jpeg/png" ]);
             }
 
-        // Get profile image input
-          $avatar = $request->file('avatar');
+            // Get profile image input
+            $avatar = $request->file('avatar');
         }
 
         // Ensure unique email
