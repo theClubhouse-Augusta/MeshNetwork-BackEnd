@@ -78,8 +78,6 @@ class UserController extends Controller
           'title' => 'nullable|string',
           'avatar' => 'nullable|string',
           // workInfo
-          'company' => 'nullable|string',
-          'hireable' => 'nullable|string',
           'password' => 'nullable|string',
           'email' => 'nullable|string',
           'spaceID' => 'nullable|string',
@@ -93,9 +91,7 @@ class UserController extends Controller
           'instagram' => 'nullable|string',
           'linkedin' => 'nullable|string',
           'github' => 'nullable|string',
-          'dribble' => 'nullable|string',
-          'behnace' => 'nullable|string',
-          'angellist' => 'nullable|string'
+          'behance' => 'nullable|string',
         ];
 
         // Validate input against rules
@@ -110,8 +106,6 @@ class UserController extends Controller
         $website = $request->input('website');
         $title = $request->input('title');
         // workInfo
-        $company = $request->input('company');
-        $hireable = $request->input('hireable');
         $email = $request->input('email');
         $password = $request->input('password');
         $phoneNumber = $request->input('phoneNumber');
@@ -120,9 +114,7 @@ class UserController extends Controller
         $instagram = $request->input('instagram');
         $linkedin = $request->input('linkedin');
         $github = $request->input('github');
-        $dribble = $request->input('dribble');
         $behance = $request->input('behance');
-        $angellist = $request->input('angellist');
         // $bio = $request->input('bio');
         // User Skills
         $tags = json_decode($request->input('tags'));
@@ -167,8 +159,6 @@ class UserController extends Controller
         if (!empty($website)) $user->website = $website;
         if (!empty($title)) $user->title = $title;
         // workInfo
-        if (!empty($company)) $user->company = $company;
-        if (!empty($hireable)) $user->hireable = $hireable;
         if (!empty($email)) $user->email = $email;
         if (!empty($phoneNumber)) $user->email = $phoneNumber;
         if (!empty($spaceID)) $user->spaceID = $spaceID;
@@ -178,9 +168,7 @@ class UserController extends Controller
         if (!empty($instagram)) $user->instagram = $instagram;
         if (!empty($linkedin)) $user->linkedin = $linkedin;
         if (!empty($github)) $user->github = $github;
-        if (!empty($dribble)) $user->dribble = $dribble;
         if (!empty($behance)) $user->behance = $behance;
-        if (!empty($angellist)) $user->angellist = $angellist;
 
         if (!empty($bio)) $user->bio = $bio;
         // Profile Picture
@@ -256,7 +244,7 @@ class UserController extends Controller
 
         // handle skill tag button click
         if (!empty($tag)) {
-            $skills = Userskill::where('name', $tag)->select('userskills.userID')->get();
+            $skills = Userskill::where('name', $tag)->select('userskills.userID')->distinct()->get();
             if (count($skills) == 0) {
                 return Response::json([ 'error' => 'No users found with skill' ]);
             }
@@ -265,7 +253,7 @@ class UserController extends Controller
             foreach ($skills as $key => $skill)  {
                 $match = User::where('id', $skill['userID'])->first();
                 if (!empty($match)) {
-                    array_push($users, $match);
+                  array_push($users, $match);
                 }
             }
 
@@ -279,7 +267,6 @@ class UserController extends Controller
         // handle search input query
         $users = User::where('name', 'LIKE', '%'.$query.'%')
                     ->Orwhere('bio', 'LIKE', '%'.$query.'%')
-                    ->Orwhere('company', 'LIKE', '%'.$query.'%')
                     ->Orwhere('email', 'LIKE', '%'.$query.'%')
                     ->get();
         $skills = Userskill::where('name', 'LIKE', '%'.$query.'%')
@@ -518,5 +505,14 @@ class UserController extends Controller
             ]);
         }
         return Response::json($usersArray);
+    }
+
+    public function getSpaceUsers($spaceID)
+    {
+      $space = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
+
+      $users = User::where('spaceID', $space->id)->get();
+
+      return Response::json($users);
     }
 }

@@ -39,8 +39,9 @@ Route::post('searchname', 'UserController@searchName'); // search by name/spaceI
 Route::get('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
 Route::get('user/{id}', 'UserController@user'); // get user.id
-Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID
+Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
 Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
+Route::get('getSpaceUsers/{spaceID}', 'UserController@getSpaceUsers');
 
 // RoleController
 Route::post('newrole', 'RoleController@store');
@@ -59,6 +60,7 @@ Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
 Route::get('publickey/{spaceID}', 'WorkspaceController@getKey');
 Route::get('getSpaceBySlug/{slug}', 'WorkspaceController@getSpaceBySlug');
 Route::get('spaceOrganizers/{spaceID}', 'WorkspaceController@spaceOrganizers');
+Route::get('getSpaceStats/{spaceID}', 'WorkspaceController@getSpaceStats');
 
 // EventController
 Route::post('sponser','EventController@makeSponser');
@@ -74,8 +76,9 @@ Route::get('deleteEvent/{id}','EventController@delete');
 Route::get('getCalendar','EventController@getCalendar');
 Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
-Route::get('eventOrganizers/{id}', 'EventsController@EventOrganizers');
-Route::get('eventDates/{id}', 'EventsController@EventDates');
+Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
+Route::get('eventDates/{id}', 'EventController@EventDates');
+Route::get('getDashboardEvents/{spaceID}', 'EventController@getDashboardEvents');
 
 // AppeanceController
 Route::post('appearance','AppearanceController@store');

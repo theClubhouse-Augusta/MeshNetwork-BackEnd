@@ -13,6 +13,7 @@ use App\User;
 use App\Workspace;
 use App\Event;
 use App\Subscriptionplan;
+use App\Appearance;
 use Carbon\Carbon;
 
 class WorkspaceController extends Controller
@@ -27,7 +28,7 @@ class WorkspaceController extends Controller
         // 'get',
         // 'show',
         // 'approve',
-        // 'update',
+         'update',
         // 'events',
         // 'bookables'
         ]]);
@@ -157,6 +158,7 @@ class WorkspaceController extends Controller
             $workspace->description = $description;
             $workspace->lon = $lon;
             $workspace->lat = $lat;
+            $workspace->pubKey = 0;
             if (!empty($logo)) {
                 $logoName = $logo->getClientOriginalName();
                 $logo->move('storage/logo/', $logoName);
@@ -256,11 +258,6 @@ class WorkspaceController extends Controller
             'logo' => 'nullable|string',
             'twitter' => 'nullable|string',
             'instagram' => 'nullable|string',
-            'github' => 'nullable|string',
-            'dribble' => 'nullable|string',
-            'linkedin' => 'nullable|string',
-            'behance' => 'nullable|string',
-            'angelist' => 'nullable|string',
             'key' => 'nullable|string',
         ];
         // Validate input against rules
@@ -284,12 +281,13 @@ class WorkspaceController extends Controller
         $facebook = $request->input('facebook');
         $twitter = $request->input('twitter');
         $instagram = $request->input('instagram');
-        $github = $request->input('gitthub');
-        $dribble = $request->input('dribble');
-        $linkedin = $request->input('linkedin');
-        $behance = $request->input('behance');
-        $angellist = $request->input('angelist');
         $key = $request->input('key');
+
+        $auth = Auth::user();
+        if($auth->spaceID != $spaceID || $auth->roleID != 2)
+        {
+          return Response::json(['error' => 'You do not have permission.']);
+        }
 
         // optional input
         // Check for valid image upload
@@ -334,11 +332,6 @@ class WorkspaceController extends Controller
         if (!empty($facebook)) $workspace->facebook = $facebook;
         if (!empty($twitter)) $workspace->twitter = $twitter;
         if (!empty($instagram)) $workspace->instagram = $instagram;
-        if (!empty($linkedin)) $workspace->linkedin = $linkedin;
-        if (!empty($github)) $workspace->github = $github;
-        if (!empty($dribble)) $workspace->dribble = $dribble;
-        if (!empty($behance)) $workspace->behance = $behance;
-        if (!empty($angellist)) $workspace->angellist = $angellist;
         if (!empty($key)) $workspace->stripe = $key;
         if (!empty($logo)) {
             $logoName = $logo->getClientOriginalName();
@@ -396,6 +389,20 @@ class WorkspaceController extends Controller
       $users = User::where('spaceID', $spaceID)->where('roleID', 2)->get();
 
       return Response::json($users);
+    }
+
+    public function getSpaceStats($spaceID)
+    {
+      $members = User::where('spaceID', $spaceID)->get();
+      $memberCount = count($members);
+
+      $events = Event::where('spaceID', $spaceID)->get();
+      $eventCount = count($events);
+
+      $checkins = Appearance::where('spaceID', $spaceID)->get();
+      $checkinCount = count($checkins);
+
+      return Response::json(['memberCount' => $memberCount, 'eventCount' => $eventCount, 'checkinCount' => $checkinCount]);
     }
 
 }
