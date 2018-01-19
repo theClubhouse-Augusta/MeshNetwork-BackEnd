@@ -23,6 +23,7 @@ use App\Workspace;
 use App\Calendar;
 use App\Opt;
 use App\File;
+use Carbon\Carbon;
 
 class EventController extends Controller
 {
@@ -406,14 +407,32 @@ class EventController extends Controller
         $organizers = $this->getOrganizers($eventID);
         $attendees = $this->getAttendees($eventID);
         $upcomingEvents = $this->getUpcoming();
+        $workSpace = Workspace::find($event->spaceID);
+        $dates = Eventdate::where('eventID', $eventID)->get();
+        foreach($dates as $key => $date)
+        {
+          $date->start = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
+          $date->end = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
+        }
 
         if (empty($event)) {
             return Response::json([ 'error' => 'Could not find event' ]);
         }
 
-        $challenge = $event->challenge;
+        //$challenge = $event->challenge;
 
-        if (!$challenge) {
+        return Response::json([
+            'event' => $event,
+            'workspace' => $workSpace,
+            'upcomingEvents' => $upcomingEvents,
+            'sponsors' => $sponsors,
+            'organizers' => $organizers,
+            'attendees' => $attendees,
+            'tags' => $tags,
+            'dates' => $dates
+        ]);
+
+        /*if (!$challenge) {
             $workSpace = Workspace::find($event->spaceID);
             return Response::json([
                 'event' => $event,
@@ -439,7 +458,7 @@ class EventController extends Controller
                 'attendees' => !empty($attendees) ? $attendees : false,
                 'tags' => $tags
             ]);
-        }
+        }*/
     }
 
     private function getParticipating($eventID)
@@ -831,4 +850,20 @@ class EventController extends Controller
         }
         return Response::json($eventsArray);
     }
+  public function getDashboardEvents($spaceID)
+  {
+    $events = Event::where('spaceID', $spaceID)->paginate(30);
+
+    foreach($events as $key => $event)
+    {
+      $date = Eventdate::where('eventID', $event->id)->first();
+      $date->start = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y');
+      $event->date = $date;
+
+      $space = Workspace::find($event->id);
+      $event->space = $space;
+    }
+
+    return Response::json($events);
+  }
 }

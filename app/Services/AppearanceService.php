@@ -5,10 +5,13 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response;
 
 use App\Appearance;
+use App\Workspace;
 
 class AppearanceService {
 
     public function getAllAppearances($spaceId) {
+        $space = Workspace::where('id', $spaceId)->orWhere('slug', $spaceId)->first();
+        $spaceId = $space->id;
         $sortedAppearances = Appearance::where('spaceID', $spaceId)->orderBy('created_at', 'ASC')->get();
         $appearanceCount = count($sortedAppearances);
 
@@ -51,6 +54,8 @@ class AppearanceService {
     }
 
     public function getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
+        $space = Workspace::where('id', $spaceId)->orWhere('slug', $spaceId)->first();
+        $spaceId = $space->id;
         $start = date('Y-m-d', mktime(0, 0, 0, $startMonth, 1, $startYear));
         $end = date('Y-m-d', mktime(0, 0, 0, ($endMonth + 1), 1, $endYear));
 
@@ -90,6 +95,8 @@ class AppearanceService {
      */
     public function getEventAppearances($spaceId) {
         // event
+        $space = Workspace::where('id', $spaceId)->orWhere('slug', $spaceId)->first();
+        $spaceId = $space->id;
         $sortedAppearances = Appearance::where('spaceID', $spaceId)
                                         ->where('occasion', 'Event' )
                                         ->orderBy('created_at', 'ASC')
@@ -117,19 +124,19 @@ class AppearanceService {
                                            ->whereYear('created_at', ( $firstYear + $year ) )
                                            ->whereMonth('created_at', ( $month ) )
                                            ->get()
-                                     ); 
-                    if ( !empty($appearancesForMonth) ) { 
+                                     );
+                    if ( !empty($appearancesForMonth) ) {
                         array_push($appearances, $appearancesForMonth);
                     }
-                }        
+                }
             }
             return (
                 array (
                     'memberAppearancesData' => $appearances,
-                    'firstYear' => $firstYear, 
-                    'lastYear' => $lastYear, 
+                    'firstYear' => $firstYear,
+                    'lastYear' => $lastYear,
                     'firstMonth' => $firstMonth,
-                    'lastMonth' => $lastMonth 
+                    'lastMonth' => $lastMonth
                 )
             );
 
@@ -138,7 +145,8 @@ class AppearanceService {
     }
 
     public function getNonEventAppearances($spaceId, $occasion) {
-
+        $space = Workspace::where('id', $spaceId)->orWhere('slug', $spaceId)->first();
+        $spaceId = $space->id;
         $sortedAppearances = Appearance::where('spaceID', $spaceId)
                                         ->where('occasion', $occasion )
                                         ->orderBy('created_at', 'ASC')
@@ -165,24 +173,26 @@ class AppearanceService {
                                           ->whereYear('created_at', ( $firstYear + $year ) )
                                           ->whereMonth('created_at', ( $month ) )
                                           ->get()
-                                     ); 
-                    if ( !empty($appearancesForMonth) ) { 
+                                     );
+                    if ( !empty($appearancesForMonth) ) {
                         array_push($appearances, $appearancesForMonth);
                     }
-                }        
+                }
             }
             return (
                 array (
                     'memberAppearancesData' => $appearances,
-                    'firstYear' => $firstYear, 
-                    'lastYear' => $lastYear, 
+                    'firstYear' => $firstYear,
+                    'lastYear' => $lastYear,
                     'firstMonth' => $firstMonth,
-                    'lastMonth' => $lastMonth 
+                    'lastMonth' => $lastMonth
                 )
             );
         }
     }
     private static function getByMonthYear($spaceID, $month, $year) {
+        $space = Workspace::where('id', $spaceId)->orWhere('slug', $spaceId)->first();
+        $spaceId = $space->id;
         $appearances = Appearance::where('spaceID', $spaceID)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
