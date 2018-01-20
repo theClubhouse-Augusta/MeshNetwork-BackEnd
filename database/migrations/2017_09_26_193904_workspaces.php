@@ -34,6 +34,7 @@ class Workspaces extends Migration
             $table->string('twitter')->nullable();
             $table->string('instagram')->nullable();
             $table->string('linkedin')->nullable();
+            $table->integer('pageVisits')->default(0);
             $table->timestamps();
       });
     }
