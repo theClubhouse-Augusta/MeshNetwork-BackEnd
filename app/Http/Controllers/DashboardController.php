@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Workspace;
 use Response;
 use Auth;
 use JWTAuth;
@@ -57,43 +58,16 @@ class DashBoardController extends Controller
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Appearances($spaceId) {
+    public function Appearances($slug) {
 
-        // Write head of RMarkdown File
-//        $this->rmarkdownService->generateTitle("Appearances!");
-
-        // Get appearances from database by occasion
-          $appearances =  $this->appearanceService->getAllAppearances($spaceId);
-          return Response::json($appearances);
-//            'event' => $this->appearanceService->getEventAppearances($spaceId),
-//            'work' => $this->appearanceService->getNonEventAppearances($spaceId, 'work'),
-//            'booking' => $this->appearanceService->getNonEventAppearances($spaceId, 'booking'),
-//            'student' => $this->appearanceService->getNonEventAppearances($spaceId, 'student'),
-//            'invite' => $this->appearanceService->getNonEventAppearances($spaceId, 'invite')
-//        );
-
-        // Create a seperate dataset for each occasion
-//        foreach ($appearances as $key => $appearance)
-//        {
-            // Insert data into RMarkdown Script
-//            $this->rmarkdownService->generateMemberAppearancesRmd(
-//                $appearance['firstYear'],
-//                $appearance['lastYear'],
-//                $appearance['firstMonth'],
-//                $appearance['lastMonth'],
-//                $appearance['memberAppearancesData'],
-//                $key,
-//                (count($appearances) - 1) // for keeping track of function calls
-//            );
-//        }
-        // Generate individual tabs for each dataset
-        // $this->rmarkdownService->generateTabs();
-
+//        $spaceID = Workspace::where('slug', $slug)->select('id')->first();
+        $appearances =  $this->appearanceService->getAllAppearances($slug);
+        return Response::json($appearances);
     }
 
-    public function appearanceForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
-        $appearances =  $this->appearanceService
-                             ->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
+    public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
+        $spaceID = Workspace::where('slug', $slug)->select('id')->first();
+        $appearances =  $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
     }
 

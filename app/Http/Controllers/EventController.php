@@ -46,6 +46,7 @@ class EventController extends Controller
             'deleteCalendar',
             'delete',
             'Sponsers',
+            'getTodaysEvents'
         ]]);
     }
 
@@ -197,7 +198,8 @@ class EventController extends Controller
                 $eventSkill->skillID = $skillTag->id;
                 $eventSkill->name = $skillTag->name;
                 // Persist App\Skill to database
-                if (!$eventSkill->save())  return Response::json([ 'error' => 'eventSkill database error' ]);
+                if (!$eventSkill->save())
+                    return Response::json([ 'error' => 'eventSkill database error' ]);
 
             }
         }
@@ -833,7 +835,9 @@ class EventController extends Controller
     return Response::json($event);
   }
 
-    public function getTodaysEvents($spaceID) {
+    public function getTodaysEvents() {
+        $user = Auth::user();
+        $spaceID = $user->spaceID;
         $date = new DateTime("now");
         $today = $date->format('Y-m-d');
         $events = EventDate::all();
