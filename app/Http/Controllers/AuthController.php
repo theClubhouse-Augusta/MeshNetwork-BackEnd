@@ -100,13 +100,8 @@ class AuthController extends Controller {
         $user->name = $name;
         $user->bio = $bio;
         $user->email = $email;
-
-        if (!empty($spaceID)) $user->spaceID = $spaceID;
-        if ($organizer) $user->roleID = 2;
-        else $user->roleID = 3;
+        $user->spaceID = $spaceID;
         $user->password = Hash::make($password);
-
-
         // if (!empty($bio)) $user->bio = $bio;
 
         // Profile Picture

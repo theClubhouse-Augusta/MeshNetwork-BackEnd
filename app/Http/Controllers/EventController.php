@@ -24,6 +24,7 @@ use App\Calendar;
 use App\Opt;
 use App\File;
 use Carbon\Carbon;
+use DB;
 
 class EventController extends Controller
 {
@@ -852,8 +853,26 @@ class EventController extends Controller
                     array_push($eventsArray, $findEvent);
             }
         }
-        return Response::json($eventsArray);
+    return Response::json($eventsArray);
     }
+
+    // $events = DB::table('eventdates')
+    //   ->select(DB::raw('*'))
+    //   ->whereRaw('Date(eventdates.start) = CURDATE()')
+    //   ->join('events', 'eventdates.eventID', '=', 'events.id')
+    //   ->where('events.spaceID', $spaceID)
+    //   ->select('events.id', 'events.spaceID', 'events.title', 'events.description', 'events.image', 'eventdates.start')
+    //   ->get();
+
+    // foreach($events as $key => $event)
+    // {
+    //   $event->start = Carbon::createFromTimeStamp(strtotime($event->start))->format('l jS \\of F Y h:i A');
+    // }
+
+    // return Response::json($events);
+
+//   }
+
   public function getDashboardEvents($spaceID)
   {
     $events = Event::where('spaceID', $spaceID)->paginate(30);

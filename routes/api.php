@@ -76,6 +76,7 @@ Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
 Route::get('eventDates/{id}', 'EventController@EventDates');
 Route::get('today/event', 'EventController@getTodaysEvents');
+Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('getDashboardEvents/{spaceID}', 'EventController@getDashboardEvents');
 
 // AppeanceController
@@ -91,4 +92,10 @@ Route::get('occasions','AppearanceController@getValidOccasions');
 Route::post('booking','BookingController@store');
 Route::get('booking/approve/{token}','BookingController@approve');
 Route::get('booking/deny/{token}','BookingController@deny');
+
+//PhotosController
+Route::get('getPhotos/{spaceID}', 'PhotosController@getPhotos');
+Route::post('storePhoto', 'PhotosController@storePhotos');
+Route::post('deletePhoto/{spaceID}/{id}', 'PhotosController@deletePhoto');
+
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

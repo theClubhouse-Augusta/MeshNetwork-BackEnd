@@ -182,7 +182,7 @@ class AppearanceController extends Controller {
     public function getValidOccasions() {
        return Response::json([
            'work' => 'Work',
-           'meetup' => 'Meet-Up',
+           'meetup' => 'Meeting',
            'student' => 'Class',
            'event' => 'Event',
        ]);
