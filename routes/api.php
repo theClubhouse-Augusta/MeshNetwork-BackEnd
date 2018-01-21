@@ -75,7 +75,7 @@ Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
 Route::get('eventDates/{id}', 'EventController@EventDates');
-Route::get('todayevent', 'EventController@getTodaysEvents');
+Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('getDashboardEvents/{spaceID}', 'EventController@getDashboardEvents');
 
 // AppeanceController
