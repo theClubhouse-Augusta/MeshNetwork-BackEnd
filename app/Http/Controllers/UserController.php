@@ -244,7 +244,7 @@ class UserController extends Controller
 
         // handle skill tag button click
         if (!empty($tag)) {
-            $skills = Userskill::where('name', $tag)->select('userskills.userID')->distinct()->get();
+            $skills = Userskill::where('name', $tag)->select('userskills.userID')->distinct('userID')->get();
             if (count($skills) == 0) {
                 return Response::json([ 'error' => 'No users found with skill' ]);
             }
