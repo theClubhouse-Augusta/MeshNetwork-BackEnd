@@ -30,6 +30,7 @@ class UserController extends Controller
         $this->middleware('jwt.auth', [ 'only' => [
            'updateUser',
            'delete',
+           'makeOrganizer',
            //'showUser',
            //'user',
             //'searchName',
@@ -37,7 +38,7 @@ class UserController extends Controller
            //'userSkills',
         //   'getSkills',
             // 'allSkills',
-            'Organizers'
+            // 'Organizers'
         ]]);
     }
 
@@ -514,5 +515,27 @@ class UserController extends Controller
       $users = User::where('spaceID', $space->id)->get();
 
       return Response::json($users);
+    }
+
+    public function makeOrganizer($userID) {
+        $organizer = Auth::user();
+        $user = User::find($userID);
+        if ($organizer->roleID != 2 || $user->spaceID != $organizer->spaceID) {
+            Return Response::json([ 'error' => 'invalid credentials' ]);
+        }
+        
+        $user = User::find($userID);
+        if ($user->roleID == 2) {
+            $user->roleID = 3;
+        } else {
+            $user->roleID = 2;
+        }
+
+        $success = $user->save();
+        if ($success) {
+            return Response::json(['success' => 'account updated successfully']);
+        } else {
+            return Response::json(['error' => 'database error']);
+        }
     }
 }
