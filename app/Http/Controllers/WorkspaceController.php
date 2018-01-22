@@ -171,7 +171,7 @@ class WorkspaceController extends Controller
             $workspace->description = $description;
             $workspace->lon = $lon;
             $workspace->lat = $lat;
-            $workspace->pubKey = 0;
+            $workspace->pub_key = 0;
             if (!empty($logo)) {
                 $logoName = $logo->getClientOriginalName();
                 $logo->move('storage/logo/', $logoName);
@@ -226,30 +226,26 @@ class WorkspaceController extends Controller
             }
 
             $user->avatar = $avatar;
-            $user->plan = 'free';
+            $user->subscriber = 0;
             $user->save();
 
             return Response::json($workspace->id);
         }
 
 
-    private function getGeoLocation($address, $city, $state)
-    {
+    private function getGeoLocation($address, $city, $state) {
         $address_array = explode(' ', $address);
 
-//       $string = '';
         $length = count($address_array);
 
         $URIparam = '';
-        for ($i = 0; $i < $length; $i++)
-        {
+        for ($i = 0; $i < $length; $i++) {
             if ( $i != ($length - 1) )
                 $URIparam .= $address_array[$i].'+';
             else
                 $URIparam .= $address_array[$i];
         }
-
-            return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$URIparam.',+'.$city.',+'.$state.'&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
+        return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$URIparam.',+'.$city.',+'.$state.'&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
 
         }
 

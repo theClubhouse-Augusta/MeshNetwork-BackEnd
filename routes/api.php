@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Response;
 |
 */
 // DashboardController
-Route::get('db/Joins/{spaceId}/{year}', 'DashboardController@Joins');
-Route::get('appearances/{spaceId}', 'DashboardController@Appearances');
+Route::get('db/Joins/{slug}/{year}', 'DashboardController@Joins');
+Route::get('appearances/{slug}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 Route::get('log/{message}', 'DashboardController@log');
 Route::get('email', 'DashboardController@email');
@@ -77,6 +77,7 @@ Route::get('event/join/{eventID}','EventController@storeCalendar');
 Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
 Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
 Route::get('eventDates/{id}', 'EventController@EventDates');
+Route::get('today/event', 'EventController@getTodaysEvents');
 Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('getDashboardEvents/{spaceID}', 'EventController@getDashboardEvents');
 
