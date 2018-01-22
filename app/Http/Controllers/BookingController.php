@@ -68,7 +68,7 @@ class BookingController extends Controller {
     }
 
     public function approve($token) {
-      $booking = Booking::where('token', $token)->first();
+      $booking = Booking::where('token', $token)->where('status', 'pending')->first();
 
       if(!$booking->token == 0) {
         $booking->status = 'approved';
@@ -85,12 +85,13 @@ class BookingController extends Controller {
 
         return "Booking has been approved.";
       } else {
+        $booking = Booking::where('token', $token)->first();
         return "Booking has been ".$booking->status.".";
       }
     }
 
     public function deny($token) {
-      $booking = Booking::where('token', $token)->first();
+      $booking = Booking::where('token', $token)->where('status', 'pending')->first();
       if(!$booking->token == 0) {
         $booking->status = 'denied';
         $booking->token = 0;
@@ -107,6 +108,7 @@ class BookingController extends Controller {
 
         return "Booking has been denied.";
       } else {
+        $booking = Booking::where('token', $token)->first();
         return "Booking has been ".$booking->status.".";
       }
     }

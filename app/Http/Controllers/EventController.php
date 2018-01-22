@@ -137,7 +137,7 @@ class EventController extends Controller
         $files = $request->input('file0');
         $image = $request->file('image');
         $imageName = $image->getClientOriginalName();
-        $image->move('/storage/events/images', $imageName);
+        $image->move('storage/events/images', $imageName);
 
         // create ne App\Event
         $event = new Event;
