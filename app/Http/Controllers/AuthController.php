@@ -25,6 +25,7 @@ class AuthController extends Controller {
             // 'getUsers',
             'ban',
             'checkAuth',
+            'getUser'
         ]]);
     }
 
@@ -223,23 +224,7 @@ class AuthController extends Controller {
             return Response::json(['error' => 'Wrong Email/Password']);
         }
 
-        $skills = Userskill::where('userID', $user->id)
-                           ->select('name')
-                           ->get();
-
-        $space = Workspace::where('id', $user->spaceID)
-                          ->select('name')
-                          ->first();
-
-        $events = $this->getUpcomingEvents();
-        $upcoming = $this->getAttendingEvents($user->id);
-
         return Response::json([
-            'user' => $user,
-            'skills' => !empty($skills) ? $skills : false,
-            'space' => !empty($space) ? $space : false,
-            'events' => !empty($events) ? $events : false,
-            'upcoming' => !empty($upcoming) ? $upcoming : false,
             'token' => $token,
         ]);
     }
@@ -339,6 +324,13 @@ class AuthController extends Controller {
       return Response::json(['error' => 'datebase error']);
     }
     return Response::json(['success' => 'user'.$bannedUser->name.' has been banned from MeshNetwork']);
+  }
+
+  public function getUser() {
+    $auth = Auth::user();
+    $user = User::find($auth->id);
+
+    return Response::json($user);
   }
 
 }
