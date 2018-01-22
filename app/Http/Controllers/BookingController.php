@@ -69,21 +69,21 @@ class BookingController extends Controller {
 
     public function approve($token) {
       $booking = Booking::where('token', $token)->where('status', 'pending')->first();
+      if(!empty($booking)) {
+        if(!$booking->token == 0) {
+          $booking->status = 'approved';
+          $booking->save();
+          $space = Workspace::find($booking->spaceID);
 
-      if(!$booking->token == 0) {
-        $booking->status = 'approved';
-        $booking->token = 0;
-        $booking->save();
-        $space = Workspace::find($booking->spaceID);
+          Mail::send('emails.bookingApprove', array('space' => $space, 'booking' => $booking),
+          function($message) use ($space, $booking)
+          {
+            $message->from($space->email, $space->name);
+            $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
+          });
 
-        Mail::send('emails.bookingApprove', array('space' => $space, 'booking' => $booking),
-        function($message) use ($space, $booking)
-        {
-          $message->from($space->email, $space->name);
-          $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
-        });
-
-        return "Booking has been approved.";
+          return "Booking has been approved.";
+        }
       } else {
         $booking = Booking::where('token', $token)->first();
         return "Booking has been ".$booking->status.".";
@@ -92,21 +92,22 @@ class BookingController extends Controller {
 
     public function deny($token) {
       $booking = Booking::where('token', $token)->where('status', 'pending')->first();
-      if(!$booking->token == 0) {
-        $booking->status = 'denied';
-        $booking->token = 0;
-        $booking->save();
+      if(!empty($booking)) {
+        if(!$booking->token == 0) {
+          $booking->status = 'denied';
+          $booking->save();
 
-        $space = Workspace::find($booking->spaceID);
+          $space = Workspace::find($booking->spaceID);
 
-        Mail::send('emails.bookingDeny', array('space' => $space, 'booking' => $booking),
-        function($message) use ($space, $booking)
-        {
-          $message->from($space->email, $space->name);
-          $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Denied.');
-        });
+          Mail::send('emails.bookingDeny', array('space' => $space, 'booking' => $booking),
+          function($message) use ($space, $booking)
+          {
+            $message->from($space->email, $space->name);
+            $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Denied.');
+          });
 
-        return "Booking has been denied.";
+          return "Booking has been denied.";
+        }
       } else {
         $booking = Booking::where('token', $token)->first();
         return "Booking has been ".$booking->status.".";
