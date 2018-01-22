@@ -59,14 +59,15 @@ class DashBoardController extends Controller
      * @return Illuminate\Support\Facades\Response::class
      */
     public function Appearances($slug) {
-
-//        $spaceID = Workspace::where('slug', $slug)->select('id')->first();
-        $appearances =  $this->appearanceService->getAllAppearances($slug);
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $appearances = $this->appearanceService->getAllAppearances($spaceID);
         return Response::json($appearances);
     }
 
     public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
-        $spaceID = Workspace::where('slug', $slug)->select('id')->first();
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
         $appearances =  $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
     }
