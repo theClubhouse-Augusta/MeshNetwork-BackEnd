@@ -47,6 +47,7 @@ class EventController extends Controller
             'deleteCalendar',
             'delete',
             'Sponsers',
+            'getTodaysEvents'
         ]]);
     }
 
@@ -198,7 +199,8 @@ class EventController extends Controller
                 $eventSkill->skillID = $skillTag->id;
                 $eventSkill->name = $skillTag->name;
                 // Persist App\Skill to database
-                if (!$eventSkill->save())  return Response::json([ 'error' => 'eventSkill database error' ]);
+                if (!$eventSkill->save())
+                    return Response::json([ 'error' => 'eventSkill database error' ]);
 
             }
         }
@@ -834,39 +836,37 @@ class EventController extends Controller
     return Response::json($event);
   }
 
-  public function getTodaysEvents($spaceID) {
-    /*$date = new DateTime("now");
-    $today = $date->format('Y-m-d');
-    $events = EventDate::all();
-    $eventsArray = [];
-    foreach ($events as $event) {
-        $start = $event->start;
-        $pos = strrpos($start, " ");
-        $formattedDate = substr($start, 0, $pos);
-        if ($today == $formattedDate) {
-            $findEvent = Event::find($event->eventID);
-            if ($findEvent->spaceID == $spaceID)
-                array_push($eventsArray, $findEvent);
+    public function getTodaysEvents($spaceID) {
+        /*$user = Auth::user();
+        $spaceID = $user->spaceID;
+        $date = new DateTime("now");
+        $today = $date->format('Y-m-d');
+        $events = EventDate::all();
+        $eventsArray = [];
+        foreach ($events as $event) {
+            $start = $event->start;
+            $pos = strrpos($start, " ");
+            $formattedDate = substr($start, 0, $pos);
+            if ($today == $formattedDate) {
+                $findEvent = Event::find($event->eventID);
+                if ($findEvent->spaceID == $spaceID)
+                    array_push($eventsArray, $findEvent);
+            }
         }
+        return Response::json($eventsArray);*/
+        $events = DB::table('eventdates')
+            ->select(DB::raw('*'))
+            ->whereRaw('Date(eventdates.start) = CURDATE()')
+            ->join('events', 'eventdates.eventID', '=', 'events.id')
+            ->where('events.spaceID', $spaceID)
+            ->select('events.id', 'events.spaceID', 'events.title', 'events.description', 'events.image', 'eventdates.start')
+            ->get();
+        foreach($events as $key => $event)
+        {
+            $event->start = Carbon::createFromTimeStamp(strtotime($event->start))->format('l jS \\of F Y h:i A');
+        }
+        return Response::json($events);
     }
-    return Response::json($eventsArray);*/
-
-    $events = DB::table('eventdates')
-      ->select(DB::raw('*'))
-      ->whereRaw('Date(eventdates.start) = CURDATE()')
-      ->join('events', 'eventdates.eventID', '=', 'events.id')
-      ->where('events.spaceID', $spaceID)
-      ->select('events.id', 'events.spaceID', 'events.title', 'events.description', 'events.image', 'eventdates.start')
-      ->get();
-
-    foreach($events as $key => $event)
-    {
-      $event->start = Carbon::createFromTimeStamp(strtotime($event->start))->format('l jS \\of F Y h:i A');
-    }
-
-    return Response::json($events);
-
-  }
 
   public function getDashboardEvents($spaceID)
   {
