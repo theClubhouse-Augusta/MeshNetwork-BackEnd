@@ -11,4 +11,7 @@
 |
 */
 
+Route::get('booking/approve/{token}','BookingController@approve');
+Route::get('booking/deny/{token}','BookingController@deny');
+
 Route::any('{path?}', 'MainController@index')->where("path", ".+");

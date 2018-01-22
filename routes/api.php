@@ -19,12 +19,14 @@ Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{end
 Route::get('log/{message}', 'DashboardController@log');
 Route::get('email', 'DashboardController@email');
 
+
 // AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
 Route::get('users', 'AuthController@getUsers');  // admin get users
 Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
+Route::get('getUser', 'AuthController@getUser'); // get Auth User
 
 // UserController
 Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user

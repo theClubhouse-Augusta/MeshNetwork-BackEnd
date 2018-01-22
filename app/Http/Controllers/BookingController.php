@@ -10,6 +10,7 @@ use Auth;
 use JWTAuth;
 use Mail;
 
+use App\Workspace;
 use App\Booking;
 
 class BookingController extends Controller {
@@ -34,6 +35,7 @@ class BookingController extends Controller {
         $spaceID = $request->input('spaceID');
         $type = $request->input('type');
         $times = json_decode($request->input('times'), false);
+        $token = str_random(128);
 
         foreach($times as $key => $time) {
           $booking = new Booking;
@@ -44,15 +46,19 @@ class BookingController extends Controller {
           $booking->day = $time->day;
           $booking->times = $time->time;
           $booking->status = 'pending';
-          $booking->token = str_random(128);
+          $booking->token = $token;
           $booking->save();
 
           $space = Workspace::find($spaceID);
+          $approve = 'https://innovationmesh.com/api/booking/approve/'.$token;
+          $deny = 'https://innovationmesh.com/api/booking/deny/'.$token;
 
-          Mail::send('emails.booking', array('name' => $name, 'email' => $email, 'type' => $type, 'day' => $time->day, 'time' => $time->time, 'token' => $token, 'space' => $space), function($message)
+          Mail::send('emails.booking', array('name' => $name, 'email' => $email, 'type' => $type, 'day' => $time->day, 'time' => $time->time, 'approve' => $approve, 'deny' => $deny, 'space' => $space),
+          function($message) use ($name, $email, $type, $time, $approve, $deny, $space)
           {
             $message->from($email, $name);
             $message->to($space->email, $space->name)->subject('Booking: '.$type);
+            //$message->to('nsoharab@gmail.com', $space->name)->subject('Booking: '.$type);
           });
         }
 
@@ -63,34 +69,46 @@ class BookingController extends Controller {
 
     public function approve($token) {
       $booking = Booking::where('token', $token)->first();
-      $booking->status = 'approved';
-      $booking->save();
 
-      $space = Workspace::find($booking->spaceID);
+      if(!$booking->token == 0) {
+        $booking->status = 'approved';
+        $booking->token = 0;
+        $booking->save();
+        $space = Workspace::find($booking->spaceID);
 
-      Mail::send('emails.bookingApprove', array('space' => $space, 'booking' => $booking), function($message)
-      {
-        $message->from($space->email, $space->name);
-        $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
-      });
+        Mail::send('emails.bookingApprove', array('space' => $space, 'booking' => $booking),
+        function($message) use ($space, $booking)
+        {
+          $message->from($space->email, $space->name);
+          $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
+        });
 
-      return "Booking has been approved.";
+        return "Booking has been approved.";
+      } else {
+        return "Booking has been ".$booking->status.".";
+      }
     }
 
     public function deny($token) {
       $booking = Booking::where('token', $token)->first();
-      $booking->status = 'denied';
-      $booking->save();
+      if(!$booking->token == 0) {
+        $booking->status = 'denied';
+        $booking->token = 0;
+        $booking->save();
 
-      $space = Workspace::find($booking->spaceID);
+        $space = Workspace::find($booking->spaceID);
 
-      Mail::send('emails.bookingDeny', array('space' => $space, 'booking' => $booking), function($message)
-      {
-        $message->from($space->email, $space->name);
-        $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Denied.');
-      });
+        Mail::send('emails.bookingDeny', array('space' => $space, 'booking' => $booking),
+        function($message) use ($space, $booking)
+        {
+          $message->from($space->email, $space->name);
+          $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Denied.');
+        });
 
-      return "Booking has been denied.";
+        return "Booking has been denied.";
+      } else {
+        return "Booking has been ".$booking->status.".";
+      }
     }
 
 }
