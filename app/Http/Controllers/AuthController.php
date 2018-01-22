@@ -101,6 +101,7 @@ class AuthController extends Controller {
         $user->bio = $bio;
         $user->email = $email;
         $user->spaceID = $spaceID;
+        $user->roleID = 3;
         $user->password = Hash::make($password);
         // if (!empty($bio)) $user->bio = $bio;
 
