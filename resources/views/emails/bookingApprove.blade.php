@@ -13,7 +13,7 @@
   {{$space->address}} {{$space->city}}, {{$space->state}}<br/><br/>
 
   <strong>WHEN</strong><br/>
-  {{$booking->day}} - {{$booking->time}}
+  {{$booking->day}} - {{$booking->times}}
 
   <br/>
   <br/>

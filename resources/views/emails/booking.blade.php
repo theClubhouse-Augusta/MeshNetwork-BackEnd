@@ -12,10 +12,10 @@
   {{$day}} - {{$time}}
   <br/><br/>
 
-  To Approve the Booking, <a href="https://innovationmesh.com/api/booking/approve/"{{$token}}>CLICK HERE</a>
+  To Approve the Booking, <a href={{$approve}}>CLICK HERE</a>
   <br/>
   <br/>
-  To Deny the Booking, <a href="https://innovationmesh.com/api/booking/deny/"{{$token}}>CLICK HERE</a>
+  To Deny the Booking, <a href={{$deny}}>CLICK HERE</a>
   <br/>
   <br/>
   Contact: {{$email}}
