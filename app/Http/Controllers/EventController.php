@@ -103,11 +103,12 @@ class EventController extends Controller
         // $sponserIDs = json_decode($request->input('sponsors'));
 
 
-        /*if (!empty($sponsors))ny  {
+        if (!empty($sponsors)) {
             foreach($sponsors as $s) {
-                array_push($sponserIDs, $s->id);
+                $sponsor = Sponser::where('name', $s)->first();
+                array_push($sponserIDs, $sponsor->id);
             }
-        }*/
+        }
 
         $newSponsors = json_decode($request->input('newSponsors'));
         if (!empty($newSponsors)) {
@@ -612,6 +613,9 @@ class EventController extends Controller
 
     public function search(Request $request)
     {
+        $organizer = Auth::user();
+        if ($organizer->roleID != 2)
+            return Reponse::json(['error' => 'invalid crediantials']);
         $rules = [
             'query' => 'required|string',
         ];
@@ -636,8 +640,6 @@ class EventController extends Controller
         }
 
         $search = Event::where('title', 'LIKE', $query)
-                        ->Orwhere('tags', 'LIKE', $query)
-                        ->Orwhere('type', 'LIKE', $query)
                         ->Orwhere('description', 'LIKE', $query)
                         ->get();
 
