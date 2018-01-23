@@ -5,6 +5,7 @@
 /.vscode
 ./public/storage/events/*
 Homestead.json
+foo.php
 Homestead.yaml
 .env
 .env.production

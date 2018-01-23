@@ -8,6 +8,8 @@ use Purifier;
 use Hash;
 use Auth;
 use JWTAuth;
+use DateTime;
+use DateInterval;
 use Illuminate\Support\Facades\Validator;
 use App\User;
 use App\Workspace;
@@ -461,7 +463,23 @@ class WorkspaceController extends Controller
       $checkins = Appearance::where('spaceID', $spaceID)->get();
       $checkinCount = count($checkins);
 
-      return Response::json(['memberCount' => $memberCount, 'eventCount' => $eventCount, 'checkinCount' => $checkinCount]);
+      $now = new DateTime("now");
+      $now->add(new DateInterval('P1D'));
+      $lastMonth = new DateTime("now");
+      $lastMonth->sub(new DateInterval('P32D'));
+
+      $start = date('Y-m-d', $lastMonth->getTimeStamp());
+      $end = date('Y-m-d', $now->getTimeStamp());
+
+      $thisMonthCheckIns = count(Appearance::where('spaceID', $spaceID)
+                                  ->whereBetween('created_at', [$start, $end])
+                                  ->get());
+      return Response::json([
+          'memberCount' => $memberCount, 
+          'eventCount' => $eventCount, 
+          'checkinCount' => $checkinCount,
+          'thisMonthCheckIns' => $thisMonthCheckIns,
+     ]);
     }
 
 }

@@ -40,7 +40,9 @@ Route::get('showuser', 'UserController@showUser'); // show logged in user
 Route::get('user/{id}', 'UserController@user'); // get user.id
 Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
 Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
+Route::get('organizers/events', 'UserController@OrganizersForEvents'); // to populate tags in sign up form
 Route::get('getSpaceUsers/{spaceID}', 'UserController@getSpaceUsers');
+Route::get('userToOrg/{userID}', 'UserController@makeOrganizer');
 
 // RoleController
 Route::post('newrole', 'RoleController@store');
