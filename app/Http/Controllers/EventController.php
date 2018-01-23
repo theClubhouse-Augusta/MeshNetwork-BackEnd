@@ -99,14 +99,16 @@ class EventController extends Controller
 
         $event = new Event;
         /* Sponser Info */
-        $sponsors = json_decode($request->input('sponsors'));
-        $sponserIDs = [];
+        //$sponsors = json_decode($request->input('sponsors'));
+        //$sponserIDs = [];
+        $sponserIDs = json_decode($request->input('sponsors'));
 
-        if (!empty($sponsors))  {
+
+        /*if (!empty($sponsors))  {
             foreach($sponsors as $s) {
                 array_push($sponserIDs, $s->id);
             }
-        }
+        }*/
 
         $newSponsors = json_decode($request->input('newSponsors'));
         if (!empty($newSponsors)) {
@@ -165,7 +167,7 @@ class EventController extends Controller
             foreach ($organizers as $organizer) {
                 $eventorganizer = new Eventorganizer;
                 $eventorganizer->eventID = $eventID;
-                $eventorganizer->userID = $organizer->value;
+                $eventorganizer->userID = $organizer;
                 if (!$eventorganizer->save()) return Response::json([ 'error' => 'e org' ]);
                 $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
                 if (empty($check)) {
@@ -178,7 +180,7 @@ class EventController extends Controller
         }
 
         // Update App\Skill;
-        if (!empty($tags)) {
+      /*  if (!empty($tags)) {
             foreach($tags as $key => $tag) {
                 if (!property_exists($tag, 'id')) {
                     $newSkill = new Skill;
@@ -187,12 +189,12 @@ class EventController extends Controller
                     if (!$newSkill->save()) return Response::json([ 'error' => 'database error' ]);
                 }
            }
-        }
+        }*/
 
         // Update App\Eventskill;
         if (!empty($tags)) {
             foreach ($tags as $key => $tag) {
-                $skillTag = Skill::where('name', $tag->value)->first();
+                $skillTag = Skill::where('id', $tag)->first();
                 // Create new EventSkill
                 $eventSkill = new Eventskill;
                 $eventSkill->eventID = $eventID;

@@ -32,6 +32,7 @@ class CreateUsersTable extends Migration
             $table->string('behance')->nullable();
             $table->boolean('ban')->default(false);
             $table->boolean('subscriber')->default(false);
+            $table->longText('skills')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

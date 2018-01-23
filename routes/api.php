@@ -35,7 +35,7 @@ Route::get('userskills', 'UserController@userSkills'); // to populate tags in si
 Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
 Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sign up form
 Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
-Route::get('search', 'UserController@search'); // search by skill/SpaceID
+Route::post('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('showuser', 'UserController@showUser'); // show logged in user
 Route::get('user/{id}', 'UserController@user'); // get user.id
 Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
@@ -95,6 +95,9 @@ Route::get('occasions','AppearanceController@getValidOccasions');
 Route::post('booking','BookingController@store');
 Route::get('booking/approve/{token}','BookingController@approve');
 Route::get('booking/deny/{token}','BookingController@deny');
+Route::get('getResources/{spaceID}', 'BookingController@getResources');
+Route::post('storeResource', 'BookingController@storeResource');
+Route::post('deleteResource/{id}', 'BookingController@deleteResource');
 
 //PhotosController
 Route::get('getPhotos/{spaceID}', 'PhotosController@getPhotos');

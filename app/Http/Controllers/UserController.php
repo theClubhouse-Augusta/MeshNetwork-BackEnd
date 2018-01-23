@@ -78,15 +78,11 @@ class UserController extends Controller
           'name' => 'nullable|string',
           'title' => 'nullable|string',
           'avatar' => 'nullable|string',
-          // workInfo
           'password' => 'nullable|string',
+          'passwordConfirm' => 'nullable|string',
           'email' => 'nullable|string',
-          'spaceID' => 'nullable|string',
-          'website' => 'nullable|string',
-        //   'bio' => 'nullable|string',
-          'tags' => 'nullable|string',
+          'skills' => 'nullable|string',
           'phoneNumber' => 'nullable|string',
-          'deleteSkills' => 'nullable|string',
           'facebook' => 'nullable|string',
           'twitter' => 'nullable|string',
           'instagram' => 'nullable|string',
@@ -102,24 +98,25 @@ class UserController extends Controller
             return Response::json(['error' => 'Invalid form input.']);
         }
 
-        // userInfo
         $name = $request->input('name');
-        $website = $request->input('website');
         $title = $request->input('title');
-        // workInfo
         $email = $request->input('email');
         $password = $request->input('password');
+        $passwordConfirm = $request->input('passwordConfirm');
         $phoneNumber = $request->input('phoneNumber');
-        $facbook = $request->input('facbook');
+        $facebook = $request->input('facebook');
         $twitter = $request->input('twitter');
         $instagram = $request->input('instagram');
         $linkedin = $request->input('linkedin');
         $github = $request->input('github');
         $behance = $request->input('behance');
-        // $bio = $request->input('bio');
-        // User Skills
-        $tags = json_decode($request->input('tags'));
-        $deleteSkills = explode(',', $request->input('deleteSkills'));
+        $skills = $request->input('skills');
+
+        if($password != $passwordConfirm) {
+          return Response::json(['error' => 'Passwords do not match.']);
+        }
+
+
         // Avatar Input
         if (!empty($_FILES['avatar'])) {
             // Check for file upload error
@@ -154,7 +151,8 @@ class UserController extends Controller
         }
 
         $user = Auth::user();
-        $userID = Auth::id();
+        $user = User::find($user->id);
+
         // userInfo
         if (!empty($name)) $user->name = $name;
         if (!empty($website)) $user->website = $website;
@@ -162,7 +160,6 @@ class UserController extends Controller
         // workInfo
         if (!empty($email)) $user->email = $email;
         if (!empty($phoneNumber)) $user->email = $phoneNumber;
-        if (!empty($spaceID)) $user->spaceID = $spaceID;
         if (!empty($password)) $user->password = Hash::make($password);
         if (!empty($facebook)) $user->facebook = $facebook;
         if (!empty($twitter)) $user->twitter = $twitter;
@@ -170,6 +167,7 @@ class UserController extends Controller
         if (!empty($linkedin)) $user->linkedin = $linkedin;
         if (!empty($github)) $user->github = $github;
         if (!empty($behance)) $user->behance = $behance;
+        if (!empty($skills)) $user->skills = $skills;
 
         if (!empty($bio)) $user->bio = $bio;
         // Profile Picture
@@ -178,12 +176,10 @@ class UserController extends Controller
             $avatar->move('storage/avatar/', $avatarName);
             $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
         }
-        // Persist changes to database
-        if (!$user->save()) {
-           return Response::json(['error' => 'Account not created']);
-        }
 
-        // delete skills
+        $user->save();
+
+        /*// delete skills
         if (!empty($deleteSkills)) {
             foreach ($deleteSkills as $key => $deleteSkill) {
                 Userskill::where('name', $deleteSkill)->where('userID', $userID)->delete();
@@ -229,7 +225,7 @@ class UserController extends Controller
                     }
                 }
             }
-        }
+        }*/
         return Response::json(['success' => 'Account updated!']);
     }
 
@@ -240,11 +236,29 @@ class UserController extends Controller
     **/
     public function search(Request $request) {
         // url query params
-        $query = $request->query('query');
-        $tag = $request->query('tag');
+        $query = $request->input('query');
+        $tag = $request->input('tag');
 
+        if(!empty($tag)) {
+          $tag = Skill::find($tag);
+          $users = User::where('skills', 'LIKE', '%'.$tag->name.'%')->orderBy('created_at', 'DESC')->get();
+
+          if($users->isEmpty()) {
+            return Response::json(['error' => 'No Users Found.']);
+          }
+
+          return Response::json($users);
+        }
+        else {
+          $users = User::where('name', 'LIKE', '%'.$query.'%')->orWhere('title','LIKE', '%'.$query.'%')->where('skills', 'LIKE', '%'.$query.'%')->orderBy('created_at', 'DESC')->get();
+          if($users->isEmpty()) {
+            return Response::json(['error' => 'No Users Found.']);
+          }
+
+          return Response::json($users);
+        }
         // handle skill tag button click
-        if (!empty($tag)) {
+      /*  if (!empty($tag)) {
             $skills = Userskill::where('name', $tag)->select('userskills.userID')->distinct('userID')->get();
             if (count($skills) == 0) {
                 return Response::json([ 'error' => 'No users found with skill' ]);
@@ -263,10 +277,10 @@ class UserController extends Controller
             }   else {
                 return Response::json([ 'error' => 'no user matched tag' ]);
             }
-        }
+        }*/
 
         // handle search input query
-        $users = User::where('name', 'LIKE', '%'.$query.'%')
+        /*$users = User::where('name', 'LIKE', '%'.$query.'%')
                     ->Orwhere('bio', 'LIKE', '%'.$query.'%')
                     ->Orwhere('email', 'LIKE', '%'.$query.'%')
                     ->get();
@@ -314,7 +328,7 @@ class UserController extends Controller
             }
             return Response::json($res);
         }
-        return Response::json(['error' => 'nothing matched query']);
+        return Response::json(['error' => 'nothing matched query']);*/
     }
 
 
@@ -485,7 +499,7 @@ class UserController extends Controller
         $organizersArray = [];
         foreach($organizers as $organizer) {
                 array_push($organizersArray, [
-                'label' => $organizer->email,
+                'label' => $organizer->name.' - '.$organizer->email,
                 'value' => $organizer->id,
                 'avatar'=> $organizer->avatar,
                 'name' => $organizer->name
