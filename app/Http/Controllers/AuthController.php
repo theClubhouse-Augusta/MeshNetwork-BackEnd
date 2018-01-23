@@ -104,6 +104,7 @@ class AuthController extends Controller {
         $user->spaceID = $spaceID;
         $user->roleID = 3;
         $user->password = Hash::make($password);
+        $user->skills = $tags;
         // if (!empty($bio)) $user->bio = $bio;
 
         // Profile Picture
@@ -146,7 +147,7 @@ class AuthController extends Controller {
         }
 
         $userID = $user->id;
-        // Update App\Skill;
+      /*  // Update App\Skill;
         if (!empty($tags)) {
             foreach($tags as $key => $tag) {
                 if (!property_exists($tag, 'id'))  {
@@ -176,6 +177,7 @@ class AuthController extends Controller {
                 if (!$success) return Response::json([ 'error' => 'eventSkill database error' ]);
             }
         }
+        */
 
         $credentials = compact("email", "password");
         $token = JWTAuth::attempt($credentials);

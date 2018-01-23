@@ -6,7 +6,7 @@
 </head>
 <body>
 
-  <p>{{$name}} would like to book a {{$type}} at {{$space->name}}.</p>
+  <p>{{$name}} would like to book a {{$resource->resourceName}} at {{$space->name}}.</p>
 
   <strong>TIME</strong><br/>
   {{$day}} - {{$time}}
