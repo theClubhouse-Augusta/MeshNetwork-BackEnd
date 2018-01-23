@@ -70,7 +70,8 @@ class WorkspaceController extends Controller
 
         // form input
         $name = $request->input('name');
-        $slug = str_replace(' ', '-', $name);
+        $slug = (strtolower($name));
+        $slug = str_replace(' ', '-', $slug);
         $slug = preg_replace('/[^A-Za-z0-9\-]/', '', $slug);
         $slug = preg_replace('/-+/', '-', $slug);
         $city = $request->input('city');
@@ -90,6 +91,13 @@ class WorkspaceController extends Controller
 
         if (!empty($check)) {
             return Response::json(['error' => 'Email already in use']);
+        }
+
+        $slugCheck = Workspace::where('slug', $slug)->first();
+
+        if(!empty($slugCheck)) {
+          $string = str_random(3);
+          $slug = $slug.'-'.$string;
         }
 
         $coordinates = $this->getGeoLocation($address, $city, $state);
