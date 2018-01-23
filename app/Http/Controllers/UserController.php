@@ -425,10 +425,12 @@ class UserController extends Controller
         $skillsArray = [];
         foreach($skills as $skill) {
             array_push($skillsArray, [
-                'label' => $skill->name,
-                'value' => $skill->name,
-                'id' => $skill->id
+                $skill->name,
             ]);
+
+//                'label' => $skill->name,
+//                'value' => $skill->name,
+//                'id' => $skill->id
         }
         return Response::json($skillsArray);
     }
@@ -494,9 +496,17 @@ class UserController extends Controller
         ]);
     }
 
+    public function OrganizersForEvents() {
+       $organizers = User::all();
+       $organizersArray = [];
+        foreach($organizers as $organizer) {
+            array_push($organizersArray, $organizer->email);
+        }
+        return Response::json($organizersArray);
+    }
     public function Organizers() {
         $organizers = User::all();
-        $organizersArray = [];
+       $organizersArray = [];
         foreach($organizers as $organizer) {
                 array_push($organizersArray, [
                 'label' => $organizer->name.' - '.$organizer->email,
