@@ -9,7 +9,6 @@ use Purifier;
 use Hash;
 use Auth;
 use JWTAuth;
-
 use App\User;
 use App\Userskill;
 use App\Skill;
@@ -61,7 +60,7 @@ class AuthController extends Controller {
         $password = $request->input('password');
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
-        $tags = json_decode($request->input('tags'));
+        $tags = $request->input('tags');
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
@@ -146,7 +145,8 @@ class AuthController extends Controller {
             return Response::json(['error' => 'Account not created']);
         }
 
-        $userID = $user->id;
+        // $userID = $user->id;
+
       /*  // Update App\Skill;
         if (!empty($tags)) {
             foreach($tags as $key => $tag) {
