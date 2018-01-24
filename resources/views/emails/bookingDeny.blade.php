@@ -13,7 +13,9 @@
   {{$space->address}} {{$space->city}}, {{$space->state}}<br/><br/>
 
   <strong>WHEN</strong><br/>
-  {{$booking->day}} - {{$booking->times}}
+  {{$booking->start}}<br/>
+  TO<br/>
+  {{$booking->end}}
 
   <br/>
   <br/>

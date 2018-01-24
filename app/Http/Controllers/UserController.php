@@ -80,7 +80,7 @@ class UserController extends Controller
           'avatar' => 'nullable|string',
           'password' => 'nullable|string',
           'passwordConfirm' => 'nullable|string',
-          'email' => 'nullable|string',
+          //'email' => 'nullable|string',
           'skills' => 'nullable|string',
           'phoneNumber' => 'nullable|string',
           'facebook' => 'nullable|string',
@@ -100,7 +100,7 @@ class UserController extends Controller
 
         $name = $request->input('name');
         $title = $request->input('title');
-        $email = $request->input('email');
+        //$email = $request->input('email');
         $password = $request->input('password');
         $passwordConfirm = $request->input('passwordConfirm');
         $phoneNumber = $request->input('phoneNumber');
@@ -110,7 +110,14 @@ class UserController extends Controller
         $linkedin = $request->input('linkedin');
         $github = $request->input('github');
         $behance = $request->input('behance');
-        $skills = $request->input('skills');
+        $skills = json_decode($request->input('skills'));
+
+        $skillArray = [];
+        foreach($skills as $key => $skill) {
+          $skillArray[] = $skill[0];
+        }
+
+        $skills = implode(",", $skillArray);
 
         if($password != $passwordConfirm) {
           return Response::json(['error' => 'Passwords do not match.']);
@@ -158,7 +165,7 @@ class UserController extends Controller
         if (!empty($website)) $user->website = $website;
         if (!empty($title)) $user->title = $title;
         // workInfo
-        if (!empty($email)) $user->email = $email;
+        //if (!empty($email)) $user->email = $email;
         if (!empty($phoneNumber)) $user->email = $phoneNumber;
         if (!empty($password)) $user->password = Hash::make($password);
         if (!empty($facebook)) $user->facebook = $facebook;
@@ -480,9 +487,18 @@ class UserController extends Controller
         if (empty($user)) {
             return Response::json([ 'error' => 'user not found' ]);
         }
-        $skills = Userskill::where('userID', $id)
+        /*$skills = Userskill::where('userID', $id)
                            ->select('name')
-                           ->get();
+                           ->get();*/
+
+          $skills = $user->skills;
+          if($skills == NULL || strlen($skills) == 0 || $skills == "")
+          {
+            $skills = [];
+          }
+          else {
+            $skills = explode(",", $skills);
+          }
 
         $space = Workspace::where('id', $user->spaceID)
                           ->select('name')
@@ -554,7 +570,7 @@ class UserController extends Controller
         if ($organizer->roleID != 2 || $user->spaceID != $organizer->spaceID) {
             Return Response::json([ 'error' => 'invalid credentials' ]);
         }
-        
+
         $user = User::find($userID);
         if ($user->roleID == 2) {
             $user->roleID = 3;

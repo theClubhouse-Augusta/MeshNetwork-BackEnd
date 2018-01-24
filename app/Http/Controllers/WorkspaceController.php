@@ -72,7 +72,8 @@ class WorkspaceController extends Controller
 
         // form input
         $name = $request->input('name');
-        $slug = str_replace(' ', '-', $name);
+        $slug = (strtolower($name));
+        $slug = str_replace(' ', '-', $slug);
         $slug = preg_replace('/[^A-Za-z0-9\-]/', '', $slug);
         $slug = preg_replace('/-+/', '-', $slug);
         $city = $request->input('city');
@@ -86,12 +87,20 @@ class WorkspaceController extends Controller
 
         $username = $request->input('username');
         $useremail = $request->input('useremail');
+        $unhash = $request->input('password');
         $password = $request->input('password');
 
         $check = User::where('email', $useremail)->first();
 
         if (!empty($check)) {
             return Response::json(['error' => 'Email already in use']);
+        }
+
+        $slugCheck = Workspace::where('slug', $slug)->first();
+
+        if(!empty($slugCheck)) {
+          $string = str_random(3);
+          $slug = $slug.'-'.$string;
         }
 
         $coordinates = $this->getGeoLocation($address, $city, $state);
@@ -230,6 +239,34 @@ class WorkspaceController extends Controller
             $user->avatar = $avatar;
             $user->subscriber = 0;
             $user->save();
+
+            $url = 'http://challenges.innovationmesh.com/api/signUp';
+            $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
+
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data)
+                )
+            );
+
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+
+            $url = 'http://houseofhackers.me:81/signUp/';
+            $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
+
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data)
+                )
+            );
+
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
 
             return Response::json($workspace->id);
         }
@@ -469,8 +506,8 @@ class WorkspaceController extends Controller
                                   ->whereBetween('created_at', [$start, $end])
                                   ->get());
       return Response::json([
-          'memberCount' => $memberCount, 
-          'eventCount' => $eventCount, 
+          'memberCount' => $memberCount,
+          'eventCount' => $eventCount,
           'checkinCount' => $checkinCount,
           'thisMonthCheckIns' => $thisMonthCheckIns,
      ]);

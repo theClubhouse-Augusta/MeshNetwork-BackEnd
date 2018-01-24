@@ -9,7 +9,9 @@
   <p>{{$name}} would like to book a {{$resource->resourceName}} at {{$space->name}}.</p>
 
   <strong>TIME</strong><br/>
-  {{$day}} - {{$time}}
+  {{$start}}<br/>
+  TO<br/>
+  {{$end}}
   <br/><br/>
 
   To Approve the Booking, <a href={{$approve}}>CLICK HERE</a>
