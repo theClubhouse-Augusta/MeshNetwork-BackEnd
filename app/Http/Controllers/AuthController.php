@@ -9,6 +9,7 @@ use Purifier;
 use Hash;
 use Auth;
 use JWTAuth;
+
 use App\User;
 use App\Userskill;
 use App\Skill;
