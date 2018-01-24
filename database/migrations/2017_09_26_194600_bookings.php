@@ -17,8 +17,10 @@ class Bookings extends Migration {
             $table->string('email');
             $table->integer('spaceID')->unsigned();
             $table->integer('resourceID');
-            $table->string('day');
-            $table->string('time');
+            $table->dateTime('start');
+            $table->dateTime('end');
+            /*$table->string('day');
+            $table->string('time');*/
             $table->string('token');
             $table->string('status')->default('pending');
             $table->timestamps();

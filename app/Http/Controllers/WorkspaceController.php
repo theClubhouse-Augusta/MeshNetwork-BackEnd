@@ -87,6 +87,7 @@ class WorkspaceController extends Controller
 
         $username = $request->input('username');
         $useremail = $request->input('useremail');
+        $unhash = $request->input('password');
         $password = $request->input('password');
 
         $check = User::where('email', $useremail)->first();
@@ -238,6 +239,34 @@ class WorkspaceController extends Controller
             $user->avatar = $avatar;
             $user->subscriber = 0;
             $user->save();
+
+            $url = 'http://challenges.innovationmesh.com/api/signUp';
+            $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
+
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data)
+                )
+            );
+
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+
+            $url = 'http://houseofhackers.me:81/signUp/';
+            $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
+
+            $options = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($data)
+                )
+            );
+
+            $context  = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
 
             return Response::json($workspace->id);
         }
@@ -475,8 +504,8 @@ class WorkspaceController extends Controller
                                   ->whereBetween('created_at', [$start, $end])
                                   ->get());
       return Response::json([
-          'memberCount' => $memberCount, 
-          'eventCount' => $eventCount, 
+          'memberCount' => $memberCount,
+          'eventCount' => $eventCount,
           'checkinCount' => $checkinCount,
           'thisMonthCheckIns' => $thisMonthCheckIns,
      ]);
