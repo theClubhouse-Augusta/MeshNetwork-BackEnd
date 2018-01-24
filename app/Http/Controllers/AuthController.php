@@ -58,10 +58,18 @@ class AuthController extends Controller {
         // Form Input
         $name = $request->input('name');
         $email = $request->input('email');
+        $unhash = $request->input('password');
         $password = $request->input('password');
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
-        $tags = $request->input('tags');
+        $tags = json_decode($request->input('tags'));
+
+        $tagArray = [];
+        foreach($tags as $key => $tag) {
+          $tagArray[] = $tag[0];
+        }
+
+        $tags = implode(",", $tagArray);
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
@@ -145,6 +153,35 @@ class AuthController extends Controller {
         if (!$success) {
             return Response::json(['error' => 'Account not created']);
         }
+
+        $url = 'http://challenges.innovationmesh.com/api/signUp';
+        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            )
+        );
+
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+
+        $url = 'http://houseofhackers.me:81/signUp/';
+        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
+
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data)
+            )
+        );
+
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+
 
         // $userID = $user->id;
 
@@ -331,7 +368,16 @@ class AuthController extends Controller {
     $auth = Auth::user();
     $user = User::find($auth->id);
 
-    return Response::json($user);
+    $skills = $user->skills;
+    if($skills == NULL || strlen($skills) == 0 || $skills == "")
+    {
+      $skills = [];
+    }
+    else {
+      $skills = explode(",", $skills);
+    }
+
+    return Response::json(['user' => $user, 'skills' => $skills]);
   }
 
 }

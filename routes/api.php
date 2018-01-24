@@ -94,6 +94,7 @@ Route::get('occasions','AppearanceController@getValidOccasions');
 
 // BookingController
 Route::post('booking','BookingController@store');
+Route::get('getBookings/{resourceID}', 'BookingController@getBookings');
 Route::get('booking/approve/{token}','BookingController@approve');
 Route::get('booking/deny/{token}','BookingController@deny');
 Route::get('getResources/{spaceID}', 'BookingController@getResources');
