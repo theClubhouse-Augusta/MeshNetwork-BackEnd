@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Response;
 |
 */
 // DashboardController
-Route::get('db/Joins/{slug}/{year}', 'DashboardController@Joins');
+Route::get('joins/{slug}', 'DashboardController@Joins');
 Route::get('appearances/{slug}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 Route::get('log/{message}', 'DashboardController@log');
@@ -55,7 +55,7 @@ Route::post('newspace', 'WorkspaceController@store');
 Route::get('spacestatus/{spaceID}/{status}', 'WorkspaceController@approve');
 Route::post('spaceupdate', 'WorkspaceController@update');
 Route::get('workspaces', 'WorkspaceController@get');
-Route::get('workspace/{spaceID}', 'WorkspaceController@show');
+Route::get('workspace/{slug}', 'WorkspaceController@show');
 Route::get('workevents/{spaceID}', 'WorkspaceController@events');
 Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
 Route::get('publickey/{spaceID}', 'WorkspaceController@getKey');

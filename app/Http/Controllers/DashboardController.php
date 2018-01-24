@@ -39,18 +39,11 @@ class DashBoardController extends Controller
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Joins($spaceId, $year) 
-    {
-        $dataAndDates = $this->joinsService->spaceUserJoins($spaceId, $year);
-        return Response::json($dataAndDates);
-        // insert data and dates into R Markdown File
-        $this->rmarkdownService->generateMemberJoinsRmd(
-            $dataAndDates['firstYear'],
-            $dataAndDates['lastYear'],
-            $dataAndDates['firstMonth'], 
-            $dataAndDates['lastMonth'],
-            $dataAndDates['memberSignUpData']
-        );
+    public function Joins($slug) {
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $joins = $this->appearanceService->getAllJoins($spaceID);
+        return Response::json($joins);
     }
 
     /**
@@ -62,7 +55,8 @@ class DashBoardController extends Controller
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $appearances = $this->appearanceService->getAllAppearances($spaceID);
-        return Response::json($appearances);
+//        return Response::json($appearances);
+        return Response::json([]);
     }
 
     public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
@@ -70,6 +64,7 @@ class DashBoardController extends Controller
         $spaceID = $space->id;
         $appearances =  $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
+
     }
 
     public function inviteHelper() 

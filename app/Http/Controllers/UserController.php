@@ -248,7 +248,9 @@ class UserController extends Controller
 
         if(!empty($tag)) {
           $tag = Skill::find($tag);
-          $users = User::where('skills', 'LIKE', '%'.$tag->name.'%')->orderBy('created_at', 'DESC')->get();
+          $users = User::where('skills', 'LIKE', '%'.$tag->name.'%')
+                        ->orderBy('created_at', 'DESC')
+                        ->get();
 
           if($users->isEmpty()) {
             return Response::json(['error' => 'No Users Found.']);
@@ -257,7 +259,12 @@ class UserController extends Controller
           return Response::json($users);
         }
         else {
-          $users = User::where('name', 'LIKE', '%'.$query.'%')->orWhere('title','LIKE', '%'.$query.'%')->where('skills', 'LIKE', '%'.$query.'%')->orderBy('created_at', 'DESC')->get();
+          $users = User::where('name', 'LIKE', '%'.$query.'%')
+                        ->orWhere('title','LIKE', '%'.$query.'%')
+                        ->where('skills', 'LIKE', '%'.$query.'%')
+                        ->orderBy('created_at', 'DESC')
+                        ->get();
+
           if($users->isEmpty()) {
             return Response::json(['error' => 'No Users Found.']);
           }

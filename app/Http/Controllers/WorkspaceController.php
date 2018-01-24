@@ -292,7 +292,7 @@ class WorkspaceController extends Controller
         return Response::json(Workspace::all());
     }
 
-    public function show($spaceID)
+    public function show($slug)
     {
     // Ensure user has admin privalages
   //   $admin = Auth::user();
@@ -300,12 +300,14 @@ class WorkspaceController extends Controller
   //   if ($id != 1 && $id != 2) {
   //     return Response::json(['error' => 'invalid credentials']);
   //   }
-        $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
-        if (empty($workspace))
+        $space = Workspace::where('slug', $slug)
+                            ->orWhere('id', $slug)
+                            ->first();
+        if (empty($space))
         {
             return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
         }
-        return Response::json($workspace);
+        return Response::json($space);
     }
 
 

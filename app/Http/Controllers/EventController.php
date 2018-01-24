@@ -611,8 +611,7 @@ class EventController extends Controller
         return $attendees;
     }
 
-    public function search(Request $request)
-    {
+    public function search(Request $request) {
         $organizer = Auth::user();
         if ($organizer->roleID != 2)
             return Reponse::json(['error' => 'invalid crediantials']);
@@ -627,33 +626,26 @@ class EventController extends Controller
             ), $rules
         );
 
-        if ($validator->fails())
-        {
+        if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
         $query = $request->input('query');
 
-        if (empty($query))
-        {
-            return Response::json([ 'error' => 'No search query recieved' ]);
-        }
 
         $search = Event::where('title', 'LIKE', $query)
                         ->Orwhere('description', 'LIKE', $query)
                         ->get();
 
-        if (!empty($search))
-        {
-            return Response::json([ 'success' => $search ]);
+        if (!empty($search)) {
+            return Response::json($search);
         }
         return Response::json([ 'error' => 'Nothing matched your query' ]);
     }
 
 
     // allow workspaces to opt-in to a remote event at another workspace
-    public function opt(Request $request)
-    {
+    public function opt(Request $request) {
         $rules = [
             'spaceID' => 'required|string',
             'eventID' => 'required|string'
@@ -675,8 +667,7 @@ class EventController extends Controller
         $opt->spaceID = $spaceID;
         $opt->eventID = $eventID;
 
-        if (!$opt->save())
-        {
+        if (!$opt->save()) {
             return Response::json([ 'error' => 'Database error' ]);
         }
         return Response::json([ 'success' => 'Joined event!' ]);

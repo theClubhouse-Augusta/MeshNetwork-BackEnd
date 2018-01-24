@@ -5,12 +5,15 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Response;
 
 use App\Appearance;
+use App\User;
 use App\Workspace;
 
 class AppearanceService {
 
     public function getAllAppearances($spaceID) {
-        $sortedAppearances = Appearance::where('spaceID', $spaceID)->orderBy('created_at', 'ASC')->get();
+        $sortedAppearances = Appearance::where('spaceID', $spaceID)
+                                        ->orderBy('created_at', 'ASC')
+                                        ->get();
         $appearanceCount = count($sortedAppearances);
 
         if ( $appearanceCount == 0 )
@@ -49,6 +52,50 @@ class AppearanceService {
             ]);
         }
         return $appearancesArray;
+    }
+
+    public function getAllJoins($spaceID) {
+        $sortedJoins = User::where('spaceID', $spaceID)
+                                        ->orderBy('created_at', 'ASC')
+                                        ->get();
+        $joinsCount = count($sortedJoins);
+
+        if ( $joinsCount == 0 )
+            return Response::json(['error' => 'No data available']);
+
+        $firstJoin = $sortedJoins[0]->created_at;
+        $firstYear = $firstJoin->year;
+
+        $lastJoin = $sortedJoins[( $joinsCount - 1 )]->created_at;
+        $lastYear = $lastJoin->year;
+
+        $joins = array();
+        for ($year = $firstYear; $year <= $lastYear; $year++) {
+            for ($month = 1; $month <= 12; $month++) {
+                $joinsForMonth = count(User::
+                where('spaceID', $spaceID)
+                    ->whereYear('created_at', ( $year ) )
+                    ->whereMonth('created_at', ( $month ) )
+                    ->get()
+                );
+                if ( !empty($joinsForMonth) ) {
+                    if (array_key_exists("$month-$year", $joins))
+                        $joins["$month-$year"] += $joinsForMonth;
+                    else
+                        $joins["$month-$year"] = $joinsForMonth;
+
+                }
+
+            }
+        }
+        $joinsArray = [];
+        foreach ($joins as $key => $join) {
+            array_push($joinsArray, [
+                'name' => $key,
+                'joins' => $join,
+            ]);
+        }
+        return $joinsArray;
     }
 
     public function getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
