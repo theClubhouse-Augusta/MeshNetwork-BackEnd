@@ -11,35 +11,30 @@ use Illuminate\Support\Facades\Log;
 // Service Classes 
 use App\Services\AppearanceService;
 use App\Services\JoinsService;
-use App\Services\RMarkdownService;
 
 // Eloquent Models
 use App\User;
 use App\Appearance;
 
-class DashBoardController extends Controller 
+class DashBoardController extends Controller
 {
     protected $appearanceService;
     protected $joinsService;
-    protected $rmarkdownService;
-    
+
     public function __construct(
-        AppearanceService $appearanceService, 
-        JoinsService $joinsService,
-        RMarkdownService $rmarkdownService 
-    ) 
-    {
+        AppearanceService $appearanceService,
+        JoinsService $joinsService
+    ) {
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
-        $this->rmarkdownService = $rmarkdownService;
     }
 
     /**
-     * Generate Member Sign up data visualizations using RMarkdown 
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Joins($slug) {
+    public function Joins($slug)
+    {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $joins = $this->appearanceService->getAllJoins($spaceID);
@@ -47,39 +42,41 @@ class DashBoardController extends Controller
     }
 
     /**
-     * Generate Appearances visualizations using RMarkdown 
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Appearances($slug) {
+    public function Appearances($slug)
+    {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $appearances = $this->appearanceService->getAllAppearances($spaceID);
-//        return Response::json($appearances);
-        return Response::json([]);
+        return Response::json($appearances);
     }
 
-    public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
+    public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear)
+    {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
-        $appearances =  $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
+        $appearances = $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
 
     }
 
-    public function inviteHelper() 
+    public function inviteHelper()
     {
 
     }
 
-    public function log($message) {
+    public function log($message)
+    {
         Log::error($message);
     }
-    public function email() {
+    public function email()
+    {
 
-    Mail::send('emails.welcome', array('key' => 'value'), function($message) {
-        $message->to('austin.conder@outlook.com', 'Austin Conder')->subject('Welcome!');
-        $message->from('laravel@example.com', 'Laravel');
+        Mail::send('emails.welcome', array('key' => 'value'), function ($message) {
+            $message->to('austin.conder@outlook.com', 'Austin Conder')->subject('Welcome!');
+            $message->from('laravel@example.com', 'Laravel');
         });
     }
 }

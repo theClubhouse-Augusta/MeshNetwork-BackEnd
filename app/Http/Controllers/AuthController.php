@@ -18,9 +18,11 @@ use App\Event;
 use App\Eventdate;
 use App\Calendar;
 
-class AuthController extends Controller {
+class AuthController extends Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt.auth', ['only' => [
             // 'getUsers',
             'ban',
@@ -29,7 +31,8 @@ class AuthController extends Controller {
         ]]);
     }
 
-    public function checkAuth() {
+    public function checkAuth()
+    {
         return Response::json(Auth::check());
     }
 
@@ -38,7 +41,8 @@ class AuthController extends Controller {
      * @param Illuminate\Support\Facades\Request::class
      * @return  Illuminate\Support\Facades\Response::class
      */
-    public function signUp(Request $request) {
+    public function signUp(Request $request)
+    {
         // Validation Rules
         $rules = [
             'name' => 'required|string',
@@ -62,34 +66,27 @@ class AuthController extends Controller {
         $password = $request->input('password');
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
-        $tags = json_decode($request->input('tags'));
-
-        $tagArray = [];
-        foreach($tags as $key => $tag) {
-          $tagArray[] = $tag[0];
-        }
-
-        $tags = implode(",", $tagArray);
+        $tags = $request->input('tags');
+        return Response::json($tags);
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
         // Check for file upload error
-          if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-              return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-          }
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+            }
         // checks for valid image upload
-          $info = getimagesize($_FILES['avatar']['tmp_name']);
+            $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-          if ($info === FALSE) {
-            return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-          }
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
+            }
 
         // checks for valid image upload
-          if (($info[2] !== IMAGETYPE_GIF)
+            if (($info[2] !== IMAGETYPE_GIF)
                 && ($info[2] !== IMAGETYPE_JPEG)
-                && ($info[2] !== IMAGETYPE_PNG))
-            {
-                return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
             }
 
             // Get profile image input
@@ -117,12 +114,12 @@ class AuthController extends Controller {
 
         // Profile Picture
         if (!empty($avatar)) {
-          $avatarName = $avatar->getClientOriginalName();
-          $avatar->move('storage/avatar/', $avatarName);
-          $avatar = $request->root().'/storage/avatar/'.$avatarName;
+            $avatarName = $avatar->getClientOriginalName();
+            $avatar->move('storage/avatar/', $avatarName);
+            $avatar = $request->root() . '/storage/avatar/' . $avatarName;
         } else {
-           $sub = substr($name, 0, 2);
-           $avatar = "https://invatar0.appspot.com/svg/".$sub.".jpg?s=100";
+            $sub = substr($name, 0, 2);
+            $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
         }
 
         $user->avatar = $avatar;
@@ -154,33 +151,33 @@ class AuthController extends Controller {
             return Response::json(['error' => 'Account not created']);
         }
 
-        $url = 'http://challenges.innovationmesh.com/api/signUp';
-        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
+//        $url = 'http://challenges.innovationmesh.com/api/signUp';
+//        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
 
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
+//        $options = array(
+//            'http' => array(
+//                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+//                'method'  => 'POST',
+//                'content' => http_build_query($data)
+//            )
+//        );
 
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+//        $context  = stream_context_create($options);
+//        $result = file_get_contents($url, false, $context);
 
-        $url = 'http://houseofhackers.me:81/signUp/';
-        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
+//        $url = 'http://houseofhackers.me:81/signUp/';
+//        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
 
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data)
-            )
-        );
+//        $options = array(
+//            'http' => array(
+//                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+//                'method'  => 'POST',
+//                'content' => http_build_query($data)
+//            )
+//        );
 
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+//        $context  = stream_context_create($options);
+//        $result = file_get_contents($url, false, $context);
 
 
         // $userID = $user->id;
@@ -215,7 +212,7 @@ class AuthController extends Controller {
                 if (!$success) return Response::json([ 'error' => 'eventSkill database error' ]);
             }
         }
-        */
+         */
 
         $credentials = compact("email", "password");
         $token = JWTAuth::attempt($credentials);
@@ -232,12 +229,13 @@ class AuthController extends Controller {
      *
      * @param Illuminate\Support\Facades\Request::class
      * @return  Illuminate\Support\Facades\Response::class
-    */
-    public function signIn(Request $request) {
+     */
+    public function signIn(Request $request)
+    {
         // required input
         $rules = [
-          'email' => 'required',
-          'password' => 'required'
+            'email' => 'required',
+            'password' => 'required'
         ];
 
         // Validate and purify input
@@ -267,7 +265,8 @@ class AuthController extends Controller {
         ]);
     }
 
-    private function getUpcomingEvents() {
+    private function getUpcomingEvents()
+    {
         $now = new DateTime();
         $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
 
@@ -294,7 +293,8 @@ class AuthController extends Controller {
 
     }
 
-    private function getAttendingEvents($userID) {
+    private function getAttendingEvents($userID)
+    {
         $now = new DateTime();
         $attending = Calendar::where('userID', $userID)->get();
         $upcoming = array();
@@ -310,7 +310,8 @@ class AuthController extends Controller {
                     $formattedDiff = $diff->format('%R%a');
 
                     if ((int)$formattedDiff > 0) {
-                        array_push($upcoming,
+                        array_push(
+                            $upcoming,
                             [
                                 "title" => $title,
                                 "id" => $id
@@ -323,61 +324,62 @@ class AuthController extends Controller {
         return $upcoming;
     }
 
-  /**
-   * Get users
-   * @param spaceID
-   * @return  Illuminate\Support\Facades\Response::class
-  **/
-    public function getUsers() {
+    /**
+     * Get users
+     * @param spaceID
+     * @return  Illuminate\Support\Facades\Response::class
+     **/
+    public function getUsers()
+    {
         $organizer = Auth::user();
         if ($organizer->roleID != 2) {
-            return Response::json([ 'error' => 'invalid role' ]);
+            return Response::json(['error' => 'invalid role']);
         }
 
         $users = User::where('spaceID', $organizer->spaceID)->get();
 
         if (!empty($users)) {
             return Response::json($users);
-        }   else {
-            return Response::json([ 'error' => 'no users for space' ]);
+        } else {
+            return Response::json(['error' => 'no users for space']);
         }
     }
 
-  /**
-   * Ban User
-   * @param userID
-   * @return  Illuminate\Support\Facades\Response::class
-  **/
-  public function ban($id) {
-    $admin = Auth::user();
-
-
-    if ($admin->roleID != 1) {
-        return Response::json(['error' => 'invalid credintials']);
-    }
-    $bannedUser = User::where('id', $id)->first();
-    $bannedUser->ban = 1;
-
-    if (!$bannedUser->save()) {
-      return Response::json(['error' => 'datebase error']);
-    }
-    return Response::json(['success' => 'user'.$bannedUser->name.' has been banned from MeshNetwork']);
-  }
-
-  public function getUser() {
-    $auth = Auth::user();
-    $user = User::find($auth->id);
-
-    $skills = $user->skills;
-    if($skills == NULL || strlen($skills) == 0 || $skills == "")
+    /**
+     * Ban User
+     * @param userID
+     * @return  Illuminate\Support\Facades\Response::class
+     **/
+    public function ban($id)
     {
-      $skills = [];
-    }
-    else {
-      $skills = explode(",", $skills);
+        $admin = Auth::user();
+
+
+        if ($admin->roleID != 1) {
+            return Response::json(['error' => 'invalid credintials']);
+        }
+        $bannedUser = User::where('id', $id)->first();
+        $bannedUser->ban = 1;
+
+        if (!$bannedUser->save()) {
+            return Response::json(['error' => 'datebase error']);
+        }
+        return Response::json(['success' => 'user' . $bannedUser->name . ' has been banned from MeshNetwork']);
     }
 
-    return Response::json(['user' => $user, 'skills' => $skills]);
-  }
+    public function getUser()
+    {
+        $auth = Auth::user();
+        $user = User::find($auth->id);
+
+        $skills = $user->skills;
+        if ($skills == null || strlen($skills) == 0 || $skills == "") {
+            $skills = [];
+        } else {
+            $skills = explode(",", $skills);
+        }
+
+        return Response::json(['user' => $user, 'skills' => $skills]);
+    }
 
 }
