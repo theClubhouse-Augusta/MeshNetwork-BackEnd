@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Workspace;
 use Illuminate\Http\Request;
-use Response;
+use Illuminate\Support\Facades\Response;
 use Purifier;
 use Hash;
 use Auth;
@@ -12,7 +13,6 @@ use DateTime;
 use DateInterval;
 use Illuminate\Support\Facades\Validator;
 use App\User;
-use App\Workspace;
 use App\Event;
 use App\Subscriptionplan;
 use App\Appearance;
@@ -184,6 +184,7 @@ class WorkspaceController extends Controller
             $workspace->lon = $lon;
             $workspace->lat = $lat;
             $workspace->pub_key = 0;
+
             if (!empty($logo)) {
                 $logoName = $logo->getClientOriginalName();
                 $logo->move('storage/logo/', $logoName);
@@ -241,33 +242,33 @@ class WorkspaceController extends Controller
             $user->subscriber = 0;
             $user->save();
 
-            $url = 'http://challenges.innovationmesh.com/api/signUp';
-            $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
+            // $url = 'http://challenges.innovationmesh.com/api/signUp';
+            // $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
 
-            $options = array(
-                'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data)
-                )
-            );
+            // $options = array(
+                // 'http' => array(
+                    // 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    // 'method'  => 'POST',
+                    // 'content' => http_build_query($data)
+                // )
+            // );
 
-            $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
+            // $context  = stream_context_create($options);
+            // $result = file_get_contents($url, false, $context);
 
-            $url = 'http://houseofhackers.me:81/signUp/';
-            $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
+            // $url = 'http://houseofhackers.me:81/signUp/';
+            // $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
 
-            $options = array(
-                'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    'method'  => 'POST',
-                    'content' => http_build_query($data)
-                )
-            );
+            // $options = array(
+                // 'http' => array(
+                    // 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    // 'method'  => 'POST',
+                    // 'content' => http_build_query($data)
+                // )
+            // );
 
-            $context  = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
+            // $context  = stream_context_create($options);
+            // $result = file_get_contents($url, false, $context);
 
             return Response::json($workspace->id);
         }
@@ -286,27 +287,20 @@ class WorkspaceController extends Controller
                 $URIparam .= $address_array[$i];
         }
         return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$URIparam.',+'.$city.',+'.$state.'&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
-
         }
 
     public function get() {
         return Response::json(Workspace::all());
     }
 
-    public function show($slug)
+    public function show($slugOrSpaceID)
     {
-    // Ensure user has admin privalages
-  //   $admin = Auth::user();
-  //   $id = $admin->roleID;
-  //   if ($id != 1 && $id != 2) {
-  //     return Response::json(['error' => 'invalid credentials']);
-  //   }
-        $space = Workspace::where('slug', $slug)
-                            ->orWhere('id', $slug)
+        $space = Workspace::where('id', $slugOrSpaceID)
+                            ->orWhere('slug', $slugOrSpaceID)
                             ->first();
         if (empty($space))
         {
-            return Response::json([ 'error' => 'No space with id: '.$spaceID ]);
+            return Response::json([ 'error' => 'No space with id: '.$slugOrSpaceID ]);
         }
         return Response::json($space);
     }
@@ -331,6 +325,7 @@ class WorkspaceController extends Controller
 
     public function update(Request $request)
     {
+
         // Ensure user has admin privalages
         // $org = Auth::user();
         // $id = $org->id;
@@ -351,7 +346,6 @@ class WorkspaceController extends Controller
             'logo' => 'nullable|string',
             'stripe' => 'nullable|string',
             'facebook' => 'nullable|string',
-            'logo' => 'nullable|string',
             'twitter' => 'nullable|string',
             'instagram' => 'nullable|string',
             'key' => 'nullable|string',
@@ -440,6 +434,11 @@ class WorkspaceController extends Controller
         else return Response::json([ 'success' => $workspace->name.' updated!' ]);
     }
 
+
+    /**
+     * @param $spaceID
+     * @return mixed
+     */
     public function events($spaceID)
     {
         // Ensure user has admin privalages
@@ -465,11 +464,19 @@ class WorkspaceController extends Controller
     }
 
 
-    public function getSubscriptions($spaceID) {
-       $space = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->select('stripe')->first();
-        \Stripe\Stripe::setApiKey($space->stripe);
-        $plans = \Stripe\Plan::all();
-        return Response::json($plans);
+    /**
+     * @param $slug
+     * @return bool
+     */
+    public function getSubscriptions($slug) {
+       $space = Workspace::where('id', $slug)->orWhere('slug', $slug)->select('stripe')->first();
+       if ($space->stripe != null) {
+           \Stripe\Stripe::setApiKey($space->stripe);
+           $plans = \Stripe\Plan::all();
+           return Response::json($plans);
+       } else {
+           return Response::json([]);
+       }
     }
 
     public function getKey($spaceID) {

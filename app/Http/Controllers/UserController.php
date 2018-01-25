@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Response;
 use Purifier;
 use Hash;
@@ -22,15 +23,16 @@ use App\Workspace;
 class UserController extends Controller
 {
     /**
-    * Apply jwt middleware to specific routes.
-    * @param  void
-    * @return void
-    */
-    public function __construct() {
-        $this->middleware('jwt.auth', [ 'only' => [
-           'updateUser',
-           'delete',
-           'makeOrganizer',
+     * Apply jwt middleware to specific routes.
+     * @param  void
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('jwt.auth', ['only' => [
+            'updateUser',
+            'delete',
+            'makeOrganizer',
            //'showUser',
            //'user',
             //'searchName',
@@ -46,8 +48,9 @@ class UserController extends Controller
      * Delete user from database.
      * @param userID
      * @return  Illuminate\Support\Facades\Response::class
-    */
-    public function delete($id) {
+     */
+    public function delete($id)
+    {
         // Check for Authorized user
         $role = Auth::user()->roleID;
         return Response::json($role);
@@ -71,30 +74,31 @@ class UserController extends Controller
      * @param Illuminate\Support\Facades\Request::class
      * @return  Illuminate\Support\Facades\Response::class
      */
-    public function updateUser(Request $request) {
+    public function updateUser(Request $request)
+    {
         //constants
         $rules = [
           // userInfo
-          'name' => 'nullable|string',
-          'title' => 'nullable|string',
-          'avatar' => 'nullable|string',
-          'password' => 'nullable|string',
-          'passwordConfirm' => 'nullable|string',
+            'name' => 'nullable|string',
+            'title' => 'nullable|string',
+            'avatar' => 'nullable|string',
+            'password' => 'nullable|string',
+            'passwordConfirm' => 'nullable|string',
           //'email' => 'nullable|string',
-          'skills' => 'nullable|string',
-          'phoneNumber' => 'nullable|string',
-          'facebook' => 'nullable|string',
-          'twitter' => 'nullable|string',
-          'instagram' => 'nullable|string',
-          'linkedin' => 'nullable|string',
-          'github' => 'nullable|string',
-          'behance' => 'nullable|string',
+            'skills' => 'nullable|string',
+            'phoneNumber' => 'nullable|string',
+            'facebook' => 'nullable|string',
+            'twitter' => 'nullable|string',
+            'instagram' => 'nullable|string',
+            'linkedin' => 'nullable|string',
+            'github' => 'nullable|string',
+            'behance' => 'nullable|string',
         ];
 
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
 
-        if ( $validator->fails() ) {
+        if ($validator->fails()) {
             return Response::json(['error' => 'Invalid form input.']);
         }
 
@@ -113,37 +117,34 @@ class UserController extends Controller
         $skills = json_decode($request->input('skills'));
 
         $skillArray = [];
-        foreach($skills as $key => $skill) {
-          $skillArray[] = $skill[0];
+        foreach ($skills as $key => $skill) {
+            $skillArray[] = $skill[0];
         }
 
         $skills = implode(",", $skillArray);
 
-        if($password != $passwordConfirm) {
-          return Response::json(['error' => 'Passwords do not match.']);
+        if ($password != $passwordConfirm) {
+            return Response::json(['error' => 'Passwords do not match.']);
         }
 
 
         // Avatar Input
         if (!empty($_FILES['avatar'])) {
             // Check for file upload error
-            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK)
-            {
-                return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['avatar']['tmp_name']);
 
-            if ($info === FALSE)
-            {
-               return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
             }
 
-            if ( ($info[2] !== IMAGETYPE_GIF)
-               && ($info[2] !== IMAGETYPE_JPEG)
-               && ($info[2] !== IMAGETYPE_PNG))
-            {
-                return Response::json([ "error" => "Not a gif/jpeg/png" ]);
+            if (($info[2] !== IMAGETYPE_GIF)
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
             }
 
             // Get profile image input
@@ -181,7 +182,7 @@ class UserController extends Controller
         if (!empty($avatar)) {
             $avatarName = $avatar->getClientOriginalName();
             $avatar->move('storage/avatar/', $avatarName);
-            $user->avatar = $request->root().'/storage/avatar/'.$avatarName;
+            $user->avatar = $request->root() . '/storage/avatar/' . $avatarName;
         }
 
         $user->save();
@@ -240,36 +241,36 @@ class UserController extends Controller
      * Search Users by skill/spaceid
      * @param Illuminate\Support\Facades\Request
      * @return  Illuminate\Support\Facades\Response
-    **/
-    public function search(Request $request) {
+     **/
+    public function search(Request $request)
+    {
         // url query params
         $query = $request->input('query');
         $tag = $request->input('tag');
 
-        if(!empty($tag)) {
-          $tag = Skill::find($tag);
-          $users = User::where('skills', 'LIKE', '%'.$tag->name.'%')
-                        ->orderBy('created_at', 'DESC')
-                        ->get();
+        if (!empty($tag)) {
+            $tag = Skill::find($tag);
+            $users = User::where('skills', 'LIKE', '%' . $tag->name . '%')
+                ->orderBy('created_at', 'DESC')
+                ->get();
 
-          if($users->isEmpty()) {
-            return Response::json(['error' => 'No Users Found.']);
-          }
+            if ($users->isEmpty()) {
+                return Response::json(['error' => 'No Users Found.']);
+            }
 
-          return Response::json($users);
-        }
-        else {
-          $users = User::where('name', 'LIKE', '%'.$query.'%')
-                        ->orWhere('title','LIKE', '%'.$query.'%')
-                        ->where('skills', 'LIKE', '%'.$query.'%')
-                        ->orderBy('created_at', 'DESC')
-                        ->get();
+            return Response::json($users);
+        } else {
+            $users = User::where('name', 'LIKE', '%' . $query . '%')
+                ->orWhere('title', 'LIKE', '%' . $query . '%')
+                ->where('skills', 'LIKE', '%' . $query . '%')
+                ->orderBy('created_at', 'DESC')
+                ->get();
 
-          if($users->isEmpty()) {
-            return Response::json(['error' => 'No Users Found.']);
-          }
+            if ($users->isEmpty()) {
+                return Response::json(['error' => 'No Users Found.']);
+            }
 
-          return Response::json($users);
+            return Response::json($users);
         }
         // handle skill tag button click
       /*  if (!empty($tag)) {
@@ -346,26 +347,27 @@ class UserController extends Controller
     }
 
 
-  /**
-   * Show logged in user.
-   * @param void
-   * @return  Illuminate\Support\Facades\Response::class
-  */
-    public function showUser(Request $request) {
+    /**
+     * Show logged in user.
+     * @param void
+     * @return  Illuminate\Support\Facades\Response::class
+     */
+    public function showUser(Request $request)
+    {
         $user = Auth::user();
         $id = Auth::id();
 
         $skills = Userskill::where('userID', $user->id)
-                           ->select('name')
-                           ->get();
+            ->select('name')
+            ->get();
         $space = Workspace::where('id', $user->spaceID)
-                          ->select('name')
-                          ->first();
+            ->select('name')
+            ->first();
         $events = $this->getUpcomingEvents();
         $upcoming = $this->getAttendingEvents($user->id);
 
         if (empty($user)) {
-            return Response::json([ 'error' => 'User does not exist' ]);
+            return Response::json(['error' => 'User does not exist']);
         }
 
         return Response::json([
@@ -377,7 +379,8 @@ class UserController extends Controller
         ]);
     }
 
-    private function getUpcomingEvents() {
+    private function getUpcomingEvents()
+    {
         $now = new DateTime();
         $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
 
@@ -404,7 +407,8 @@ class UserController extends Controller
 
     }
 
-    private function getAttendingEvents($userID) {
+    private function getAttendingEvents($userID)
+    {
         $now = new DateTime();
         $attending = Calendar::where('userID', $userID)->get();
         $upcoming = array();
@@ -420,7 +424,8 @@ class UserController extends Controller
                     $formattedDiff = $diff->format('%R%a');
 
                     if ((int)$formattedDiff > 0) {
-                        array_push($upcoming,
+                        array_push(
+                            $upcoming,
                             [
                                 "title" => $title,
                                 "id" => $id
@@ -434,45 +439,42 @@ class UserController extends Controller
     }
 
 
-    public function allSkills() {
+    public function allSkills()
+    {
         $skills = Skill::all();
-        $skillsArray = [];
-        foreach($skills as $skill) {
-            array_push($skillsArray, [
-                $skill->name,
-            ]);
-
-//                'label' => $skill->name,
-//                'value' => $skill->name,
-//                'id' => $skill->id
+        $skillArray = [];
+        foreach ($skills as $skill) {
+            array_push($skillArray, $skill->name);
         }
-        return Response::json($skillsArray);
+        return Response::json($skillArray);
     }
 
-    public function getSkills() {
+    public function getSkills()
+    {
         $userskills = DB::table('userskills')
-        ->select(DB::raw('COUNT(*) AS foo, skillID'))
-        ->groupBY('skillID')
-        ->orderBy('foo', 'desc')
-        ->limit(12)
-        ->get();
+            ->select(DB::raw('COUNT(*) AS foo, skillID'))
+            ->groupBY('skillID')
+            ->orderBy('foo', 'desc')
+            ->limit(12)
+            ->get();
 
         $res = array();
         foreach ($userskills as $userskill) {
             array_push($res, Skill::find($userskill->skillID));
         }
 
-        if(count($res) == 0) {
-          $res = Skill::take(12)->get();
+        if (count($res) == 0) {
+            $res = Skill::take(12)->get();
         }
         return Response::json($res);
     }
 
-    public function userSkills() {
+    public function userSkills()
+    {
         $userID = Auth::id();
         $skills = Userskill::where('userID', $userID)->get();
         $skillsArray = array();
-        foreach($skills as $skill) {
+        foreach ($skills as $skill) {
             array_push($skillsArray, [
                 'label' => $skill->name,
                 'value' => $skill->name,
@@ -482,33 +484,32 @@ class UserController extends Controller
         return Response::json($skillsArray);
     }
 
-    public function user($id) {
+    public function user($id)
+    {
         $user = User::find($id);
         if (empty($user)) {
-            return Response::json([ 'error' => 'user not found' ]);
+            return Response::json(['error' => 'user not found']);
         }
         /*$skills = Userskill::where('userID', $id)
                            ->select('name')
                            ->get();*/
 
-          $skills = $user->skills;
-          if($skills == NULL || strlen($skills) == 0 || $skills == "")
-          {
+        $skills = $user->skills;
+        if ($skills == null || strlen($skills) == 0 || $skills == "") {
             $skills = [];
-          }
-          else {
+        } else {
             $skills = explode(",", $skills);
-          }
+        }
 
         $space = Workspace::where('id', $user->spaceID)
-                          ->select('name')
-                          ->first();
+            ->select('name')
+            ->first();
 
         $events = $this->getUpcomingEvents();
         $upcoming = $this->getAttendingEvents($user->id);
 
         if (empty($user)) {
-            return Response::json([ 'error' => 'User does not exist' ]);
+            return Response::json(['error' => 'User does not exist']);
         }
         return Response::json([
             'user' => $user,
@@ -519,36 +520,39 @@ class UserController extends Controller
         ]);
     }
 
-    public function OrganizersForEvents() {
-       $organizers = User::all();
-       $organizersArray = [];
-        foreach($organizers as $organizer) {
+    public function OrganizersForEvents()
+    {
+        $organizers = User::all();
+        $organizersArray = [];
+        foreach ($organizers as $organizer) {
             array_push($organizersArray, $organizer->email);
         }
         return Response::json($organizersArray);
     }
-    public function Organizers() {
+    public function Organizers()
+    {
         $organizers = User::all();
-       $organizersArray = [];
-        foreach($organizers as $organizer) {
-                array_push($organizersArray, [
-                'label' => $organizer->name.' - '.$organizer->email,
+        $organizersArray = [];
+        foreach ($organizers as $organizer) {
+            array_push($organizersArray, [
+                'label' => $organizer->name . ' - ' . $organizer->email,
                 'value' => $organizer->id,
-                'avatar'=> $organizer->avatar,
+                'avatar' => $organizer->avatar,
                 'name' => $organizer->name
             ]);
         }
         return Response::json($organizersArray);
     }
 
-    public function usersFromSpace($spaceID) {
+    public function usersFromSpace($spaceID)
+    {
         $users = User::where('spaceID', $spaceID)->get();
         $usersArray = [];
-        foreach($users as $user) {
+        foreach ($users as $user) {
             array_push($usersArray, [
-                'label' => $user->name.' - '.$user->email,
+                'label' => $user->name . ' - ' . $user->email,
                 'value' => $user->id,
-                'avatar'=> $user->avatar,
+                'avatar' => $user->avatar,
                 'name' => $user->name
             ]);
         }
@@ -557,18 +561,19 @@ class UserController extends Controller
 
     public function getSpaceUsers($spaceID)
     {
-      $space = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
+        $space = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
 
-      $users = User::where('spaceID', $space->id)->get();
+        $users = User::where('spaceID', $space->id)->get();
 
-      return Response::json($users);
+        return Response::json($users);
     }
 
-    public function makeOrganizer($userID) {
+    public function makeOrganizer($userID)
+    {
         $organizer = Auth::user();
         $user = User::find($userID);
         if ($organizer->roleID != 2 || $user->spaceID != $organizer->spaceID) {
-            Return Response::json([ 'error' => 'invalid credentials' ]);
+            return Response::json(['error' => 'invalid credentials']);
         }
 
         $user = User::find($userID);
