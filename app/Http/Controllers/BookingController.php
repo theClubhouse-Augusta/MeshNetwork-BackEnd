@@ -169,8 +169,8 @@ class BookingController extends Controller {
         function($message) use ($name, $email, $resource, $start, $end, $approve, $deny, $space, $contact)
         {
           $message->from($email, $name);
-          //$message->to($contact, $space->name)->subject('Booking: '.$resource->resourceName);
-          $message->to('nsoharab@gmail.com', $space->name)->subject('Booking: '.$resource->resourceName);
+          $message->to($contact, $space->name)->subject('Booking: '.$resource->resourceName);
+          //$message->to('nsoharab@gmail.com', $space->name)->subject('Booking: '.$resource->resourceName);
 
         });
 
