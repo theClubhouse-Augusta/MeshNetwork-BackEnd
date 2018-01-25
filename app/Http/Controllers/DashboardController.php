@@ -8,7 +8,7 @@ use JWTAuth;
 use Mail;
 use Illuminate\Support\Facades\Log;
 
-// Service Classes 
+// Service Classes
 use App\Services\AppearanceService;
 use App\Services\JoinsService;
 
@@ -20,7 +20,6 @@ class DashBoardController extends Controller
 {
     protected $appearanceService;
     protected $joinsService;
-
     public function __construct(
         AppearanceService $appearanceService,
         JoinsService $joinsService
