@@ -16,6 +16,7 @@ use App\Workspace;
 use App\Event;
 use App\Subscriptionplan;
 use App\Appearance;
+use App\Eventdate;
 use Carbon\Carbon;
 
 class WorkspaceController extends Controller
@@ -512,5 +513,24 @@ class WorkspaceController extends Controller
           'thisMonthCheckIns' => $thisMonthCheckIns,
      ]);
     }
+
+  public function getSpaceEvents($spaceID)
+  {
+    $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
+    ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
+    ->get();
+
+    $eventArray = [];
+    foreach($events as $key => $event)
+    {
+      $eventArray[$key]['id'] = $event->eventID;
+      $eventArray[$key]['title'] = $event->title;
+      $eventArray[$key]['image'] = $event->image;
+      $eventArray[$key]['start'] = $event->start;
+      $eventArray[$key]['end'] = $event->end;
+    }
+
+    return Response::json($eventArray);
+  }
 
 }

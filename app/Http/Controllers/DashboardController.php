@@ -8,7 +8,7 @@ use JWTAuth;
 use Mail;
 use Illuminate\Support\Facades\Log;
 
-// Service Classes 
+// Service Classes
 use App\Services\AppearanceService;
 use App\Services\JoinsService;
 use App\Services\RMarkdownService;
@@ -17,17 +17,17 @@ use App\Services\RMarkdownService;
 use App\User;
 use App\Appearance;
 
-class DashBoardController extends Controller 
+class DashBoardController extends Controller
 {
     protected $appearanceService;
     protected $joinsService;
     protected $rmarkdownService;
-    
+
     public function __construct(
-        AppearanceService $appearanceService, 
+        AppearanceService $appearanceService,
         JoinsService $joinsService,
-        RMarkdownService $rmarkdownService 
-    ) 
+        RMarkdownService $rmarkdownService
+    )
     {
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
@@ -35,7 +35,7 @@ class DashBoardController extends Controller
     }
 
     /**
-     * Generate Member Sign up data visualizations using RMarkdown 
+     * Generate Member Sign up data visualizations using RMarkdown
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
@@ -47,7 +47,7 @@ class DashBoardController extends Controller
     }
 
     /**
-     * Generate Appearances visualizations using RMarkdown 
+     * Generate Appearances visualizations using RMarkdown
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
@@ -55,8 +55,8 @@ class DashBoardController extends Controller
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $appearances = $this->appearanceService->getAllAppearances($spaceID);
-//        return Response::json($appearances);
-        return Response::json([]);
+        return Response::json($appearances);
+        //return Response::json($apperan);
     }
 
     public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
@@ -67,7 +67,7 @@ class DashBoardController extends Controller
 
     }
 
-    public function inviteHelper() 
+    public function inviteHelper()
     {
 
     }
