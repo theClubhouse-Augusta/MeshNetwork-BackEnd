@@ -67,7 +67,6 @@ class AuthController extends Controller
         $spaceID = $request->input('spaceID');
         $bio = $request->input('bio');
         $tags = $request->input('tags');
-        return Response::json($tags);
 
         // Check for valid image upload
         if (!empty($_FILES['avatar'])) {
@@ -151,33 +150,41 @@ class AuthController extends Controller
             return Response::json(['error' => 'Account not created']);
         }
 
-//        $url = 'http://challenges.innovationmesh.com/api/signUp';
-//        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
+        $url = 'https://challenges.innovationmesh.com/api/signUp';
+        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
 
-//        $options = array(
-//            'http' => array(
-//                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-//                'method'  => 'POST',
-//                'content' => http_build_query($data)
-//            )
-//        );
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+                "ssl"=>array(
+                  "verify_peer"=>false,
+                  "verify_peer_name"=>false,
+                )
+            )
+        );
 
-//        $context  = stream_context_create($options);
-//        $result = file_get_contents($url, false, $context);
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
 
-//        $url = 'http://houseofhackers.me:81/signUp/';
-//        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
+        $url = 'https://lms.innovationmesh.com/signUp/';
+        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
 
-//        $options = array(
-//            'http' => array(
-//                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-//                'method'  => 'POST',
-//                'content' => http_build_query($data)
-//            )
-//        );
+        $options = array(
+            'http' => array(
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method'  => 'POST',
+                'content' => http_build_query($data),
+                "ssl"=>array(
+                  "verify_peer"=>false,
+                  "verify_peer_name"=>false,
+                )
+            )
+        );
 
-//        $context  = stream_context_create($options);
-//        $result = file_get_contents($url, false, $context);
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
 
 
         // $userID = $user->id;
