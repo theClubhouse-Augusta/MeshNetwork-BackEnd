@@ -293,26 +293,11 @@ class WorkspaceController extends Controller
 
     public function show($slugOrSpaceID)
     {
-<<<<<<< HEAD
-    // Ensure user has admin privalages
-  //   $admin = Auth::user();
-  //   $id = $admin->roleID;
-  //   if ($id != 1 && $id != 2) {
-  //     return Response::json(['error' => 'invalid credentials']);
-  //   }
-        $space = Workspace::where('slug', $slugOrSpaceID)
-            ->orWhere('id', $slugOrSpaceID)
+        $space = Workspace::where('id', $slugOrSpaceID)
+            ->orWhere('slug', $slugOrSpaceID)
             ->first();
         if (empty($space)) {
-            return Response::json(['error' => 'No space with id: ' . $spaceID]);
-=======
-        $space = Workspace::where('id', $slugOrSpaceID)
-                            ->orWhere('slug', $slugOrSpaceID)
-                            ->first();
-        if (empty($space))
-        {
-            return Response::json([ 'error' => 'No space with id: '.$slugOrSpaceID ]);
->>>>>>> db83d2af1a71549cc7e9efabd832559bf362ee05
+            return Response::json(['error' => 'No space with id: ' . $slugOrSpaceID]);
         }
         return Response::json($space);
     }
@@ -529,23 +514,22 @@ class WorkspaceController extends Controller
         ]);
     }
 
-  public function getSpaceEvents($spaceID)
-  {
-    $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
-    ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
-    ->get();
-
-    $eventArray = [];
-    foreach($events as $key => $event)
+    public function getSpaceEvents($spaceID)
     {
-      $eventArray[$key]['id'] = $event->eventID;
-      $eventArray[$key]['title'] = $event->title;
-      $eventArray[$key]['image'] = $event->image;
-      $eventArray[$key]['start'] = $event->start;
-      $eventArray[$key]['end'] = $event->end;
-    }
+        $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
+            ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
+            ->get();
 
-    return Response::json($eventArray);
-  }
+        $eventArray = [];
+        foreach ($events as $key => $event) {
+            $eventArray[$key]['id'] = $event->eventID;
+            $eventArray[$key]['title'] = $event->title;
+            $eventArray[$key]['image'] = $event->image;
+            $eventArray[$key]['start'] = $event->start;
+            $eventArray[$key]['end'] = $event->end;
+        }
+
+        return Response::json($eventArray);
+    }
 
 }

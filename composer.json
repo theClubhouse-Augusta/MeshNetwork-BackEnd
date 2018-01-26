@@ -12,6 +12,7 @@
         "laravel/tinker": "~1.0",
         "mews/purifier": "^2.0",
         "nexmo/client": "^1.2",
+        "spatie/laravel-google-calendar": "^2.2",
         "stripe/stripe-php": "^5.8",
         "tymon/jwt-auth": "0.5.10"
     },
