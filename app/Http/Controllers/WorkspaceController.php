@@ -140,7 +140,6 @@ class WorkspaceController extends Controller
             if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
                 return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
-            w
 
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
@@ -238,41 +237,41 @@ class WorkspaceController extends Controller
         $user->subscriber = 0;
         $user->save();
 
-             $url = 'https://challenges.innovationmesh.com/api/signUp';
-             $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
+            //  $url = 'https://challenges.innovationmesh.com/api/signUp';
+            //  $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
 
-             $options = array(
-                 'http' => array(
-                     'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                     'method'  => 'POST',
-                     'content' => http_build_query($data),
-                     "ssl"=>array(
-                       "verify_peer"=>false,
-                       "verify_peer_name"=>false,
-                     )
-                 )
-             );
+            //  $options = array(
+            //      'http' => array(
+            //          'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            //          'method'  => 'POST',
+            //          'content' => http_build_query($data),
+            //          "ssl"=>array(
+            //            "verify_peer"=>false,
+            //            "verify_peer_name"=>false,
+            //          )
+            //      )
+            //  );
 
-             $context  = stream_context_create($options);
-             $result = file_get_contents($url, false, $context);
+            //  $context  = stream_context_create($options);
+            //  $result = file_get_contents($url, false, $context);
 
-             $url = 'https://lms.innovationmesh.com/signUp/';
-             $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
+            //  $url = 'https://lms.innovationmesh.com/signUp/';
+            //  $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
 
-             $options = array(
-                 'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                     'method'  => 'POST',
-                     'content' => http_build_query($data),
-                     "ssl"=>array(
-                       "verify_peer"=>false,
-                       "verify_peer_name"=>false,
-                     )
-                 )
-             );
+            //  $options = array(
+            //      'http' => array(
+            //         'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            //          'method'  => 'POST',
+            //          'content' => http_build_query($data),
+            //          "ssl"=>array(
+            //            "verify_peer"=>false,
+            //            "verify_peer_name"=>false,
+            //          )
+            //      )
+            //  );
 
-             $context  = stream_context_create($options);
-             $result = file_get_contents($url, false, $context);
+            //  $context  = stream_context_create($options);
+            //  $result = file_get_contents($url, false, $context);
 
         return Response::json($workspace->id);
     }
