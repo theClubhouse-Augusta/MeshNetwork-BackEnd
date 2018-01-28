@@ -25,19 +25,21 @@ class WorkspaceController extends Controller
      * @param void
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('jwt.auth', ['only' => [
         // 'store',
         // 'get',
         // 'show',
         // 'approve',
-         'update',
+            'update',
         // 'events',
         // 'bookables'
         ]]);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $rules = [
             'name' => 'required|string',
             'city' => 'required|string',
@@ -99,9 +101,9 @@ class WorkspaceController extends Controller
 
         $slugCheck = Workspace::where('slug', $slug)->first();
 
-        if(!empty($slugCheck)) {
-          $string = str_random(3);
-          $slug = $slug.'-'.$string;
+        if (!empty($slugCheck)) {
+            $string = str_random(3);
+            $slug = $slug . '-' . $string;
         }
 
         $coordinates = $this->getGeoLocation($address, $city, $state);
@@ -110,205 +112,199 @@ class WorkspaceController extends Controller
 
         // optional input
         // Check for valid image upload
-        if (!empty($_FILES['logo']))
-        {
+        if (!empty($_FILES['logo'])) {
             // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK)
-            {
-                return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE)
-            {
-                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
             }
 
             // checks for valid image upload
             if (($info[2] !== IMAGETYPE_GIF)
-                    && ($info[2] !== IMAGETYPE_JPEG)
-                    && ($info[2] !== IMAGETYPE_PNG))
-                {
-                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-                }
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
+            }
 
             // Get profile image input
             $logo = $request->file('logo');
         }
 
-        if (!empty($_FILES['logo']))
-        {
+        if (!empty($_FILES['logo'])) {
             // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK)
-            {
-                return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
+
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE) {
-                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
             }
 
             // checks for valid image upload
             if (($info[2] !== IMAGETYPE_GIF)
-                    && ($info[2] !== IMAGETYPE_JPEG)
-                    && ($info[2] !== IMAGETYPE_PNG))
-                {
-                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-                }
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
+            }
 
             // Get profile image input
             $logo = $request->file('logo');
-            }
+        }
             // Ensure unique email
-            $check = Workspace::where('name', $name)->first();
+        $check = Workspace::where('name', $name)->first();
 
-            if (!empty($check)) {
-                return Response::json(['error' => 'Name already in use']);
-            }
+        if (!empty($check)) {
+            return Response::json(['error' => 'Name already in use']);
+        }
 
             // create new App\Workspace;
-            $workspace = new Workspace;
-            $workspace->name = $name;
-            $workspace->slug = $slug;
-            $workspace->city = $city;
-            $workspace->address = $address;
-            $workspace->state = $state;
-            $workspace->zipcode = $zipcode;
-            $workspace->email = $email;
-            $workspace->website = $website;
-            $workspace->phone_number = $phone_number;
-            $workspace->description = $description;
-            $workspace->lon = $lon;
-            $workspace->lat = $lat;
-            $workspace->pub_key = 0;
+        $workspace = new Workspace;
+        $workspace->name = $name;
+        $workspace->slug = $slug;
+        $workspace->city = $city;
+        $workspace->address = $address;
+        $workspace->state = $state;
+        $workspace->zipcode = $zipcode;
+        $workspace->email = $email;
+        $workspace->website = $website;
+        $workspace->phone_number = $phone_number;
+        $workspace->description = $description;
+        $workspace->lon = $lon;
+        $workspace->lat = $lat;
+        $workspace->pub_key = 0;
 
-            if (!empty($logo)) {
-                $logoName = $logo->getClientOriginalName();
-                $logo->move('storage/logo/', $logoName);
-                $workspace->logo = $request->root().'/storage/logo/'.$logoName;
-            }
-
-            $workspace->save();
-
-            $spaceID = $workspace->id;
-
-            // Check for valid image upload
-            if (!empty($_FILES['avatar'])) {
-            // Check for file upload error
-              if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-                  return Response::json([ "error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-              }
-            // checks for valid image upload
-              $info = getimagesize($_FILES['avatar']['tmp_name']);
-
-              if ($info === FALSE) {
-                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
-              }
-
-            // checks for valid image upload
-              if (($info[2] !== IMAGETYPE_GIF)
-                    && ($info[2] !== IMAGETYPE_JPEG)
-                    && ($info[2] !== IMAGETYPE_PNG))
-                {
-                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-                }
-
-                // Get profile image input
-                $avatar = $request->file('avatar');
-            }
-
-            $user = new User;
-            // Required input
-            $user->name = $username;
-            $user->email = $useremail;
-            $user->spaceID = $spaceID;
-            $user->roleID = 2;
-            $user->password = Hash::make($password);
-
-            // Profile Picture
-            if (!empty($avatar)) {
-              $avatarName = $avatar->getClientOriginalName();
-              $avatar->move('storage/avatar/', $avatarName);
-              $avatar = $request->root().'/storage/avatar/'.$avatarName;
-            } else {
-               $sub = substr($name, 0, 2);
-               $avatar = "https://invatar0.appspot.com/svg/".$sub.".jpg?s=100";
-            }
-
-            $user->avatar = $avatar;
-            $user->subscriber = 0;
-            $user->save();
-
-             $url = 'https://challenges.innovationmesh.com/api/signUp';
-             $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
-
-             $options = array(
-                 'http' => array(
-                     'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                     'method'  => 'POST',
-                     'content' => http_build_query($data),
-                     "ssl"=>array(
-                       "verify_peer"=>false,
-                       "verify_peer_name"=>false,
-                     )
-                 )
-             );
-
-             $context  = stream_context_create($options);
-             $result = file_get_contents($url, false, $context);
-
-             $url = 'https://lms.innovationmesh.com/signUp/';
-             $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
-
-             $options = array(
-                 'http' => array(
-                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                     'method'  => 'POST',
-                     'content' => http_build_query($data),
-                     "ssl"=>array(
-                       "verify_peer"=>false,
-                       "verify_peer_name"=>false,
-                     )
-                 )
-             );
-
-             $context  = stream_context_create($options);
-             $result = file_get_contents($url, false, $context);
-
-            return Response::json($workspace->id);
+        if (!empty($logo)) {
+            $logoName = $logo->getClientOriginalName();
+            $logo->move('storage/logo/', $logoName);
+            $workspace->logo = $request->root() . '/storage/logo/' . $logoName;
         }
 
+        $workspace->save();
 
-    private function getGeoLocation($address, $city, $state) {
+        $spaceID = $workspace->id;
+
+            // Check for valid image upload
+        if (!empty($_FILES['avatar'])) {
+            // Check for file upload error
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+            }
+            // checks for valid image upload
+            $info = getimagesize($_FILES['avatar']['tmp_name']);
+
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
+            }
+
+            // checks for valid image upload
+            if (($info[2] !== IMAGETYPE_GIF)
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
+            }
+
+                // Get profile image input
+            $avatar = $request->file('avatar');
+        }
+
+        $user = new User;
+            // Required input
+        $user->name = $username;
+        $user->email = $useremail;
+        $user->spaceID = $spaceID;
+        $user->roleID = 2;
+        $user->password = Hash::make($password);
+
+            // Profile Picture
+        if (!empty($avatar)) {
+            $avatarName = $avatar->getClientOriginalName();
+            $avatar->move('storage/avatar/', $avatarName);
+            $avatar = $request->root() . '/storage/avatar/' . $avatarName;
+        } else {
+            $sub = substr($name, 0, 2);
+            $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
+        }
+
+        $user->avatar = $avatar;
+        $user->subscriber = 0;
+        $user->save();
+
+        $url = 'https://challenges.innovationmesh.com/api/signUp';
+        $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash);
+
+        $options = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data),
+                "ssl" => array(
+                    "verify_peer" => false,
+                    "verify_peer_name" => false,
+                )
+            )
+        );
+
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+
+        $url = 'https://lms.innovationmesh.com/signUp/';
+        $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash);
+
+        $options = array(
+            'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST',
+                'content' => http_build_query($data),
+                "ssl" => array(
+                    "verify_peer" => false,
+                    "verify_peer_name" => false,
+                )
+            )
+        );
+
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+
+        return Response::json($workspace->id);
+    }
+
+
+    private function getGeoLocation($address, $city, $state)
+    {
         $address_array = explode(' ', $address);
 
         $length = count($address_array);
 
         $URIparam = '';
         for ($i = 0; $i < $length; $i++) {
-            if ( $i != ($length - 1) )
-                $URIparam .= $address_array[$i].'+';
+            if ($i != ($length - 1))
+                $URIparam .= $address_array[$i] . '+';
             else
                 $URIparam .= $address_array[$i];
         }
-        return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$URIparam.',+'.$city.',+'.$state.'&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
-        }
+        return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=' . $URIparam . ',+' . $city . ',+' . $state . '&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
+    }
 
-    public function get() {
+    public function get()
+    {
         return Response::json(Workspace::all());
     }
 
     public function show($slugOrSpaceID)
     {
         $space = Workspace::where('id', $slugOrSpaceID)
-                            ->orWhere('slug', $slugOrSpaceID)
-                            ->first();
-        if (empty($space))
-        {
-            return Response::json([ 'error' => 'No space with id: '.$slugOrSpaceID ]);
+            ->orWhere('slug', $slugOrSpaceID)
+            ->first();
+        if (empty($space)) {
+            return Response::json(['error' => 'No space with id: ' . $slugOrSpaceID]);
         }
         return Response::json($space);
     }
@@ -324,11 +320,10 @@ class WorkspaceController extends Controller
         // }
         $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
         $workspace->status = $status;
-        if (!$workspace->save())
-        {
-            return Response::json([ 'error' => 'Database error' ]);
+        if (!$workspace->save()) {
+            return Response::json(['error' => 'Database error']);
         }
-        return Response::json([ 'success' => 'Workspace status: '.$status ]);
+        return Response::json(['success' => 'Workspace status: ' . $status]);
     }
 
     public function update(Request $request)
@@ -382,35 +377,30 @@ class WorkspaceController extends Controller
         $key = $request->input('key');
 
         $auth = Auth::user();
-        if($auth->spaceID != $spaceID || $auth->roleID != 2)
-        {
-          return Response::json(['error' => 'You do not have permission.']);
+        if ($auth->spaceID != $spaceID || $auth->roleID != 2) {
+            return Response::json(['error' => 'You do not have permission.']);
         }
 
         // optional input
         // Check for valid image upload
-        if (!empty($_FILES['logo']))
-        {
+        if (!empty($_FILES['logo'])) {
             // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK)
-            {
-                return Response::json([ "error" => "Upload failed with error code " . $_FILES['logo']['error']]);
+            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
+                return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
             }
             // checks for valid image upload
             $info = getimagesize($_FILES['logo']['tmp_name']);
 
-            if ($info === FALSE)
-            {
-                return Response::json([ "error" => "Unable to determine image type of uploaded file" ]);
+            if ($info === false) {
+                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
             }
 
             // checks for valid image upload
             if (($info[2] !== IMAGETYPE_GIF)
-                    && ($info[2] !== IMAGETYPE_JPEG)
-                    && ($info[2] !== IMAGETYPE_PNG))
-                {
-                    return Response::json([ "error" => "Not a gif/jpeg/png" ]);
-                }
+                && ($info[2] !== IMAGETYPE_JPEG)
+                && ($info[2] !== IMAGETYPE_PNG)) {
+                return Response::json(["error" => "Not a gif/jpeg/png"]);
+            }
 
             // Get profile image input
             $logo = $request->file('logo');
@@ -418,15 +408,15 @@ class WorkspaceController extends Controller
 
         $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
 
-        if(!empty($name)) $workspace->name = $name;
-        if(!empty($city)) $workspace->city = $city;
-        if(!empty($address)) $workspace->address = $address;
-        if(!empty($state)) $workspace->state = $state;
-        if(!empty($zipcode)) $workspace->zipcode = $zipcode;
-        if(!empty($email)) $workspace->email = $email;
-        if(!empty($website)) $workspace->website = $website;
-        if(!empty($phone_number)) $workspace->phone_number = $phone_number;
-        if(!empty($description)) $workspace->description = $description;
+        if (!empty($name)) $workspace->name = $name;
+        if (!empty($city)) $workspace->city = $city;
+        if (!empty($address)) $workspace->address = $address;
+        if (!empty($state)) $workspace->state = $state;
+        if (!empty($zipcode)) $workspace->zipcode = $zipcode;
+        if (!empty($email)) $workspace->email = $email;
+        if (!empty($website)) $workspace->website = $website;
+        if (!empty($phone_number)) $workspace->phone_number = $phone_number;
+        if (!empty($description)) $workspace->description = $description;
         if (!empty($facebook)) $workspace->facebook = $facebook;
         if (!empty($twitter)) $workspace->twitter = $twitter;
         if (!empty($instagram)) $workspace->instagram = $instagram;
@@ -434,12 +424,12 @@ class WorkspaceController extends Controller
         if (!empty($logo)) {
             $logoName = $logo->getClientOriginalName();
             $logo->move('storage/logo/', $logoName);
-            $workspace->logo = $request->root().'/storage/logo/'.$logoName;
+            $workspace->logo = $request->root() . '/storage/logo/' . $logoName;
         }
 
         // persist workspace to database
         if (!$workspace->save()) return Response::json(['error' => 'Account not created']);
-        else return Response::json([ 'success' => $workspace->name.' updated!' ]);
+        else return Response::json(['success' => $workspace->name . ' updated!']);
     }
 
 
@@ -459,12 +449,12 @@ class WorkspaceController extends Controller
         // TODO provide check for dates or let
 
         $events = Event::where('events.spaceID', $spaceID)
-        ->join('eventdates', 'events.id', '=', 'eventdates.eventID')
-        ->select('events.id', 'events.spaceID', 'events.title', 'events.description', 'events.image', 'eventdates.start', 'eventdates.end')
-        ->paginate(12);
-        foreach($events as $key => $event) {
-          $event->start = Carbon::createFromTimeStamp(strtotime($event->start))->diffForHumans();
-          $event->end = Carbon::createFromTimeStamp(strtotime($event->end))->diffForHumans();
+            ->join('eventdates', 'events.id', '=', 'eventdates.eventID')
+            ->select('events.id', 'events.spaceID', 'events.title', 'events.description', 'events.image', 'eventdates.start', 'eventdates.end')
+            ->paginate(12);
+        foreach ($events as $key => $event) {
+            $event->start = Carbon::createFromTimeStamp(strtotime($event->start))->diffForHumans();
+            $event->end = Carbon::createFromTimeStamp(strtotime($event->end))->diffForHumans();
         }
 
         return Response::json($events);
@@ -476,76 +466,77 @@ class WorkspaceController extends Controller
      * @param $slug
      * @return bool
      */
-    public function getSubscriptions($slug) {
-       $space = Workspace::where('id', $slug)->orWhere('slug', $slug)->select('stripe')->first();
-       if ($space->stripe != null) {
-           \Stripe\Stripe::setApiKey($space->stripe);
-           $plans = \Stripe\Plan::all();
-           return Response::json($plans);
-       } else {
-           return Response::json([]);
-       }
+    public function getSubscriptions($slug)
+    {
+        $space = Workspace::where('id', $slug)->orWhere('slug', $slug)->select('stripe')->first();
+        if ($space->stripe != null) {
+            \Stripe\Stripe::setApiKey($space->stripe);
+            $plans = \Stripe\Plan::all();
+            return Response::json($plans);
+        } else {
+            return Response::json([]);
+        }
     }
 
-    public function getKey($spaceID) {
-       $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
-       return $workspace->pub_key;
+    public function getKey($spaceID)
+    {
+        $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
+        return $workspace->pub_key;
     }
 
     public function spaceOrganizers($spaceID)
     {
-      $users = User::where('spaceID', $spaceID)->where('roleID', 2)->get();
+        $users = User::where('spaceID', $spaceID)->where('roleID', 2)->get();
 
-      return Response::json($users);
+        return Response::json($users);
     }
 
     public function getSpaceStats($spaceID)
     {
-      $members = User::where('spaceID', $spaceID)->get();
-      $memberCount = count($members);
+        $members = User::where('spaceID', $spaceID)->get();
+        $memberCount = count($members);
 
-      $events = Event::where('spaceID', $spaceID)->get();
-      $eventCount = count($events);
+        $events = Event::where('spaceID', $spaceID)->get();
+        $eventCount = count($events);
 
-      $checkins = Appearance::where('spaceID', $spaceID)->get();
-      $checkinCount = count($checkins);
+        $checkins = Appearance::where('spaceID', $spaceID)->get();
+        $checkinCount = count($checkins);
 
-      $now = new DateTime("now");
-      $now->add(new DateInterval('P1D'));
-      $lastMonth = new DateTime("now");
-      $lastMonth->sub(new DateInterval('P32D'));
+        $now = new DateTime("now");
+        $now->add(new DateInterval('P1D'));
+        $lastMonth = new DateTime("now");
+        $lastMonth->sub(new DateInterval('P32D'));
 
-      $start = date('Y-m-d', $lastMonth->getTimeStamp());
-      $end = date('Y-m-d', $now->getTimeStamp());
+        $start = date('Y-m-d', $lastMonth->getTimeStamp());
+        $end = date('Y-m-d', $now->getTimeStamp());
 
-      $thisMonthCheckIns = count(Appearance::where('spaceID', $spaceID)
-                                  ->whereBetween('created_at', [$start, $end])
-                                  ->get());
-      return Response::json([
-          'memberCount' => $memberCount,
-          'eventCount' => $eventCount,
-          'checkinCount' => $checkinCount,
-          'thisMonthCheckIns' => $thisMonthCheckIns,
-     ]);
+        $thisMonthCheckIns = count(Appearance::where('spaceID', $spaceID)
+            ->whereBetween('created_at', [$start, $end])
+            ->get());
+        return Response::json([
+            'memberCount' => $memberCount,
+            'eventCount' => $eventCount,
+            'checkinCount' => $checkinCount,
+            'thisMonthCheckIns' => $thisMonthCheckIns,
+        ]);
     }
 
-  public function getSpaceEvents($spaceID)
-  {
-    $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
-    ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
-    ->get();
-
-    $eventArray = [];
-    foreach($events as $key => $event)
+    public function getSpaceEvents($spaceID)
     {
-      $eventArray[$key]['id'] = $event->eventID;
-      $eventArray[$key]['title'] = $event->title;
-      $eventArray[$key]['image'] = $event->image;
-      $eventArray[$key]['start'] = $event->start;
-      $eventArray[$key]['end'] = $event->end;
-    }
+        $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
+            ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
+            ->get();
 
-    return Response::json($eventArray);
-  }
+        $eventArray = [];
+        foreach ($events as $key => $event) {
+            $eventArray[$key]['id'] = $event->eventID;
+            $eventArray[$key]['title'] = $event->title;
+            $eventArray[$key]['image'] = $event->image;
+            $eventArray[$key]['start'] = $event->start;
+            $eventArray[$key]['end'] = $event->end;
+        }
+
+        return Response::json($eventArray);
+    }
 
 }
