@@ -96,14 +96,12 @@ class EventController extends Controller
             return Response::json(['error' => 'You must fill out all fields!']);
         }
 
+        $sponsors = $request->input('sponsors');
         $event = new Event;
-        /* Sponser Info */
-        $sponsors = explode(',', $request->input('sponsors'));
-        // return Response::json($sponsors);
         $sponserIDs = [];
-        // $sponserIDs = json_decode($request->input('sponsors'));
-        if (count($sponsors) != 0) {
-            foreach ($sponsors as $s) {
+        if (!empty($sponsors)) {
+            $sponsorArray = explode(',', $sponsors);
+            foreach ($sponsorArray as $s) {
                 $sponsor = Sponser::where('name', $s)->first();
                 array_push($sponserIDs, $sponsor->id);
             }
