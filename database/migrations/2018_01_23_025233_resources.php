@@ -18,6 +18,10 @@ class Resources extends Migration
           $table->integer('spaceID');
           $table->string('resourceName');
           $table->string('resourceEmail')->nullable();
+          $table->string('resourceStartDay');
+          $table->string('resourceEndDay');
+          $table->string('resourceStartTime');
+          $table->string('resourceEndTime');
           $table->timestamps();
       });
     }

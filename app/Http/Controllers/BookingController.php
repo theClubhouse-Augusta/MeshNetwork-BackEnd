@@ -46,6 +46,10 @@ class BookingController extends Controller {
       $spaceID = $request->input('spaceID');
       $resourceName = $request->input('resourceName');
       $resourceEmail = $request->input('resourceEmail');
+      $resourceStartDay = $request->input('resourceStartDay');
+      $resourceEndDay = $request->input('resourceEndDay');
+      $resourceStartTime = $request->input('resourceStartTime');
+      $resourceEndTime = $request->input('resourceEndTime');
 
       $auth = Auth::user();
       if($auth->spaceID != $spaceID && $auth->roleID != 2) {
@@ -56,6 +60,10 @@ class BookingController extends Controller {
       $res->spaceID = $spaceID;
       $res->resourceName = $resourceName;
       $res->resourceEmail = $resourceEmail;
+      $res->resourceStartDay = $resourceStartDay;
+      $res->resourceEndDay = $resourceEndDay;
+      $res->resourceStartTime = $resourceStartTime;
+      $res->resourceEndTime = $resourceEndTime;
       $res->save();
 
       $resourceData = Resource::find($res->id);
