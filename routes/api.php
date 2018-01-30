@@ -29,6 +29,7 @@ Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{end
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
+Route::post('forgotpassword', 'AuthController@resetPassword');
 
 // UserController
 Route::get('user/auth', 'AuthController@getUser'); // get Auth User
