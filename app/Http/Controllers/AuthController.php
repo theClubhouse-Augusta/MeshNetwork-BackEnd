@@ -105,10 +105,7 @@ class AuthController extends Controller
         $user->name = $name;
         $user->bio = $bio;
         $user->email = $email;
-        $user->spaceID = $spaceID;
-        $user->roleID = 3;
         $user->password = Hash::make($password);
-        $user->skills = $tags;
         // if (!empty($bio)) $user->bio = $bio;
 
         // Profile Picture
@@ -120,8 +117,6 @@ class AuthController extends Controller
             $sub = substr($name, 0, 2);
             $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
         }
-
-        $user->avatar = $avatar;
 
         $plan = $request['plan'];
         if ($plan != "free" && !empty($plan)) {
@@ -149,6 +144,20 @@ class AuthController extends Controller
         if (!$success) {
             return Response::json(['error' => 'Account not created']);
         }
+
+        $profile = new Profile;
+        $profile->userID = $user->id;
+        $profile->roleID = 2;
+        $profile->spaceID = $spaceID;
+        $profile->profileName = $name;
+        $profile->title = NULL;
+        $user->roleID = 3;
+        $profile->avatar = $avatar;
+        $profile->skills = $tags;
+        $profile->ban = 0;
+        $profile->save();
+
+
 
         $url = 'https://challenges.innovationmesh.com/api/signUp';
         $data = array('email' => $email, 'name' => $name, 'password' => $unhash );

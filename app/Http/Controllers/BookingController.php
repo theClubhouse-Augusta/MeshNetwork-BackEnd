@@ -15,6 +15,7 @@ use App\Booking;
 use App\Resource;
 use App\User;
 use Carbon\Carbon;
+use Spatie\GoogleCalendar\Event;
 
 class BookingController extends Controller {
     public function __construct() {
@@ -27,6 +28,12 @@ class BookingController extends Controller {
 
     public function getResources($spaceID) {
       $resources = Resource::where('spaceID', $spaceID)->get();
+
+      foreach($resources as $key => $res)
+      {
+        $res->start = date("Y/m/d G:i:s A", strtotime($res->resourceStartDate." ".$res->resourceStartTime));
+        $res->end = date("Y/m/d G:i:s A", strtotime($res->resourceEndDate." ".$res->resourceEndTime));
+      }
 
       return Response::json($resources);
     }
@@ -50,6 +57,7 @@ class BookingController extends Controller {
       $resourceEndDay = $request->input('resourceEndDay');
       $resourceStartTime = $request->input('resourceStartTime');
       $resourceEndTime = $request->input('resourceEndTime');
+      $resourceIncrement = $request->input('resourceIncrement');
 
       $auth = Auth::user();
       if($auth->spaceID != $spaceID && $auth->roleID != 2) {
@@ -64,6 +72,7 @@ class BookingController extends Controller {
       $res->resourceEndDay = $resourceEndDay;
       $res->resourceStartTime = $resourceStartTime;
       $res->resourceEndTime = $resourceEndTime;
+      $res->resourceIncrement = $resourceIncrement;
       $res->save();
 
       $resourceData = Resource::find($res->id);
@@ -203,6 +212,24 @@ class BookingController extends Controller {
             $message->from($space->email, $space->name);
             $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
           });
+
+          $space = Workspace::find($booking->spaceID);
+          if($resource->resourceEmail != NULL) {
+            $contact = $resource->resourceEmail;
+          }
+          else {
+            $contact = $space->email;
+          }
+
+          $event = new Event;
+
+          $event->name = $booking->resourceName;
+          $event->startDateTime = $booking->start;
+          $event->endDateTime = $booking->end;
+          $event->addAttendee(['email' => $contact]);
+          $event->addAttendee(['email' => $booking->email]);
+
+          $event->save();
 
           return "Booking has been approved.";
         }
