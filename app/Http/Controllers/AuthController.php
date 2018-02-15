@@ -150,7 +150,7 @@ class AuthController extends Controller
             return Response::json(['error' => 'Account not created']);
         }
 
-        $url = 'https://challenges.innovationmesh.com/api/signUp';
+        /*$url = 'https://challenges.innovationmesh.com/api/signUp';
         $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
 
         $options = array(
@@ -167,6 +167,8 @@ class AuthController extends Controller
 
         $context  = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
+
+        */
 
         $url = 'https://lms.innovationmesh.com/signUp/';
         $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
