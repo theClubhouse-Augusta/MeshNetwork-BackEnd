@@ -237,7 +237,7 @@ class WorkspaceController extends Controller
         $user->subscriber = 0;
         $user->save();
 
-        $url = 'https://challenges.innovationmesh.com/api/signUp';
+       /* $url = 'https://challenges.innovationmesh.com/api/signUp';
         $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash);
 
         $options = array(
@@ -254,6 +254,7 @@ class WorkspaceController extends Controller
 
         $context = stream_context_create($options);
         $result = file_get_contents($url, false, $context);
+        */
 
         $url = 'https://lms.innovationmesh.com/signUp/';
         $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash);

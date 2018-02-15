@@ -840,14 +840,18 @@ class EventController extends Controller
 
     public function getDashboardEvents($spaceID)
     {
-        $events = Event::where('spaceID', $spaceID)->paginate(30);
+        $events = Event::where('spaceID', $spaceID)->get();
 
         foreach ($events as $key => $event) {
             $date = Eventdate::where('eventID', $event->id)->first();
-            $date->start = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y');
+            if(!empty($date)) {
+              $date = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y');
+            } else {
+              $date = "No Start Date";
+            }
             $event->date = $date;
 
-            $space = Workspace::find($event->id);
+            $space = Workspace::find($event->spaceID);
             $event->space = $space;
         }
 

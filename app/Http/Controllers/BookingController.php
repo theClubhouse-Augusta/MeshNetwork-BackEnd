@@ -15,6 +15,7 @@ use App\Booking;
 use App\Resource;
 use App\User;
 use Carbon\Carbon;
+use Spatie\GoogleCalendar\Event;
 
 class BookingController extends Controller {
     public function __construct() {
@@ -46,6 +47,25 @@ class BookingController extends Controller {
       $spaceID = $request->input('spaceID');
       $resourceName = $request->input('resourceName');
       $resourceEmail = $request->input('resourceEmail');
+      $resourceDays = $request->input('resourceDays');
+      $resourceStartTime = $request->input('resourceStartTime');
+      $resourceEndTime = $request->input('resourceEndTime');
+      $resourceIncrement = $request->input('resourceIncrement');
+
+      if(empty($resourceStartTime))
+      {
+        $resourceStartTime = '9:00am';
+      }
+
+      if(empty($resourceEndTime))
+      {
+        $resourceEndTime = '5:00pm';
+      }
+
+      if(empty($resourceDays))
+      {
+        $resourceDays = [1,2,3,4,5];
+      }
 
       $auth = Auth::user();
       if($auth->spaceID != $spaceID && $auth->roleID != 2) {
@@ -56,6 +76,10 @@ class BookingController extends Controller {
       $res->spaceID = $spaceID;
       $res->resourceName = $resourceName;
       $res->resourceEmail = $resourceEmail;
+      $res->resourceDays = $resourceDays;
+      $res->resourceStartTime = $resourceStartTime;
+      $res->resourceEndTime = $resourceEndTime;
+      $res->resourceIncrement = $resourceIncrement;
       $res->save();
 
       $resourceData = Resource::find($res->id);
@@ -95,9 +119,13 @@ class BookingController extends Controller {
         //$bookArray[$key]['end'] = Carbon::createFromTimeStamp(strtotime($book->end))->format('Y, n, j, G, i, s');
         $bookArray[$key]['start'] = $book->start;
         $bookArray[$key]['end'] = $book->end;
-      }
+      }      
 
-      return Response::json($bookArray);
+      $resource = Resource::find($resourceID);
+      $resource->startTime = date("H:i:s", strtotime($resource->resourceStartTime));
+      $resource->endTime = date("H:i:s", strtotime($resource->resourceEndTime));
+
+      return Response::json(['bookings' => $bookArray, 'resource' => $resource]);
 
     }
 
@@ -195,6 +223,24 @@ class BookingController extends Controller {
             $message->from($space->email, $space->name);
             $message->to($booking->email, $booking->name)->subject($space->name.': Your Booking has been Approved!');
           });
+
+          $space = Workspace::find($booking->spaceID);
+          if($resource->resourceEmail != NULL) {
+            $contact = $resource->resourceEmail;
+          }
+          else {
+            $contact = $space->email;
+          }
+
+          $event = new Event;
+
+          $event->name = $booking->resourceName;
+          $event->startDateTime = $booking->start;
+          $event->endDateTime = $booking->end;
+          $event->addAttendee(['email' => $contact]);
+          $event->addAttendee(['email' => $booking->email]);
+
+          $event->save();
 
           return "Booking has been approved.";
         }
