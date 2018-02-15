@@ -104,6 +104,21 @@ Route::post('resource/delete/{id}', 'BookingController@deleteResource');
 Route::get('occasions', 'AppearanceController@getValidOccasions');
 Route::get('bookings/{resourceID}', 'BookingController@getBookings');
 Route::post('booking', 'BookingController@store');
+
+
+//Challenge Routes
+Route::get('getCategories', 'CategoriesController@index');
+Route::get('selectCategories', 'CategoriesController@select');
+Route::post('storeCategory', 'CategoriesController@store');
+Route::get('showCategory/{id}/{type}', 'CategoriesController@show');
+
+Route::get('getChallenges/{count}', 'ChallengesController@index');
+Route::post('storeChallenge', 'ChallengesController@store');
+Route::get('showChallenge/{id}', 'ChallengesController@show');
+Route::post('searchChallenges', 'ChallengesController@search');
+Route::get('joinChallenge/{id}', 'ChallengesController@joinChallenge');
+Route::post('uploadFile', 'ChallengesController@uploadFile');
+
 // Route::get('log/{message}', 'DashboardController@log');
 // Route::get('email', 'DashboardController@email');
 

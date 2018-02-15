@@ -29,12 +29,6 @@ class BookingController extends Controller {
     public function getResources($spaceID) {
       $resources = Resource::where('spaceID', $spaceID)->get();
 
-      foreach($resources as $key => $res)
-      {
-        $res->start = date("Y/m/d G:i:s A", strtotime($res->resourceStartDate." ".$res->resourceStartTime));
-        $res->end = date("Y/m/d G:i:s A", strtotime($res->resourceEndDate." ".$res->resourceEndTime));
-      }
-
       return Response::json($resources);
     }
 
@@ -53,11 +47,25 @@ class BookingController extends Controller {
       $spaceID = $request->input('spaceID');
       $resourceName = $request->input('resourceName');
       $resourceEmail = $request->input('resourceEmail');
-      $resourceStartDay = $request->input('resourceStartDay');
-      $resourceEndDay = $request->input('resourceEndDay');
+      $resourceDays = $request->input('resourceDays');
       $resourceStartTime = $request->input('resourceStartTime');
       $resourceEndTime = $request->input('resourceEndTime');
       $resourceIncrement = $request->input('resourceIncrement');
+
+      if(empty($resourceStartTime))
+      {
+        $resourceStartTime = '9:00am';
+      }
+
+      if(empty($resourceEndTime))
+      {
+        $resourceEndTime = '5:00pm';
+      }
+
+      if(empty($resourceDays))
+      {
+        $resourceDays = [1,2,3,4,5];
+      }
 
       $auth = Auth::user();
       if($auth->spaceID != $spaceID && $auth->roleID != 2) {
@@ -68,8 +76,7 @@ class BookingController extends Controller {
       $res->spaceID = $spaceID;
       $res->resourceName = $resourceName;
       $res->resourceEmail = $resourceEmail;
-      $res->resourceStartDay = $resourceStartDay;
-      $res->resourceEndDay = $resourceEndDay;
+      $res->resourceDays = $resourceDays;
       $res->resourceStartTime = $resourceStartTime;
       $res->resourceEndTime = $resourceEndTime;
       $res->resourceIncrement = $resourceIncrement;
@@ -112,9 +119,13 @@ class BookingController extends Controller {
         //$bookArray[$key]['end'] = Carbon::createFromTimeStamp(strtotime($book->end))->format('Y, n, j, G, i, s');
         $bookArray[$key]['start'] = $book->start;
         $bookArray[$key]['end'] = $book->end;
-      }
+      }      
 
-      return Response::json($bookArray);
+      $resource = Resource::find($resourceID);
+      $resource->startTime = date("H:i:s", strtotime($resource->resourceStartTime));
+      $resource->endTime = date("H:i:s", strtotime($resource->resourceEndTime));
+
+      return Response::json(['bookings' => $bookArray, 'resource' => $resource]);
 
     }
 

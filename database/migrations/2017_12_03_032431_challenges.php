@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Resources extends Migration
+class Challenges extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,16 @@ class Resources extends Migration
      */
     public function up()
     {
-      Schema::create('resources', function (Blueprint $table) {
+      Schema::create('challenges', function (Blueprint $table) {
           $table->increments('id');
           $table->integer('spaceID');
-          $table->string('resourceName');
-          $table->string('resourceEmail')->nullable();
-          $table->string('resourceDays');
-          $table->string('resourceStartTime');
-          $table->string('resourceEndTime');
-          $table->integer('resourceIncrement')->default(60);
+          $table->longText('challengeImage');
+          $table->string('challengeTitle');
+          $table->string('challengeSlug');
+          $table->longText('challengeContent');
+          $table->string('startDate')->nullable();
+          $table->string('endDate')->nullable();
+          $table->string('status')->default('Pending');
           $table->timestamps();
       });
     }
@@ -33,6 +34,6 @@ class Resources extends Migration
      */
     public function down()
     {
-      Schema::drop('resources');
+      Schema::drop('challenges');
     }
 }
