@@ -114,6 +114,7 @@ Route::get('showCategory/{id}/{type}', 'CategoriesController@show');
 
 Route::get('getChallenges/{count}', 'ChallengesController@index');
 Route::post('storeChallenge', 'ChallengesController@store');
+Route::post('updateChallenge/{id}', 'ChallengesController@update');
 Route::get('showChallenge/{id}', 'ChallengesController@show');
 Route::post('searchChallenges', 'ChallengesController@search');
 Route::get('joinChallenge/{id}', 'ChallengesController@joinChallenge');
