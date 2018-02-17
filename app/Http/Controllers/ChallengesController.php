@@ -190,6 +190,97 @@ class ChallengesController extends Controller
     return Response::json(['challenge' => $challenge->id]);
   }
 
+  public function update(Request $request, $id)
+  {
+    $rules = [
+      'challengeTitle' => 'required',
+      'challengeContent' => 'required',
+      'challengeCategories' => 'required'
+    ];
+
+    $validator = Validator::make(Purifier::clean($request->all()), $rules);
+    if($validator->fails())
+    {
+      return Response::json(['error' => 'Please fill out all fields.']);
+    }
+
+    $user = Auth::user();
+
+    if($request->hasFile('challengeImage'))
+    {
+      $challengeImage = $request->file('challengeImage');
+      $imageFile = 'challenge';
+      if (!is_dir($imageFile)) {
+        mkdir($imageFile,0777,true);
+      }
+
+      $imageName = str_random(4);
+      if($challengeImage->getClientSize() > 5242880)
+      {
+        return Response::json(['error' => 'This image is too large.']);
+      }
+      if($challengeImage->getClientMimeType() != "image/png" && $challengeImage->getClientMimeType() != "image/jpeg" && $challengeImage->getClientMimeType() != "image/gif")
+      {
+        return Response::json(['error' => 'Not a valid PNG/JPG/GIF image.']);
+      }
+      $ext = $challengeImage->getClientOriginalExtension();
+      $challengeImage->move($imageFile, $imageName.'.'.$ext);
+      $challengeImage = $imageFile.'/'.$imageName.'.'.$ext;
+      $img = Image::make($challengeImage);
+      list($width, $height) = getimagesize($challengeImage);
+      if($width > 512)
+      {
+        $img->resize(512, null, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        if($height > 512)
+        {
+          $img->crop(512, 512);
+        }
+      }
+      $img->save($challengeImage);
+      $challenge->challengeImage = $request->root().'/'.$challengeImage;
+    }
+
+    $challengeTitle = $request->input('challengeTitle');
+    $challengeContent = $request->input('challengeContent');
+    $challengeCategories = json_decode($request->input('challengeCategories'));
+    $startDate = $request->input('startDate');
+    $endDate = $request->input('endDate');
+    $status = 'Approved';
+
+    /*$challengeSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $challengeTitle)));
+    $slugCheck = Challenge::where('challengeSlug', $challengeSlug)->first();
+    if(!empty($slugCheck))
+    {
+      $str = str_random(4);
+      $challengeSlug = $challengeSlug.'-'.$str;
+    }*/
+
+    $challenge = Challenge::find($id);
+    $challenge->challengeTitle = $challengeTitle;
+    //$challenge->challengeSlug = $challengeSlug;
+    $challenge->challengeContent = $challengeContent;
+    $challenge->startDate = $startDate;
+    $challenge->endDate = $endDate;
+    $challenge->status = $status;
+    $challenge->save();
+
+    foreach($challengeCategories as $key => $category)
+    {
+      $categoryCheck = Cbind::where('challengeID', $challenge->id)->where('categoryID', $category->value)->first();
+      if(empty($categoryCheck))
+      {
+        $cbind = new Cbind;
+        $cbind->challengeID = $challenge->id;
+        $cbind->categoryID = $category->value;
+        $cbind->save();
+      }
+    }
+
+    return Response::json(['challenge' => $challenge->id]);
+  }
+
   public function uploadFile(Request $request)
   {
     $rules = [
@@ -261,11 +352,18 @@ class ChallengesController extends Controller
 
     $challenge->categories = $categories;
 
+    $categoriesArray = [];
+    foreach($challenge->categories as $key => $c)
+    {
+      $categoriesArray[$key]['value'] = $c->id;
+      $categoriesArray[$key]['label'] = $c->categoryName;
+    }
+
     $uploads = Upload::where('challengeID', $challenge->id)->get();
 
     $teams = Ptbind::where('ptbinds.challengeID', $challenge->id)->join('users', 'ptbinds.userID', '=', 'users.id')->select('users.id', 'users.avatar', 'users.name')->inRandomOrder()->take(10)->get();
 
-    return Response::json(['challenge' => $challenge, 'uploads' => $uploads, 'teams' => $teams]);
+    return Response::json(['challenge' => $challenge, 'uploads' => $uploads, 'teams' => $teams, 'categoriesArray' => $categoriesArray]);
   }
 
   public function showTeams($id)
@@ -418,7 +516,7 @@ class ChallengesController extends Controller
       'challenges.spaceID',
       'challenges.startDate',
       'challenges.endDate',
-      'workspaces.avatar',
+      'workspaces.logo',
       'workspaces.name',
       'workspaces.city'
     )

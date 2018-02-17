@@ -137,7 +137,7 @@ class CategoriesController extends Controller
               'challenges.spaceID',
               'challenges.startDate',
               'challenges.endDate',
-              'workspaces.avatar',
+              'workspaces.logo',
               'workspaces.name',
               'workspaces.city'
             )
