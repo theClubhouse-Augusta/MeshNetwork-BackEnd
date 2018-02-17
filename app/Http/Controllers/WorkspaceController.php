@@ -35,6 +35,7 @@ class WorkspaceController extends Controller
             'update',
         // 'events',
         // 'bookables'
+            'getName',
         ]]);
     }
 
@@ -538,6 +539,11 @@ class WorkspaceController extends Controller
         }
 
         return Response::json($eventArray);
+    }
+
+    public function getName($spaceID) {
+        $space = Workspace::find($spaceID);
+        return $space->name;
     }
 
 }

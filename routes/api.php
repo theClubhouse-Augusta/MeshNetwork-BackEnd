@@ -94,6 +94,7 @@ Route::get('sponsors', 'EventController@Sponsers');
 Route::post('event', 'EventController@store');
 Route::get('event/{eventID}', 'EventController@show');
 Route::get('spaceEvents/{spaceID}', 'WorkspaceController@getSpaceEvents'); //Formatted Events for the Calendar
+Route::get('spacename/{spaceID}', 'WorkspaceController@getName');
 //
 Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('events/{spaceID}', 'EventController@getDashboardEvents');
