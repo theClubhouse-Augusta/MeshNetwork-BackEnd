@@ -59,7 +59,6 @@ class EventController extends Controller
         // return $request->day;
         if ($request->day) {
             $rules = [
-                'compEvent' => 'required|string',
                 'name' => 'required|string',
                 'url' => 'required|string',
                 'tags' => 'required|string',
@@ -70,11 +69,9 @@ class EventController extends Controller
                 'start' => 'required|string',
                 'end' => 'required|string',
                 'description' => 'required|string',
-                'image' => 'required|string',
             ];
         } else {
             $rules = [
-                'compEvent' => 'required|string',
                 'name' => 'required|string',
                 'url' => 'required:|string',
                 'tags' => 'required|string',
@@ -85,7 +82,6 @@ class EventController extends Controller
                 'startMulti' => 'required|string',
                 'endMulti' => 'required|string',
                 'description' => 'required|string',
-                'image' => 'required|string',
             ];
         }
 
@@ -126,17 +122,12 @@ class EventController extends Controller
         }
 
         /* Event Info */
-        $challenge = json_decode($request->input('compEvent'));
         $title = $request->input('name');
         $description = $request->input('description');
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
         // optional input
         $url = $request->input('url');
-        $files = $request->input('file0');
-        $image = $request->file('image');
-        $imageName = $image->getClientOriginalName();
-        $image->move('storage/events/images', $imageName);
 
         // create ne App\Event
         $event = new Event;
@@ -145,9 +136,7 @@ class EventController extends Controller
         $event->title = $title;
 
         $event->description = $description;
-        $event->challenge = $challenge;
         $event->url = $url;
-        $event->image = $request->root() . '/storage/events/images/' . $imageName;
         $day = json_decode($request->input('day'));
 
         if (!empty($day)) {
@@ -177,19 +166,6 @@ class EventController extends Controller
                 }
             }
         }
-
-        // Update App\Skill;
-      /*  if (!empty($tags)) {
-            foreach($tags as $key => $tag) {
-                if (!property_exists($tag, 'id')) {
-                    $newSkill = new Skill;
-                    $newSkill->name = $tag->value;
-                    // Persist App\Skill to database
-                    if (!$newSkill->save()) return Response::json([ 'error' => 'database error' ]);
-                }
-           }
-        }*/
-
         // Update App\Eventskill;
         if (!empty($tags)) {
             foreach ($tags as $tag) {
@@ -286,23 +262,6 @@ class EventController extends Controller
             }
         }
 
-        // create new App\File;
-        if (count($_FILES) != 0) {
-            $length = count($_FILES);
-            for ($i = 0; $i < $length; $i++) {
-                if (array_key_exists("files$i", $_FILES)) {
-                    $file = new File;
-                    $file->userID = $userID;
-                    $file->eventID = $eventID;
-                    $eventFile = $request->file('files' . $i);
-                    $eventFileName = $eventFile->getClientOriginalName();
-                    $eventFile->move("storage/events/$eventID/", $eventFileName);
-                    $file->path = $request->root() . "/storage/events/$eventID/$eventFileName";
-                    if (!$file->save()) return Response::json(['error' => 'Database error']);
-                }
-            }
-        }
-
         $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
         if (empty($check)) {
             $calendar = new Calendar;
@@ -310,7 +269,7 @@ class EventController extends Controller
             $calendar->eventID = $eventID;
             $calendar->save();
         }
-        return Response::json($eventID);
+        return Response::json(['success' => 'Event Added!', 'eventID' => $eventID]);
     }
 
     // all events all spaces
