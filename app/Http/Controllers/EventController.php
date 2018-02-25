@@ -56,7 +56,7 @@ class EventController extends Controller
         // user currently signed in
         $userID = Auth::id();
         $spaceID = User::find($userID)->spaceID;
-        // return $request->day;
+        return $request->day;
         if ($request->day) {
             $rules = [
                 'compEvent' => 'required|string',
@@ -207,6 +207,7 @@ class EventController extends Controller
         }
 
         if (!empty($day)) {
+            return Response::json($day);
             $start = json_decode($request->input('start'));
             $end = json_decode($request->input('end'));
             $ymd = explode('-', $day);
@@ -410,8 +411,8 @@ class EventController extends Controller
         $workSpace = Workspace::find($event->spaceID);
         $dates = Eventdate::where('eventID', $eventID)->get();
         foreach ($dates as $key => $date) {
-            $date->start = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
-            $date->end = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
+            $date->startFormatted = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
+            $date->endFormatted = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
         }
 
         if (empty($event)) {
