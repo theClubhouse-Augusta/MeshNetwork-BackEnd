@@ -64,7 +64,6 @@ class EventController extends Controller
             'sponsors' => 'nullable|string',
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
-            'image' => 'required|string',
             'dates' => 'required|string',
         ];
 
@@ -235,8 +234,6 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'type' => 'nullable|string',
             'tags' => 'nullable|string',
-            'local' => 'nullable|string',
-            'file' => 'nullable|string'
         ];
 
         // Validate input against rules
@@ -253,7 +250,6 @@ class EventController extends Controller
         $description = $request->input('description');
         $type = $request->input('type');
         $tags = $request->input('tags');
-        $local = $request->input('local');
         $file = $request->input('file');
 
         // check if another event is in time slot
@@ -271,8 +267,6 @@ class EventController extends Controller
         if (!empty($type)) $event->type = $type;
         if (!empty($tags)) $event->tags = $tags;
 
-        //optional input
-        if (!empty($local)) $event->local = $local;
 
         if (!$event->save()) {
             return Response::json(['error' => 'Database error']);
