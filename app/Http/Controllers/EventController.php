@@ -56,34 +56,16 @@ class EventController extends Controller
         // user currently signed in
         $userID = Auth::id();
         $spaceID = User::find($userID)->spaceID;
-        // return $request->day;
-        if ($request->day) {
-            $rules = [
-                'name' => 'required|string',
-                'url' => 'required|string',
-                'tags' => 'required|string',
-                'organizers' => 'required|string',
-                'sponsors' => 'nullable|string',
-                'newSponsors' => 'nullable|string',
-                'day' => 'required|string',
-                'start' => 'required|string',
-                'end' => 'required|string',
-                'description' => 'required|string',
-            ];
-        } else {
-            $rules = [
-                'name' => 'required|string',
-                'url' => 'required:|string',
-                'tags' => 'required|string',
-                'organizers' => 'required|string',
-                'sponsors' => 'nullable|string',
-                'newSponsors' => 'nullable|string',
-                'dateMulti' => 'required|string',
-                'startMulti' => 'required|string',
-                'endMulti' => 'required|string',
-                'description' => 'required|string',
-            ];
-        }
+        $rules = [
+            'name' => 'required|string',
+            'url' => 'required|string',
+            'tags' => 'required|string',
+            'organizers' => 'required|string',
+            'sponsors' => 'nullable|string',
+            'newSponsors' => 'nullable|string',
+            'description' => 'required|string',
+            'dates' => 'required|string',
+        ];
 
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -126,6 +108,8 @@ class EventController extends Controller
         $description = $request->input('description');
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
+        $dates = json_decode($request->input('dates'));
+
         // optional input
         $url = $request->input('url');
 
@@ -134,19 +118,13 @@ class EventController extends Controller
         $event->userID = $userID;
         $event->spaceID = $spaceID;
         $event->title = $title;
-
+        count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
         $event->url = $url;
-        $day = json_decode($request->input('day'));
-
-        if (!empty($day)) {
-            $event->multiday = false;
-        } else {
-            $event->multiday = true;
-        }
 
         if (!$event->save())
             return Response::json(['error' => 'Database error']);
+
         $eventID = $event->id;
 
         // event organizers
@@ -166,6 +144,7 @@ class EventController extends Controller
                 }
             }
         }
+
         // Update App\Eventskill;
         if (!empty($tags)) {
             foreach ($tags as $tag) {
@@ -182,10 +161,11 @@ class EventController extends Controller
             }
         }
 
-        if (!empty($day)) {
-            $start = json_decode($request->input('start'));
-            $end = json_decode($request->input('end'));
-            $ymd = explode('-', $day);
+        // date placeholder
+        foreach ($dates as $date) {
+            $start = $date->start;
+            $end = $date->end;
+            $ymd = explode('-', $date->day);
             $hms = explode(':', $start);
             $hme = explode(':', $end);
 
@@ -208,51 +188,10 @@ class EventController extends Controller
             ));
             $eventDate = new Eventdate;
             $eventDate->eventID = $eventID;
-            $dateStart = $startStamp;
-            $dateEnd = $endStamp;
-            $eventDate->start = $dateStart;
-            $eventDate->end = $dateEnd;
+            $eventDate->start = $startStamp;
+            $eventDate->end = $endStamp;
             if (!$eventDate->save()) return Response::json(['error' => 'evenDate error']);
-
-        } else {
-            $dateMulti = json_decode($request->input('dateMulti'));
-            $startMulti = json_decode($request->input('startMulti'));
-            $endMulti = json_decode($request->input('endMulti'));
-
-            foreach ($dateMulti as $key => $day) {
-                $start = $startMulti[$key];
-                $end = $endMulti[$key];
-                $ymd = explode('-', $day->day);
-                $hms = explode(':', $start->start);
-                $hme = explode(':', $end->end);
-
-                $startStamp = date('Y-m-d H:i:s', mktime(
-                    (int)$hms[0],
-                    (int)$hms[1],
-                    0,
-                    (int)$ymd[1],
-                    (int)$ymd[2],
-                    (int)$ymd[0]
-                ));
-
-                $endStamp = date('Y-m-d H:i:s', mktime(
-                    (int)$hme[0],
-                    (int)$hme[1],
-                    0,
-                    (int)$ymd[1],
-                    (int)$ymd[2],
-                    (int)$ymd[0]
-                ));
-                $eventDate = new Eventdate;
-                $eventDate->eventID = $eventID;
-                $dateStart = $startStamp;
-                $dateEnd = $endStamp;
-                $eventDate->start = $dateStart;
-                $eventDate->end = $dateEnd;
-                if (!$eventDate->save()) return Response::json(['error' => 'evenDate error']);
-            }
-        }
-
+        } 
         if (!empty($sponserIDs)) {
             foreach ($sponserIDs as $sponserID) {
                 $sponserevent = new Sponserevent;
@@ -295,8 +234,6 @@ class EventController extends Controller
             'description' => 'nullable|string',
             'type' => 'nullable|string',
             'tags' => 'nullable|string',
-            'local' => 'nullable|string',
-            'file' => 'nullable|string'
         ];
 
         // Validate input against rules
@@ -313,7 +250,6 @@ class EventController extends Controller
         $description = $request->input('description');
         $type = $request->input('type');
         $tags = $request->input('tags');
-        $local = $request->input('local');
         $file = $request->input('file');
 
         // check if another event is in time slot
@@ -331,8 +267,6 @@ class EventController extends Controller
         if (!empty($type)) $event->type = $type;
         if (!empty($tags)) $event->tags = $tags;
 
-        //optional input
-        if (!empty($local)) $event->local = $local;
 
         if (!$event->save()) {
             return Response::json(['error' => 'Database error']);
@@ -369,8 +303,8 @@ class EventController extends Controller
         $workSpace = Workspace::find($event->spaceID);
         $dates = Eventdate::where('eventID', $eventID)->get();
         foreach ($dates as $key => $date) {
-            $date->start = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
-            $date->end = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
+            $date->startFormatted = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
+            $date->endFormatted = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
         }
 
         if (empty($event)) {
