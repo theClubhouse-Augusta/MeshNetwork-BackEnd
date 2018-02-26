@@ -57,7 +57,6 @@ class EventController extends Controller
         $userID = Auth::id();
         $spaceID = User::find($userID)->spaceID;
         $rules = [
-            'compEvent' => 'required|string',
             'name' => 'required|string',
             'url' => 'required|string',
             'tags' => 'required|string',
@@ -106,7 +105,6 @@ class EventController extends Controller
         }
 
         /* Event Info */
-        $challenge = json_decode($request->input('compEvent'));
         $title = $request->input('name');
         $description = $request->input('description');
         $tags = explode(',', $request->input('tags'));
@@ -115,10 +113,6 @@ class EventController extends Controller
 
         // optional input
         $url = $request->input('url');
-        $files = $request->input('file0');
-        $image = $request->file('image');
-        $imageName = $image->getClientOriginalName();
-        $image->move('storage/events/images', $imageName);
 
         // create ne App\Event
         $event = new Event;
@@ -127,9 +121,7 @@ class EventController extends Controller
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
-        $event->challenge = $challenge;
         $event->url = $url;
-        $event->image = $request->root() . '/storage/events/images/' . $imageName;
 
         if (!$event->save())
             return Response::json(['error' => 'Database error']);
@@ -210,23 +202,6 @@ class EventController extends Controller
             }
         }
 
-        // create new App\File;
-        if (count($_FILES) != 0) {
-            $length = count($_FILES);
-            for ($i = 0; $i < $length; $i++) {
-                if (array_key_exists("files$i", $_FILES)) {
-                    $file = new File;
-                    $file->userID = $userID;
-                    $file->eventID = $eventID;
-                    $eventFile = $request->file('files' . $i);
-                    $eventFileName = $eventFile->getClientOriginalName();
-                    $eventFile->move("storage/events/$eventID/", $eventFileName);
-                    $file->path = $request->root() . "/storage/events/$eventID/$eventFileName";
-                    if (!$file->save()) return Response::json(['error' => 'Database error']);
-                }
-            }
-        }
-
         $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
         if (empty($check)) {
             $calendar = new Calendar;
@@ -234,7 +209,7 @@ class EventController extends Controller
             $calendar->eventID = $eventID;
             $calendar->save();
         }
-        return Response::json($eventID);
+        return Response::json(['success' => 'Event Added!', 'eventID' => $eventID]);
     }
 
     // all events all spaces
