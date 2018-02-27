@@ -256,7 +256,7 @@ class WorkspaceController extends Controller
         $result = file_get_contents($url, false, $context);
         */
 
-        $url = 'https://lms.innovationmesh.com/signUp/';
+       /* $url = 'https://lms.innovationmesh.com/signUp/';
         $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash);
 
         $options = array(
@@ -272,7 +272,7 @@ class WorkspaceController extends Controller
         );
 
         $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+        $result = file_get_contents($url, false, $context);*/
 
         return Response::json($workspace->id);
     }

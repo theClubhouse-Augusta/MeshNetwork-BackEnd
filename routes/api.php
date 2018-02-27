@@ -120,6 +120,42 @@ Route::post('searchChallenges', 'ChallengesController@search');
 Route::get('joinChallenge/{id}', 'ChallengesController@joinChallenge');
 Route::post('uploadFile', 'ChallengesController@uploadFile');
 
+
+//LMS Routes
+Route::get('getCourses/{category}/{count}', 'CoursesController@getCourses');
+Route::get('myCourses/{category}', 'CoursesController@getMyCourses');
+Route::post('searchCourse', 'CoursesController@searchCourse');
+Route::post('storeCourse', 'CoursesController@storeCourse');
+Route::get('editCourse/{id}', 'CoursesController@editCourse');
+Route::post('updateCourse/{id}', 'CoursesController@updateCourse');
+Route::post('updateCourseImage/{id}', 'CoursesController@updateCourseImage');
+Route::post('updateCourseInstructorAvatar/{id}', 'CoursesController@updateCourseInstructorAvatar');
+Route::post('deleteCourse/{id}', 'CoursesController@deleteCourse');
+Route::get('showCourse/{id}', 'CoursesController@showCourse');
+Route::get('detailCourse/{id}', 'CoursesController@detailCourse');
+Route::post('completeLecture', 'CoursesController@completeLecture');
+Route::post('completeCourse', 'CoursesController@completeCourse');
+Route::post('storeLesson', 'CoursesController@storeLesson');
+Route::post('updateLesson/{id}', 'CoursesController@updateLesson');
+Route::post('deleteLesson/{id}', 'CoursesController@deleteLesson');
+Route::post('storeLecture', 'CoursesController@storeLecture');
+Route::post('updateLecture/{id}', 'CoursesController@updateLecture');
+Route::post('deleteLecture/{id}', 'CoursesController@deleteLecture');
+Route::post('storeFiles', 'CoursesController@storeFiles');
+Route::post('deleteFile/{id}', 'CoursesController@deleteFile');
+Route::post('storeQuestion', 'CoursesController@storeQuestion');
+Route::post('updateQuestion/{id}', 'CoursesController@updateQuestion');
+Route::post('deleteQuestion/{id}', 'CoursesController@deleteQuestion');
+Route::post('storeAnswer', 'CoursesController@storeAnswer');
+Route::post('updateAnswer/{id}', 'CoursesController@updateAnswer');
+Route::post('updateCorrectAnswer/{id}/{lid}/{aid}', 'CoursesController@updateCorrectAnswer');
+Route::post('deleteAnswer/{id}', 'CoursesController@deleteAnswer');
+Route::get('getSubjects', 'CoursesController@getSubjects');
+Route::get('enrollCourse/{id}', 'CoursesController@enrollCourse');
+Route::get('publishCourse/{id}', 'CoursesController@publishCourse');
+
+
+
 // Route::get('log/{message}', 'DashboardController@log');
 // Route::get('email', 'DashboardController@email');
 

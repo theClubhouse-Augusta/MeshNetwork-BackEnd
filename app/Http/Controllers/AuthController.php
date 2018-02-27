@@ -17,6 +17,7 @@ use App\Workspace;
 use App\Event;
 use App\Eventdate;
 use App\Calendar;
+use Mail;
 
 class AuthController extends Controller
 {
@@ -170,7 +171,7 @@ class AuthController extends Controller
 
         */
 
-        $url = 'https://lms.innovationmesh.com/signUp/';
+        /*$url = 'https://lms.innovationmesh.com/signUp/';
         $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
 
         $options = array(
@@ -186,15 +187,14 @@ class AuthController extends Controller
         );
 
         $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+        $result = file_get_contents($url, false, $context);*/
+        
 
         Mail::send('emails.signUp', array(),
-        function($message) use ($name, $email, $resource, $start, $end, $approve, $deny, $space, $contact)
+        function($message) use ($name, $email)
         {
-          $message->from($email, $name);
-          $message->to($contact, $space->name)->subject('Booking: '.$resource->resourceName);
-          //$message->to('nsoharab@gmail.com', $space->name)->subject('Booking: '.$resource->resourceName);
-
+          $message->from('heythere@innovationmesh.com', 'Innovation Mesh');
+          $message->to($email)->subject('Thanks for Joining!');
         });
 
 
@@ -398,6 +398,34 @@ class AuthController extends Controller
         }
 
         return Response::json(['user' => $user, 'skills' => $skills]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $rules = [
+            'email' => 'required'
+        ];
+
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+
+        if ($validator->fails()) {
+            return Response::json(['error' => 'You must fill out all fields.']);
+        }
+
+        $email = $request->input('email');
+        $user = User::where('email', '=', $email)->first();
+        $password = Hash::make(str_random(6));
+        $user->password = $password;
+
+        Mail::send('emails.passwordReset', array(),
+        function($message) use ($name, $email, $password)
+        {
+          $message->from('heythere@innovationmesh.com', 'Innovation Mesh');
+          $message->to($email)->subject('Password Reset');
+        });
+
+        return Response::json(['success' => 'Check your E-mail for your Temp password.']);
+
     }
 
 }
