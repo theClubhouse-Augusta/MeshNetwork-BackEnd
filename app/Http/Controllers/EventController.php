@@ -750,4 +750,38 @@ class EventController extends Controller
 
         return Response::json($events);
     }
+
+    public function resetPassword(Request $request) {
+        // Validation Rules
+        $rules = [
+            'email' => 'required|string',
+        ];
+        // Validate input against rules
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+
+        if ($validator->fails()) {
+            return Response::json(['error' => 'You must fill out all fields.']);
+        }
+
+        $email = $request['email'];
+        $user = User::where('email', $email)->first();
+        $space = Workspace::where('id', $user->spaceID)->first();
+        $temp = str_random(12);
+        $user->password = $temp;
+        $user->save();
+
+        try {
+            Mail::send(
+                'emails.resetPassword',
+                array('temp' => $temp),
+                function ($message) use ($user, $space) {
+                    $message->from($space->email, $space->name);
+                    $message->to($user->email, $user->name)->subject($space->name . ': Password reset for ' . $space->name . '@innovationmesh.com ');
+                }
+            );
+            return Response::json(['success' => 'Check your email for your temporary password.']);
+        } catch (Exception $exception) {
+            return Response::json($exception);
+        }
+    }
 }
