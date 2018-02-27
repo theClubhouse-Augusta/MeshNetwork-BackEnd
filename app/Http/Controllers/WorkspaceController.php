@@ -543,7 +543,11 @@ class WorkspaceController extends Controller
 
     public function getName($spaceID) {
         $space = Workspace::find($spaceID);
-        return $space->name;
+        if ($space != NULL) {
+            return Response::json(['name' => $space->name]);
+        } else {
+            return Response::json([ 'error' => 'no space with id:'.$spaceID]);
+        }
     }
 
 }
