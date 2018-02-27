@@ -21,6 +21,7 @@ class Events extends Migration
             $table->string('status')->default('pending'); //TODO needs approval? hence false??
             $table->string('title'); // unique? //TODO
             $table->text('description');
+            $table->text('location')->nullable();
             $table->string('url')->nullable();
             $table->timestamps();
       });
