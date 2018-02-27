@@ -58,7 +58,11 @@ class ChallengesController extends Controller
         ->get();
 
       $challenge->categories = $categories;
-      $challenge->challengeContent = substr(strip_tags($challenge->challengeContent), 0, 200);
+      if(strlen($challenge->challengeContent) > 200) {
+        $challengeContent = substr(strip_tags($challenge->challengeContent), 0, 200);
+        $challengeContent = $challengeContent.'...';
+        $challenge->challengeContent = $challengeContent;      
+      }
     }
 
     return Response::json(['challenges' => $challenges]);
@@ -179,15 +183,17 @@ class ChallengesController extends Controller
     $challenge->status = $status;
     $challenge->save();
 
-    foreach($challengeCategories as $key => $category)
-    {
-      $cbind = new Cbind;
-      $cbind->challengeID = $challenge->id;
-      $cbind->categoryID = $category->value;
-      $cbind->save();
+    if(!count($challengeCategories) < 0) {
+      foreach($challengeCategories as $key => $category)
+      {
+        $cbind = new Cbind;
+        $cbind->challengeID = $challenge->id;
+        $cbind->categoryID = $category->value;
+        $cbind->save();
+      }
     }
 
-    return Response::json(['challenge' => $challenge->id]);
+    return Response::json(['challenge' => $challenge->challengeSlug]);
   }
 
   public function update(Request $request, $id)
