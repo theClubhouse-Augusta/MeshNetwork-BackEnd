@@ -114,11 +114,11 @@ class UserController extends Controller
         $linkedin = $request->input('linkedin');
         $github = $request->input('github');
         $behance = $request->input('behance');
-        $skills = json_decode($request->input('skills'));
+        $skills = json_decode($request->input('skills'), true);
 
         $skillArray = [];
         foreach ($skills as $key => $skill) {
-            $skillArray[] = $skill[0];
+            $skillArray[] = $skill;
         }
 
         $skills = implode(",", $skillArray);
@@ -162,22 +162,90 @@ class UserController extends Controller
         $user = User::find($user->id);
 
         // userInfo
-        if (!empty($name)) $user->name = $name;
-        if (!empty($website)) $user->website = $website;
-        if (!empty($title)) $user->title = $title;
+        if (!empty($name)) {$user->name = $name;} else { $user->name = $user->name; }
+        //if (!empty($website)) {$user->website = $website;} else { $user->website = $user->website; }
+        if (!empty($title)) {$user->title = $title;} else { $user->title = $user->title; }
         // workInfo
         //if (!empty($email)) $user->email = $email;
-        if (!empty($phoneNumber)) $user->email = $phoneNumber;
-        if (!empty($password)) $user->password = Hash::make($password);
-        if (!empty($facebook)) $user->facebook = $facebook;
-        if (!empty($twitter)) $user->twitter = $twitter;
-        if (!empty($instagram)) $user->instagram = $instagram;
-        if (!empty($linkedin)) $user->linkedin = $linkedin;
-        if (!empty($github)) $user->github = $github;
-        if (!empty($behance)) $user->behance = $behance;
-        if (!empty($skills)) $user->skills = $skills;
+        if (!empty($phoneNumber)) { $user->email = $phoneNumber; } else { $user->email = $user->email; }
+        if (!empty($password)) { $user->password = Hash::make($password); } else { $user->password = $user->password; }
+        if (!empty($facebook)) { 
+            if($facebook == "null") {
+                $user->facebook = NULL;
+            } 
+            else {
+                $user->facebook = $facebook;
+            }
+        }
+        else { 
+            $user->facebook = $user->facebook; 
+        }
+        if (!empty($twitter)) { 
+            if($twitter == "null") {
+                $user->twitter = NULL;
+            } 
+            else {
+                $user->twitter = $twitter; 
+            }
+        } 
+        else { 
+            $user->twitter = $user->twitter; 
+        }
+        if (!empty($instagram)) { 
+            if($instagram == "null") {
+                $user->instagram = NULL;
+            }
+            else {
+                $user->instagram = $instagram; 
+            }
+        } 
+        else { 
+            $user->instagram = $user->instagram; 
+        }
+        if (!empty($linkedin)) { 
+            if($linkedin == "null") {
+                $user->linkedin = NULL;
+            } 
+            else {
+                $user->linkedin = $linkedin; 
+            }
+        } 
+        else { 
+            $user->linkedin = $user->linkedin; 
+        }
+        if (!empty($github)) { 
+            if($github == "null") {
+                $user->github = NULL;
+            } 
+            else {
+                $user->github = $github; 
+            }
+        } else { 
+            $user->github = $user->github; 
+        }
+        if (!empty($behance)) { 
+            if($behance == "null") {
+                $user->behance = NULL;
+            }
+            else {
+                $user->behance = $behance; 
+            }
+        } else { 
+            $user->behance = $user->behance; 
+        }
+        if (!empty($skills)) { 
+            if($skills == "")
+            {
+                $user->skills = NULL;
+            }
+            else {
+                $user->skills = $skills; 
+            }
+        } else { 
+            $user->skills = $user->skills; 
+        }
 
-        if (!empty($bio)) $user->bio = $bio;
+        if (!empty($bio)) {$user->bio = $bio;} else { $user->bio = $user->bio; }
         // Profile Picture
         if (!empty($avatar)) {
             $avatarName = $avatar->getClientOriginalName();
