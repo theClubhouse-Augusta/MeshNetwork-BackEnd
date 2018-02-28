@@ -65,6 +65,7 @@ class EventController extends Controller
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
             'dates' => 'required|string',
+            'eventID' => 'nullable|string',
         ];
 
         // Validate input against rules
@@ -72,6 +73,15 @@ class EventController extends Controller
 
         if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields!']);
+        }
+
+        $deleteEventID = $request['eventID'];
+        if (!empty($deleteEventID)) {
+            $event = Event::find($deleteEventID);
+            $success = $event->delete();
+            if (!$success) {
+                return Response::json(['error' => 'Database error']);
+            }
         }
 
         $sponsors = $request->input('sponsors');
@@ -657,28 +667,6 @@ class EventController extends Controller
 
         $event->delete();
 
-        $calendars = Calendar::where('eventID', $eventID)->get();
-
-        if (!empty($calendars)) {
-            foreach ($calendars as $key => $calendar) {
-                $calendar->delete();
-            }
-        }
-
-        $opts = Opt::where('eventID', $eventID)->get();
-        if (!empty($opts)) {
-            foreach ($opts as $key => $opt) {
-                $opt->delete();
-            }
-        }
-
-        $files = File::where('eventID', $eventID);
-
-        if (!empty($files)) {
-            foreach ($files as $key => $file) {
-                $file->delete();
-            }
-        }
     }
 
     public function storeCalendar($eventID)
