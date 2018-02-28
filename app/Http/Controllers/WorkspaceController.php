@@ -480,21 +480,18 @@ class WorkspaceController extends Controller
         }
     }
 
-    public function getKey($spaceID)
-    {
+    public function getKey($spaceID) {
         $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
         return $workspace->pub_key;
     }
 
-    public function spaceOrganizers($spaceID)
-    {
+    public function spaceOrganizers($spaceID) {
         $users = User::where('spaceID', $spaceID)->where('roleID', 2)->get();
 
         return Response::json($users);
     }
 
-    public function getSpaceStats($spaceID)
-    {
+    public function getSpaceStats($spaceID) {
         $members = User::where('spaceID', $spaceID)->get();
         $memberCount = count($members);
 
@@ -523,8 +520,7 @@ class WorkspaceController extends Controller
         ]);
     }
 
-    public function getSpaceEvents($spaceID)
-    {
+    public function getSpaceEvents($spaceID) {
         $events = Eventdate::join('events', 'eventdates.eventID', '=', 'events.id')->where('events.spaceID', $spaceID)
             ->select('eventdates.id', 'eventdates.eventID', 'events.title', 'events.image', 'eventdates.start', 'eventdates.end')
             ->get();
