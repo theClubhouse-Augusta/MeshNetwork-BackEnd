@@ -64,6 +64,7 @@ class EventController extends Controller
             'sponsors' => 'nullable|string',
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
+            'location' => 'required',
             'dates' => 'required|string',
             'eventID' => 'nullable|string',
         ];
@@ -116,6 +117,7 @@ class EventController extends Controller
         /* Event Info */
         $title = $request->input('name');
         $description = $request->input('description');
+        $location = $request->input('location');
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
         $dates = json_decode($request->input('dates'));
@@ -130,6 +132,7 @@ class EventController extends Controller
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
+        $event->location = $location;
         $event->url = $url;
 
         if (!$event->save())
