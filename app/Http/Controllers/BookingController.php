@@ -190,8 +190,8 @@ class BookingController extends Controller {
         $start = Carbon::createFromTimeStamp(strtotime($start))->format('l jS \\of F Y h:i A');
         $end = Carbon::createFromTimeStamp(strtotime($end))->format('l jS \\of F Y h:i A');
 
-        $approve = 'https://innovationmesh.com/api/booking/approve/'.$token;
-        $deny = 'https://innovationmesh.com/api/booking/deny/'.$token;
+        $approve = 'https://innovationmesh.com/booking/approve/'.$token;
+        $deny = 'https://innovationmesh.com/booking/deny/'.$token;
 
         Mail::send('emails.booking', array('name' => $name, 'email' => $email, 'resource' => $resource, 'start' => $start, 'end' => $end, 'approve' => $approve, 'deny' => $deny, 'space' => $space, 'contact' => $contact),
         function($message) use ($name, $email, $resource, $start, $end, $approve, $deny, $space, $contact)
@@ -225,6 +225,8 @@ class BookingController extends Controller {
           });
 
           $space = Workspace::find($booking->spaceID);
+
+          $resource = Resource::find($booking->resourceID);
           if($resource->resourceEmail != NULL) {
             $contact = $resource->resourceEmail;
           }

@@ -16,8 +16,8 @@ class Questions extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('lectureID');
-            $table->longText('questionContent');
-            $table->string('questionType');
+            $table->longText('questionContent')->nullable();
+            $table->string('questionType')->default('Multiple');
             $table->timestamps();
         });
     }

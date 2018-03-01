@@ -8,6 +8,7 @@ use Response;
 use Purifier;
 use Auth;
 use JWTAuth;
+use Image;
 
 use App\User;
 use App\Course;
@@ -108,49 +109,56 @@ class CoursesController extends Controller
             return Response::json(['error' => 'You do not have permission.']);
         }
 
-        if($request->hasInput('courseCategory'))
+        if($request->has('courseName'))
+        {
+            $courseName = $request->input('courseName');
+        } else {
+            $courseName = $course->courseName;
+        }
+
+        if($request->has('courseCategory'))
         {
             $courseCategory = $request->input('courseCategory');
         } else {
             $courseCategory = $course->courseCategory;
         }
 
-        if($request->hasInput('courseSummary'))
+        if($request->has('courseSummary'))
         {
             $courseSummary = $request->input('courseSummary');
         } else {
             $courseSummary = $course->courseSummary;
         }
 
-        if($request->hasInput('courseInformation'))
+        if($request->has('courseInformation'))
         {
             $courseInformation = $request->input('courseInformation');
         } else {
             $courseInformation = $course->courseInformation;
         }
 
-        if($request->hasInput('courseInstructorName'))
+        if($request->has('courseInstructorName'))
         {
             $courseInstructorName = $request->input('courseInstructorName');
         } else {
             $courseInstructorName = $course->courseInstructorName;
         }
 
-        if($request->hasInput('courseInstructorInfo'))
+        if($request->has('courseInstructorInfo'))
         {
             $courseInstructorInfo = $request->input('courseInstructorInfo');
         } else {
             $courseInstructorInfo = $course->courseInstructorInfo;
         }
 
-        if($request->hasInput('courseStatus'))
+        if($request->has('courseStatus'))
         {
             $courseStatus = $request->input('courseStatus');
         } else {
             $courseStatus = $course->courseStatus;
         }
 
-        if($request->hasInput('coursePrice'))
+        if($request->has('coursePrice'))
         {
             $coursePrice = $request->input('coursePrice');
         } else {
@@ -648,9 +656,11 @@ class CoursesController extends Controller
             return Response::json(['error' => 'You do not have permission']);
         }
 
-        $answer = Answer::where('lectureID', $lid)->first();
-        $answer->isCorrect = 0;
-        $answer->save();
+        $answers = Answer::where('questionID', $lid)->get();
+        foreach($answers as $aKey => $answer) {
+            $answer->isCorrect = 0;
+            $answer->save();
+        }
 
         $answer = Answer::where('id', $aid)->first();
         $answer->isCorrect = 1;

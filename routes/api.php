@@ -35,6 +35,8 @@ Route::post('forgotpassword', 'AuthController@resetPassword');
 Route::get('user/auth', 'AuthController@getUser'); // get Auth User
 Route::get('user/profile/{id}', 'UserController@user'); // get user.id
 Route::post('user/update', 'UserController@updateUser'); // logged in user profile update
+Route::get('getDashboardUsers/{id}', 'UserController@getDashboardUsers');
+Route::post('changeRole', 'UserController@changeRole');
 
 // TESTING
 Route::get('userskills', 'UserController@userSkills'); // to populate tags in sign up form
@@ -42,6 +44,7 @@ Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up
 Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sign up form
 Route::post('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('organizers/events', 'UserController@OrganizersForEvents'); // to populate tags in sign up form
+
 /*Route::get('getSpaceUsers/{spaceID}', 'UserController@getSpaceUsers');
 Route::get('userToOrg/{userID}', 'UserController@makeOrganizer');
 
