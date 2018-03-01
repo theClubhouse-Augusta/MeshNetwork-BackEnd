@@ -78,16 +78,6 @@ class SpaceController extends Controller
 
         // test input
 
-        // production input
-        // Logged in user
-        // $userID = Auth::id();
-        // $user = User::find($userID);
-        // $roleID = $user->roleID;
-        // return $roleID;
-        // if ($roleID != 1 && $roleID != 2) {
-        //     return Response::json(['error' => 'invalid credentials']);
-        // }
-
         // form input
         $name = $request->input('name');
         $slug = (strtolower($name));

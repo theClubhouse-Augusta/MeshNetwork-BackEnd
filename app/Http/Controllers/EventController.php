@@ -64,8 +64,11 @@ class EventController extends Controller
             'sponsors' => 'nullable|string',
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
-            'location' => 'required',
             'dates' => 'required|string',
+            'eventID' => 'nullable|string',
+            'city' => 'nullable|string',
+            'address' => 'nullable|string',
+            'state' => 'nullable|string',
         ];
 
         // Validate input against rules
@@ -73,6 +76,15 @@ class EventController extends Controller
 
         if ($validator->fails()) {
             return Response::json(['error' => 'You must fill out all fields!']);
+        }
+
+        $deleteEventID = $request['eventID'];
+        if (!empty($deleteEventID)) {
+            $event = Event::find($deleteEventID);
+            $success = $event->delete();
+            if (!$success) {
+                return Response::json(['error' => 'Database error']);
+            }
         }
 
         $sponsors = $request->input('sponsors');
@@ -107,13 +119,15 @@ class EventController extends Controller
         /* Event Info */
         $title = $request->input('name');
         $description = $request->input('description');
-        $location = $request->input('location');
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
         $dates = json_decode($request->input('dates'));
 
         // optional input
         $url = $request->input('url');
+        $city = $request->input('city');
+        $address = $request->input('address');
+        $state = $request->input('state');
 
         // create ne App\Event
         $event = new Event;
@@ -122,7 +136,17 @@ class EventController extends Controller
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
-        $event->location = $location;
+        
+        if ( (!empty($city) && !empty($state) && !empty($address)) ) {
+            $event->city = $city;
+            $event->address = $address;
+            $event->state = $state;
+            $coordinates = $this->getGeoLocation($address, $city, $state);
+            $lon = $coordinates->results[0]->geometry->location->lng;
+            $lat = $coordinates->results[0]->geometry->location->lat;
+            $event->lon = $lon;
+            $event->lat = $lat;
+        }
         $event->url = $url;
 
         if (!$event->save())
@@ -660,28 +684,6 @@ class EventController extends Controller
 
         $event->delete();
 
-        $calendars = Calendar::where('eventID', $eventID)->get();
-
-        if (!empty($calendars)) {
-            foreach ($calendars as $key => $calendar) {
-                $calendar->delete();
-            }
-        }
-
-        $opts = Opt::where('eventID', $eventID)->get();
-        if (!empty($opts)) {
-            foreach ($opts as $key => $opt) {
-                $opt->delete();
-            }
-        }
-
-        $files = File::where('eventID', $eventID);
-
-        if (!empty($files)) {
-            foreach ($files as $key => $file) {
-                $file->delete();
-            }
-        }
     }
 
     public function storeCalendar($eventID)
@@ -765,7 +767,6 @@ class EventController extends Controller
         foreach ($sponsers as $sponser) {
             array_push($sponsersArray, $sponser->name);
         }
-
                 // 'label' => $sponser->name,
                 // 'value' => $sponser->name,
                 // 'id' => $sponser->id,
@@ -876,5 +877,21 @@ class EventController extends Controller
         } catch (Exception $exception) {
             return Response::json($exception);
         }
+    }
+
+    private function getGeoLocation($address, $city, $state)
+    {
+        $address_array = explode(' ', $address);
+
+        $length = count($address_array);
+
+        $URIparam = '';
+        for ($i = 0; $i < $length; $i++) {
+            if ($i != ($length - 1))
+                $URIparam .= $address_array[$i] . '+';
+            else
+                $URIparam .= $address_array[$i];
+        }
+        return json_decode(file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address=' . $URIparam . ',+' . $city . ',+' . $state . '&key=AIzaSyCrhrhhqlvkuQkAycbZzVS5f-ym_tpFs0o'));
     }
 }
