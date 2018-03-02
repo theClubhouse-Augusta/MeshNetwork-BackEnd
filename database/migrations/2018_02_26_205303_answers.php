@@ -16,7 +16,7 @@ class Answers extends Migration
         Schema::create('answers', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('questionID');
-            $table->longText('answerContent');
+            $table->longText('answerContent')->nullable();
             $table->boolean('isCorrect')->default(false);
             $table->timestamps();
         });

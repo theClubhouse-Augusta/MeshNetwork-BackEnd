@@ -13,6 +13,8 @@ use Carbon\Carbon;
 use DateTime;
 
 use App\User;
+use App\Appearance;
+use App\Role;
 use App\Calendar;
 use App\Userskill;
 use App\Skill;
@@ -33,6 +35,7 @@ class UserController extends Controller
             'updateUser',
             'delete',
             'makeOrganizer',
+            'getDashboardUsers',
            //'showUser',
            //'user',
             //'searchName',
@@ -617,8 +620,9 @@ class UserController extends Controller
         $users = User::where('spaceID', $spaceID)->get();
         $usersArray = [];
         foreach ($users as $user) {
+            $email = substr($user->email, 0, 3).'****'.substr($user->email, strpos($user->email, "@"));
             array_push($usersArray, [
-                'label' => $user->name . ' - ' . $user->email,
+                'label' => $user->name . ' - ' . $email,
                 'value' => $user->id,
                 'avatar' => $user->avatar,
                 'name' => $user->name
@@ -657,5 +661,54 @@ class UserController extends Controller
         } else {
             return Response::json(['error' => 'database error']);
         }
+    }
+
+    public function getDashboardUsers($id)
+    {
+        $auth = Auth::user();
+        if($auth->spaceID != $id && $auth->roleID != 2) 
+        {
+            return Response::json(['error' => 'You do not have permission.']);
+        }
+
+        $users = User::where("users.spaceID", $id)->select('users.id', 'users.name', 'users.roleID', 'users.title', 'users.email')->get();
+        
+        foreach($users as $uKey => $user)
+        {
+            $role = Role::find($user->roleID);
+            $user->role = $role;
+
+            $checks = Appearance::where('userID', $user->id)->get();
+            $checks = count($checks);
+            $user->checkins = $checks;
+        }
+
+        $roles = Role::where('id', '!=', 1)->get();
+        
+        return Response::json(['users' => $users, 'roles' => $roles]);
+    }
+
+    public function changeRole(Request $request)
+    {
+        $rules = [
+            'userID' => 'required',
+            'roleID' => 'required',
+        ];
+
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+
+        if ($validator->fails()) {
+            return Response::json(['error' => 'Invalid form input.']);
+        }
+
+        $userID = $request->input('userID');
+        $roleID = $request->input('roleID');
+
+        $user = User::find($userID);
+        $user->roleID = $roleID;
+        $user->save();
+
+        return Response::json(['success' => 'Role Updated.']);
+
     }
 }

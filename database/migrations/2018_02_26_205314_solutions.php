@@ -17,7 +17,8 @@ class Solutions extends Migration
             $table->increments('id');
             $table->integer('userID');
             $table->integer('questionID');
-            $table->integer('answer');
+            $table->integer('answer')->nullable();
+            $table->longText('openContent')->nullable();
             $table->timestamps();
         });
     }

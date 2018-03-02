@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Welcome to the Mesh Network</title>
+  <title>Password Reset</title>
 </head>
 <body>
 
