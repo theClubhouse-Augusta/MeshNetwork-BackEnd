@@ -154,9 +154,12 @@ class BookingController extends Controller {
         $start = $request->input('start');
         $end = $request->input('end');
         $token = str_random(128);
+        //$start = strtotime($start);
+        //$start = Carbon::createFromTimeStamp(strtotime($start));
+        //return Response::json($start);
 
-        $start = Carbon::createFromTimeStamp(strtotime($start))->toDateTimeString();
-        $end = Carbon::createFromTimeStamp(strtotime($end))->toDateTimeString();
+        $start = Carbon::createFromTimeStamp(strtotime($start), 'America/New_York')->toDateTimeString();
+        $end = Carbon::createFromTimeStamp(strtotime($end), 'America/New_York')->toDateTimeString();
 
         $user = Auth::user();
         $user = User::find($user->id);
@@ -214,6 +217,9 @@ class BookingController extends Controller {
           $booking->save();
           $space = Workspace::find($booking->spaceID);
 
+          $googleStart = Carbon::createFromTimeStamp(strtotime($booking->start));
+          $googleEnd = Carbon::createFromTimeStamp(strtotime($booking->end));
+
           $booking->start = Carbon::createFromTimeStamp(strtotime($booking->start))->format('l jS \\of F Y h:i A');
           $booking->end = Carbon::createFromTimeStamp(strtotime($booking->end))->format('l jS \\of F Y h:i A');
 
@@ -234,15 +240,15 @@ class BookingController extends Controller {
             $contact = $space->email;
           }
 
-          $event = new Event;
+          /*$event = new Event;
 
           $event->name = $booking->resourceName;
-          $event->startDateTime = $booking->start;
-          $event->endDateTime = $booking->end;
+          $event->startDateTime = $googleStart;
+          $event->endDateTime = $googleEnd;
           $event->addAttendee(['email' => $contact]);
           $event->addAttendee(['email' => $booking->email]);
 
-          $event->save();
+          $event->save();*/
 
           return "Booking has been approved.";
         }

@@ -53,7 +53,8 @@ class CoursesController extends Controller
             'updateAnswer',
             'deleteAnswer',
             'enrollCourse',
-            'publishCourse'
+            'publishCourse',
+            'getCourseStudent'
         ]]);
     }
 
@@ -377,7 +378,7 @@ class CoursesController extends Controller
     {
         $user = Auth::user();
 
-        if($user->roleID == 3)
+        if($user->roleID == 3 || $user->roleID == 2)
         {
             $courses = Enroll::where('enrolls.userID', $user->id)->join('courses', 'enrolls.courseID', '=', 'courses.id')->select('courses.id', 'courses.courseName', 'courses.userID', 'courses.courseCategory', 'courses.courseSummary', 'courses.courseImage')->paginate(16);
 
@@ -410,7 +411,7 @@ class CoursesController extends Controller
             }
 
         }
-        else if($user->roleID == 4 || $user->roleID == 2 || $user->roleID == 1)
+        else if($user->roleID == 4 || $user->roleID == 1)
         {
             $courses = Course::where('archive', '=', 0)->where('userID', '=', $user->id)->select('id', 'userID', 'courseName', 'courseCategory', 'courseSummary', 'courseImage', 'courseStatus')->paginate(12);
         }
@@ -552,11 +553,11 @@ class CoursesController extends Controller
                         $complete = $complete . '/' . count($lectures);
                         $student = [
                             'profile' => $profile,
-                            'status' => $enroll->status,
+                            'status' => $enroll->enrollStatus,
                             'complete' => $complete,
                             'percent' => $percent
                         ];
-                        $student = json_encode($student);
+                        //$student = json_encode($student);
                         $students[] = $student;
                     }
                 }
@@ -1181,6 +1182,71 @@ class CoursesController extends Controller
             return Response::json(['success' => 'Course Published.']);
         }
 
+    }
+
+    public function getCourseStudent($cid, $uid)
+    {
+        $user = Auth::user();
+        $course = Course::find($cid);
+
+        if($user->id != $course->userID && $uid != $user->id)
+        {
+            return Response::json(['error' => 'You do not have permission']);
+        }
+
+        $enroll = Enroll::where('userID', $uid)->where('courseID', $cid)->first();
+        if(empty($enroll))
+        {
+            return Response::json(['error' => 'Student does not exist.']);
+        }
+
+        $student = User::find($uid);
+
+        $lessons = Lesson::where('courseID', $course->id)->get();
+
+        $lectureArray = [];
+
+        foreach($lessons as $lesKey => $lesson)
+        {
+            $lectures = Lecture::where('lessonID', $lesson->id)->get();
+            
+            foreach($lectures as $lecKey => $lecture)
+            {
+                $complete = Complete::where('userID', $uid)->where('lectureID', $lecture->id)->first();
+                if(empty($complete))
+                {
+                    $lecture->complete = 0;
+                    $lecture->grade = 0;
+                } else {
+                    $lecture->complete = 1;
+                    $lecture->grade = $complete->grade;
+                }
+
+                if($lecture->lectureType == "Exam")
+                {
+                    $questions = Question::where('lectureID', $lecture->id)->get();
+                    foreach($questions as $quesKey => $question)
+                    {
+                        if($question->questionType == 'Multiple') {
+                            $answers = Answer::where('questionID', $question->id)->get();
+                            $question->answers = $answers;
+                        }
+
+                        $solution = Solution::where('userID', $uid)->where('questionID', $question->id)->first();
+
+                        $question->solution = $solution;
+                    }
+
+                    $lecture->questions = $questions;
+                }
+
+                $lectureArray[] = $lecture;
+            }
+        }
+
+        
+
+        return Response::json(['course' => $course, 'student' => $student, 'lectures' => $lectureArray]);
     }
 
 

@@ -157,6 +157,7 @@ Route::post('deleteAnswer/{id}', 'CoursesController@deleteAnswer');
 Route::get('getSubjects', 'CoursesController@getSubjects');
 Route::get('enrollCourse/{id}', 'CoursesController@enrollCourse');
 Route::get('publishCourse/{id}', 'CoursesController@publishCourse');
+Route::get('getCourseStudent/{cid}/{uid}', 'CoursesController@getCourseStudent');
 
 
 

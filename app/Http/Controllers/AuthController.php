@@ -414,10 +414,12 @@ class AuthController extends Controller
 
         $email = $request->input('email');
         $user = User::where('email', '=', $email)->first();
-        $password = Hash::make(str_random(6));
-        $user->password = $password;
+        $password = str_random(6);
+        $hashword = Hash::make(str_random(6));
+        $user->password = $hashword;
+        $name = $user->name;
 
-        Mail::send('emails.passwordReset', array(),
+        Mail::send('emails.passwordReset', array('name' => $name, 'email' => $email, 'password' => $password),
         function($message) use ($name, $email, $password)
         {
           $message->from('heythere@innovationmesh.com', 'Innovation Mesh');
