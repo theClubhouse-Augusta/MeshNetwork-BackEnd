@@ -54,7 +54,8 @@ class CoursesController extends Controller
             'deleteAnswer',
             'enrollCourse',
             'publishCourse',
-            'getCourseStudent'
+            'getCourseStudent',
+            'approveAnswer'
         ]]);
     }
 
@@ -446,10 +447,17 @@ class CoursesController extends Controller
         return Response::json(['course' => $course, 'lessons' => $lessons, 'lectures' => $lectures]);
     }
 
-    public function showCourse($id)
+    public function showCourse($id, $uid)
     {
         $course = Course::where('id', $id)->where('archive', '=', 0)->first();
         $user = Auth::user();
+
+        if($user->id == $uid || $course->userID == $user->id)
+        {
+            $user = User::find($uid);
+        } else {
+            return Response::json(['authError' => 'You do not have access to this page.']);
+        }
 
         if(!empty($course))
         {
@@ -512,17 +520,47 @@ class CoursesController extends Controller
                                 if(!$questionsGet->isEmpty())
                                 {
                                     foreach($questionsGet as $qKey => $question)
-                                    {
-                                        $questions[] = $question;
-
-                                        $answersGet = Answer::where('questionID', $question->id)->get();
+                                    {                                        
+                                        if(!empty($lecComplete)) {
+                                            $answersGet = Answer::where('questionID', $question->id)->select('id', 'questionID', 'answerContent', 'isCorrect')->get();
+                                        } else {
+                                            $answersGet = Answer::where('questionID', $question->id)->select('id', 'questionID', 'answerContent')->get();
+                                        }
                                         if(!$answersGet->isEmpty())
                                         {
                                             foreach($answersGet as $aKey => $answer)
                                             {
+                                                if($question->questionType == 'multiple')
+                                                {
+                                                    $solution = Solution::where('userID', $user->id)->where('questionID', $question->id)->where('answer', $answer->id)->first();
+                                                    if(!empty($solution))
+                                                    {
+                                                        $answer->solution = 1;
+                                                        $answer->solCorrect = $solution->solCorrect;
+                                                    }
+                                                    else {
+                                                        $answer->solution = 0;
+
+                                                    }
+                                                }
                                                 $answers[] = $answer;
                                             }
                                         }
+
+                                        if($question->questionType == 'open')
+                                        {
+                                            $solution = Solution::where('userID', $user->id)->where('questionID', $question->id)->first();
+                                            if(!empty($solution))
+                                            {
+                                                $question->solution = $solution->openContent;
+                                                $question->solCorrect = $solution->solCorrect;
+                                            }
+                                            else {
+                                                $question->solution = "";
+                                            }
+                                        }
+
+                                        $questions[] = $question;
                                     }
                                 }
                             }
@@ -674,7 +712,7 @@ class CoursesController extends Controller
     {
         $courseID = $request->input('courseID');
         $lectureID = $request->input('lectureID');
-        $answers = $request->input('answers');
+        $answers = json_decode($request->input('answers'));
 
         $course = Course::find($courseID);
         $user = Auth::user();
@@ -716,15 +754,35 @@ class CoursesController extends Controller
                     {
                         foreach($answers as $aKey => $answer)
                         {
-                            $solution = new Solution;
-                            $solution->userID = $user->id;
-                            $solution->questionID = $question->id;
-                            $solution->answer = $answer->answerID;
-                            $solution->save();
-
-                            if($a->id == $answer->answerID && $a->isCorrect == 1)
+                            if($question->id == $answer->questionID)
                             {
-                                $answerCount = $answerCount + 1;
+                                if($question->questionType == 'multiple')
+                                {
+                                    $solution = new Solution;
+                                    $solution->userID = $user->id;
+                                    $solution->questionID = $question->id;
+                                    $solution->answer = $answer->answerID;
+        
+                                    if($a->id == $answer->answerID && $a->isCorrect == 1)
+                                    {
+                                        $solution->solCorrect = 1;
+                                        $answerCount = $answerCount + 1;
+                                    }
+                                    else {
+                                        $solution->solCorrect = 0;
+                                    }
+
+                                    $solution->save();
+                                }
+                                else if($question->questionType == 'open') 
+                                {
+                                    $solution = new Solution;
+                                    $solution->userID = $user->id;
+                                    $solution->questionID = $question->id;
+                                    $solution->openContent = $answer->answerID;
+                                    $solution->solCorrect = 2;
+                                    $solution->save();
+                                }
                             }
                         }
                     }
@@ -957,9 +1015,19 @@ class CoursesController extends Controller
             return Response::json(['error' => 'You do not have permission']);
         }
 
+        $docFolder = 'storage/course/documents/'.$lectureID;
+        if (!is_dir($docFolder)) {
+            mkdir($docFolder, 0777, true);
+        }
+
+        $path = '/storage/course/documents/'.$lectureID;
+        $fileData->move(public_path().$path, $fileData->getClientOriginalName());
+        $filePath = $request->root().'/storage/course/documents/'.$lectureID.'/'.$fileData->getClientOriginalName();
+
         $doc = new Document;
         $doc->lectureID = $lectureID;
-        $doc->fileData = $fileData;
+        $doc->fileName = $fileData->getClientOriginalName();
+        $doc->fileData = $filePath;
         $doc->save();
 
         return Response::json(['success' => $doc->id]);
@@ -1247,6 +1315,56 @@ class CoursesController extends Controller
         
 
         return Response::json(['course' => $course, 'student' => $student, 'lectures' => $lectureArray]);
+    }
+
+    public function approveAnswer($qid, $uid, $i)
+    {
+        $question = Question::find($qid);
+        $lecture = Lecture::find($question->lectureID);
+        $lesson = Lesson::find($lecture->lessonID);
+        $course = Course::find($lesson->courseID);
+
+        $user = Auth::user();
+
+        if($course->userID != $user->id)
+        {
+            return Response::json(['error' => 'You do not have permission']);
+        }
+
+        $solution = Solution::where('questionID', $question->id)->where('userID', $uid)->first();
+        $solution->solCorrect = $i;
+        $solution->save();
+
+        $complete = Complete::where('lectureID', $lecture->id)->where('userID', $uid)->first();
+        $grade = $complete->grade;
+        
+        if($i == 1)
+        {
+            $result = "Answer Approved.";
+
+            $questions = Question::where('lectureID', $lecture->id)->get();
+            $questionCount = count($questions);
+
+            $solutionCount = 0;
+            foreach($questions as $qKey => $question)
+            {
+                $sol = Solution::where('questionID', $question->id)->where('userID', $uid)->first();
+
+                if($sol->solCorrect == 1)
+                {
+                    $solutionCount = $solutionCount + 1;
+                }
+            }
+            
+            $grade = $solutionCount / $questionCount * 100;
+            $complete->grade = $grade;
+            $complete->save();
+        }
+        else {
+            $result = "Answer Denied.";
+        }
+
+        return Response::json(['success' => $result, 'grade' => $grade]);
     }
 
 
