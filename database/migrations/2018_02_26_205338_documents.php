@@ -16,6 +16,7 @@ class Documents extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('lectureID');
+            $table->string('fileName');
             $table->longText('fileData');
             $table->timestamps();
         });

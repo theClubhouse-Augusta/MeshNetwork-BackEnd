@@ -19,6 +19,7 @@ class Solutions extends Migration
             $table->integer('questionID');
             $table->integer('answer')->nullable();
             $table->longText('openContent')->nullable();
+            $table->boolean('solCorrect')->default(0);
             $table->timestamps();
         });
     }

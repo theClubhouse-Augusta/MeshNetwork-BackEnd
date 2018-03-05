@@ -415,8 +415,11 @@ class AuthController extends Controller
         $email = $request->input('email');
         $user = User::where('email', '=', $email)->first();
         $password = str_random(6);
-        $hashword = Hash::make(str_random(6));
+        $hashword = Hash::make($password);
+        
         $user->password = $hashword;
+        $user->save();
+
         $name = $user->name;
 
         Mail::send('emails.passwordReset', array('name' => $name, 'email' => $email, 'password' => $password),

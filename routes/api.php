@@ -135,7 +135,7 @@ Route::post('updateCourse/{id}', 'CoursesController@updateCourse');
 Route::post('updateCourseImage/{id}', 'CoursesController@updateCourseImage');
 Route::post('updateCourseInstructorAvatar/{id}', 'CoursesController@updateCourseInstructorAvatar');
 Route::post('deleteCourse/{id}', 'CoursesController@deleteCourse');
-Route::get('showCourse/{id}', 'CoursesController@showCourse');
+Route::get('showCourse/{id}/{uid}', 'CoursesController@showCourse');
 Route::get('detailCourse/{id}', 'CoursesController@detailCourse');
 Route::post('completeLecture', 'CoursesController@completeLecture');
 Route::post('completeCourse', 'CoursesController@completeCourse');
@@ -158,6 +158,7 @@ Route::get('getSubjects', 'CoursesController@getSubjects');
 Route::get('enrollCourse/{id}', 'CoursesController@enrollCourse');
 Route::get('publishCourse/{id}', 'CoursesController@publishCourse');
 Route::get('getCourseStudent/{cid}/{uid}', 'CoursesController@getCourseStudent');
+Route::get('approveAnswer/{qid}/{uid}/{i}','CoursesController@approveAnswer');
 
 
 
