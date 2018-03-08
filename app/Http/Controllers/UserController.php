@@ -628,8 +628,26 @@ class UserController extends Controller
                 'name' => $user->name
             ]);
         }
+        return Response::json(['users' => $usersArray]);
+    }
+
+    public function getKioskUsers()
+    {
+        $users = User::all();
+        $usersArray = [];
+        foreach ($users as $user) {
+            $email = substr($user->email, 0, 3).'****'.substr($user->email, strpos($user->email, "@"));
+            array_push($usersArray, [
+                'label' => $user->name . ' - ' . $email,
+                'value' => $user->id,
+                'avatar' => $user->avatar,
+                'name' => $user->name
+            ]);
+        }
         return Response::json($usersArray);
     }
+
+
 
     public function getSpaceUsers($spaceID)
     {

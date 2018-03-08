@@ -37,6 +37,7 @@ Route::get('user/profile/{id}', 'UserController@user'); // get user.id
 Route::post('user/update', 'UserController@updateUser'); // logged in user profile update
 Route::get('getDashboardUsers/{id}', 'UserController@getDashboardUsers');
 Route::post('changeRole', 'UserController@changeRole');
+Route::get('getKioskUsers', 'UserController@getKioskUsers');
 
 // TESTING
 Route::get('userskills', 'UserController@userSkills'); // to populate tags in sign up form
@@ -98,6 +99,7 @@ Route::post('event', 'EventController@store');
 Route::get('event/{eventID}', 'EventController@show');
 Route::get('spaceEvents/{spaceID}', 'WorkspaceController@getSpaceEvents'); //Formatted Events for the Calendar
 Route::get('spacename/{spaceID}', 'WorkspaceController@getName');
+Route::get('attend/{eventID}', 'EventController@attend');
 //
 Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('events/{spaceID}', 'EventController@getDashboardEvents');

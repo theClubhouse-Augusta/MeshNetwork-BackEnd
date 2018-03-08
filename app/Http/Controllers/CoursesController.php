@@ -1366,6 +1366,4 @@ class CoursesController extends Controller
 
         return Response::json(['success' => $result, 'grade' => $grade]);
     }
-
-
 }

@@ -17,6 +17,9 @@ use App\Upload;
 //use App\Team;
 use App\User;
 use App\Workspace;
+use App\Eventdate;
+
+use Carbon\Carbon;
 
 
 class ChallengesController extends Controller
@@ -113,7 +116,6 @@ class ChallengesController extends Controller
       'challengeImage' => 'required',
       'challengeTitle' => 'required',
       'challengeContent' => 'required',
-      'challengeCategories' => 'required'
     ];
 
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -128,9 +130,8 @@ class ChallengesController extends Controller
     $challengeImage = $request->file('challengeImage');
     $challengeTitle = $request->input('challengeTitle');
     $challengeContent = $request->input('challengeContent');
-    $challengeCategories = json_decode($request->input('challengeCategories'));
-    $startDate = $request->input('startDate');
-    $endDate = $request->input('endDate');
+    $eventID = $request->input('eventID');
+    //$challengeCategories = json_decode($request->input('challengeCategories'));
     $status = 'Approved';
 
     $challengeSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $challengeTitle)));
@@ -174,16 +175,15 @@ class ChallengesController extends Controller
 
     $challenge = new Challenge;
     $challenge->spaceID = $spaceID;
+    $challenge->eventID = $eventID;
     $challenge->challengeImage = $request->root().'/'.$challengeImage;
     $challenge->challengeTitle = $challengeTitle;
     $challenge->challengeSlug = $challengeSlug;
     $challenge->challengeContent = $challengeContent;
-    $challenge->startDate = $startDate;
-    $challenge->endDate = $endDate;
     $challenge->status = $status;
     $challenge->save();
 
-    if(!count($challengeCategories) < 0) {
+    /*if(!count($challengeCategories) < 0) {
       foreach($challengeCategories as $key => $category)
       {
         $cbind = new Cbind;
@@ -191,7 +191,7 @@ class ChallengesController extends Controller
         $cbind->categoryID = $category->value;
         $cbind->save();
       }
-    }
+    }*/
 
     return Response::json(['challenge' => $challenge->challengeSlug]);
   }
@@ -330,7 +330,7 @@ class ChallengesController extends Controller
 
   public function show($id)
   {
-    $challenge = Challenge::where('challenges.challengeSlug', $id)->where('challenges.status', 'Approved')->join('workspaces', 'challenges.spaceID', '=', 'workspaces.id')
+    $challenge = Challenge::where('challenges.challengeSlug', $id)->where('challenges.status', 'Approved')->join('workspaces', 'challenges.spaceID', '=', 'workspaces.id')->join('events', 'challenges.eventID', '=', 'events.id')
     ->select(
       'challenges.id',
       'challenges.challengeImage',
@@ -338,13 +338,23 @@ class ChallengesController extends Controller
       'challenges.challengeContent',
       'challenges.challengeSlug',
       'challenges.spaceID',
-      'challenges.startDate',
-      'challenges.endDate',
+      'challenges.eventID',
       'workspaces.logo',
       'workspaces.name',
-      'workspaces.city'
+      'workspaces.city',
+      'events.state',
+      'events.city',
+      'events.address',
+      'events.zipcode'
     )
     ->first();
+
+    $eventDates = Eventdate::where('eventID', $challenge->eventID)->get();
+    foreach ($eventDates as $key => $date) {
+      $date->startFormatted = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y h:i A');
+      $date->endFormatted = Carbon::createFromTimeStamp(strtotime($date->end))->format('l jS \\of F Y h:i A');
+    }
+    $workspace = Workspace::where('id', $challenge->spaceID)->first();
 
     $categories = Cbind::where('cbinds.challengeID', $challenge->id)->join('categories', 'cbinds.categoryID', '=', 'categories.id')
       ->select(
@@ -369,7 +379,7 @@ class ChallengesController extends Controller
 
     $teams = Ptbind::where('ptbinds.challengeID', $challenge->id)->join('users', 'ptbinds.userID', '=', 'users.id')->select('users.id', 'users.avatar', 'users.name')->inRandomOrder()->take(10)->get();
 
-    return Response::json(['challenge' => $challenge, 'uploads' => $uploads, 'teams' => $teams, 'categoriesArray' => $categoriesArray]);
+    return Response::json(['challenge' => $challenge, 'uploads' => $uploads, 'teams' => $teams, 'categoriesArray' => $categoriesArray, 'eventDates' => $eventDates, 'workspace' => $workspace]);
   }
 
   public function showTeams($id)

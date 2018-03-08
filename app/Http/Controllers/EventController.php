@@ -23,6 +23,7 @@ use App\Workspace;
 use App\Calendar;
 use App\Opt;
 use App\File;
+use App\Challenge;
 use Carbon\Carbon;
 use DB;
 
@@ -58,13 +59,11 @@ class EventController extends Controller
         $spaceID = User::find($userID)->spaceID;
         $rules = [
             'name' => 'required|string',
-            'url' => 'required|string',
             'tags' => 'required|string',
             'organizers' => 'required|string',
             'sponsors' => 'nullable|string',
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
-            'dates' => 'required|string',
             'eventID' => 'nullable|string',
             'city' => 'nullable|string',
             'address' => 'nullable|string',
@@ -416,6 +415,7 @@ class EventController extends Controller
         $sponsors = $this->getSponsors($eventID);
         $organizers = $this->getOrganizers($eventID);
         $attendees = $this->getAttendees($eventID);
+        $challenges = Challenge::where('eventID', $eventID)->get();
         $upcomingEvents = $this->getUpcoming();
         $workSpace = Workspace::find($event->spaceID);
         $dates = Eventdate::where('eventID', $eventID)->get();
@@ -437,6 +437,7 @@ class EventController extends Controller
             'sponsors' => $sponsors,
             'organizers' => $organizers,
             'attendees' => $attendees,
+            'challenges' => $challenges,
             'tags' => $tags,
             'dates' => $dates
         ]);
@@ -747,19 +748,24 @@ class EventController extends Controller
         return Response::json(['success' => 'Event removed form calendar']);
     }
 
-    public function attend($eventID, $userID)
+    public function attend($eventID)
     {
-        $user = User::find($userID);
+        $userID = Auth::id();
         $event = Event::find($eventID);
 
+        $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
+        if(!empty($check))
+        {
+            return Response::json(['duplicate' => 'You are already attending this event.']);
+        }
         $attendEvent = new Calendar;
         $attendEvent->eventID = $eventID;
         $attendEvent->userID = $userID;
+        $attendEvent->save();
 
-        if (!$attendEvent->save()) {
-            return Response::json(['error' => 'database error, try again']);
-        }
+        return Response::json(['success' => 'Thanks for Attending this event!']);
     }
+
     public function Sponsers()
     {
         $sponsers = Sponser::all();
