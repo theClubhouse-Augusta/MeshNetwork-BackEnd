@@ -1,6 +1,5 @@
 <?php 
 namespace App\Services\Stripe;
-
 use Stripe\Stripe;
 use Stripe\Customer as StripeCustomer;
 use Stripe\Subscription as StripeSubscription;
@@ -20,6 +19,21 @@ class SubscriptionService {
 
     public function getCustomer() { return $this->stripeCustomer; }
     public function getSubscription() { return $this->stripeSubscription; }
+    
+    public function getAllCustomers() { 
+        $customerList = new CustomerList();
+        return $customerList->getCustomers();
+    }
+    
+    public function getAllSubscriptions() { 
+        $subscriptionList = new SubscriptionList();
+        return $subscriptionList->getSubscriptions();
+    }
+    
+    public function getAllPlans() { 
+        $planList = new PlanList();
+        return $planList->getPlans();
+    }
     
     public function createCustomer($customerData) {
         try {
@@ -106,6 +120,6 @@ class SubscriptionService {
         } catch (\Exception $e) {
             return "error";
         }
-
     }
+    
 }

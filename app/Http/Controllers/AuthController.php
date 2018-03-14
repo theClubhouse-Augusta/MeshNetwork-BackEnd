@@ -37,10 +37,16 @@ class AuthController extends Controller
             'getUser'
         ]]);
     }
-
+    
     public function checkAuth()
     {
         return Response::json(Auth::check());
+    }
+    
+    public function booboo() {
+        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $plans = $subscriptionService->getAllPlans();
+        return Response::json($plans);
     }
 
     /** SIGN UP

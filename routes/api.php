@@ -26,6 +26,8 @@ Route::get('appearances/{slug}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 
 // AuthController
+
+Route::get('booboo', 'AuthController@booboo');  // sign up
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
