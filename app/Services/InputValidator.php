@@ -76,7 +76,7 @@ class InputValidator {
         ];
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
-        $imageFails = $logo != NULL ? $this->validImageUpload($logo) : false;
+        $imageFails = ($logo != NULL) ? $this->validImageUpload($logo) : false;
         $nameAlreadyInUse = !empty(Workspace::where('name', $request['name'])->first());
 
         if ($validator->fails()) {

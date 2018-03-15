@@ -18,8 +18,6 @@ use App\Workspace;
 use App\Event;
 use App\Eventdate;
 use App\Calendar;
-use App\SpaceSubscription;
-use App\SpaceCustomer;
 use App\Services\InputValidator;
 use App\Services\Stripe\SubscriptionService;
 
@@ -128,25 +126,6 @@ class AuthController extends Controller
             }
         } 
         
-        if ($userDidNotChooseFreeTier) {
-            $customer = $subscriptionService->getCustomer();
-            $subscription = $subscriptionService->getSubscription(); 
-            $spaceCustomer = new SpaceCustomer([
-                'userID' => $user->id,
-                'spaceID' => $user->spaceID,
-                'customerID' => $customer->id
-            ]);
-            $spaceSubscription = new SpaceSubscription([
-                'userID' => $user->id,
-                'spaceID' => $user->spaceID,
-                'subscriptionID' => $subscription->id
-            ]);
-            $success = ($spaceCustomer->save() && $spaceSubscription->save());
-            if (!$success) {
-                DB::rollBack();
-                return Response::json(['error' => 'Account not created: 3']);
-            }
-        }
 
         // Mail::send('emails.signUp', array(),
         // function($message) use ($name, $email)
