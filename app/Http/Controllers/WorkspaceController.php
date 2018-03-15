@@ -18,6 +18,7 @@ use App\Subscriptionplan;
 use App\Appearance;
 use App\Eventdate;
 use Carbon\Carbon;
+use App\Services\Stripe\SubscriptionService;
 
 class WorkspaceController extends Controller
 {
@@ -472,11 +473,12 @@ class WorkspaceController extends Controller
     {
         $space = Workspace::where('id', $slug)->orWhere('slug', $slug)->select('stripe')->first();
         if ($space->stripe != null) {
-            \Stripe\Stripe::setApiKey($space->stripe);
-            $plans = \Stripe\Plan::all();
-            return Response::json($plans);
-        } else {
-            return Response::json([]);
+            $subscriptionService = new SubscriptionService($space->stripe);
+//             \Stripe\Stripe::setApiKey($space->stripe);
+            $plans = $subscriptionService->getAllPlans();
+//             $plans = \Stripe\Plan::all(array("limit" => 100));
+            return Response::json(["plans" => $plans]);
+//             return Response::json([]);
         }
     }
 
@@ -545,5 +547,4 @@ class WorkspaceController extends Controller
             return Response::json([ 'error' => 'no space with id:'.$spaceID]);
         }
     }
-
 }

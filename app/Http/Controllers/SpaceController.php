@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Workspace;
@@ -12,17 +11,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
-use Purifier;
-use Hash;
-use JWTAuth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Mews\Purifier\Facades\Purifier;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use DateTime;
 use DateInterval;
+
+use App\Services\InputValidator;
 
 class SpaceController extends Controller
 {
 
-    public function __construct()
-    {
+    protected $authController;
+    public function __construct(AuthController $authController, InputValidator $inputValidator) {
+        $this->authController = $authController;
+        $this->inputValidator = $inputValidator;
         $this->middleware('jwt.auth', ['only' => [
             'update'
         ]]);
@@ -54,133 +58,43 @@ class SpaceController extends Controller
      */
     public function store(Request $request)
     {
-
-        $rules = [
-            'name' => 'required|string',
-            'city' => 'required|string',
-            'address' => 'required|string',
-            'state' => 'required|string',
-            'zipcode' => 'required|string',
-            'email' => 'required|string',
-            'website' => 'required|string',
-            'description' => 'required|string',
-            'logo' => 'nullable|string',
-            'username' => 'required|string',
-            'password' => 'required|string',
-            'useremail' => 'required|string',
-        ];
-        // Validate input against rules
-        $validator = Validator::make(Purifier::clean($request->all()), $rules);
-
-        if ($validator->fails()) {
-            return Response::json(['error' => 'You must fill out all fields.']);
+        DB::beginTransaction();
+        
+        $validInput = array_key_exists('logo', $_FILES) 
+            ? $this->inputValidator->validateSpaceStore($request, $_FILES['logo'])
+            : $this->inputValidator->validateSpaceStore($request);
+        
+        if (!$validInput['isValid']) {
+            return Response::json(['error' => $validInput['message']]);
         }
 
-        // test input
-
         // form input
-        $name = $request->input('name');
-        $slug = (strtolower($name));
+        $slug = (strtolower($request['name']));
         $slug = str_replace(' ', '-', $slug);
         $slug = preg_replace('/[^A-Za-z0-9\-]/', '', $slug);
         $slug = preg_replace('/-+/', '-', $slug);
-        $city = $request->input('city');
-        $address = $request->input('address');
-        $state = $request->input('state');
-        $zipcode = $request->input('zipcode');
-        $email = $request->input('email');
-        $website = $request->input('website');
-        $phone_number = $request->input('phone_number');
-        $description = $request->input('description');
-
-        $username = $request->input('username');
-        $useremail = $request->input('useremail');
-        $unhash = $request->input('password');
-        $password = $request->input('password');
-
-        $check = User::where('email', $useremail)->first();
-
-        if (!empty($check)) {
-            return Response::json(['error' => 'Email already in use']);
-        }
-
+        
         $slugCheck = Workspace::where('slug', $slug)->first();
-
         if (!empty($slugCheck)) {
             $string = str_random(3);
             $slug = $slug . '-' . $string;
         }
+        $logo = $request->file('logo');
 
-        $coordinates = $this->getGeoLocation($address, $city, $state);
+        $coordinates = $this->getGeoLocation($request['address'], $request['city'], $request['state']);
         $lon = $coordinates->results[0]->geometry->location->lng;
         $lat = $coordinates->results[0]->geometry->location->lat;
 
-        // optional input
-        // Check for valid image upload
-        if (!empty($_FILES['logo'])) {
-            // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
-                return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
-            }
-            // checks for valid image upload
-            $info = getimagesize($_FILES['logo']['tmp_name']);
-
-            if ($info === false) {
-                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
-            }
-
-            // checks for valid image upload
-            if (($info[2] !== IMAGETYPE_GIF)
-                && ($info[2] !== IMAGETYPE_JPEG)
-                && ($info[2] !== IMAGETYPE_PNG)) {
-                return Response::json(["error" => "Not a gif/jpeg/png"]);
-            }
-
-            // Get profile image input
-            $logo = $request->file('logo');
-        }
-
-        if (!empty($_FILES['logo'])) {
-            // Check for file upload error
-            if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
-                return Response::json(["error" => "Upload failed with error code " . $_FILES['logo']['error']]);
-            }
-            // checks for valid image upload
-            $info = getimagesize($_FILES['logo']['tmp_name']);
-
-            if ($info === false) {
-                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
-            }
-
-            // checks for valid image upload
-            if (($info[2] !== IMAGETYPE_GIF)
-                && ($info[2] !== IMAGETYPE_JPEG)
-                && ($info[2] !== IMAGETYPE_PNG)) {
-                return Response::json(["error" => "Not a gif/jpeg/png"]);
-            }
-
-            // Get profile image input
-            $logo = $request->file('logo');
-        }
-            // Ensure unique email
-        $check = Workspace::where('name', $name)->first();
-
-        if (!empty($check)) {
-            return Response::json(['error' => 'Name already in use']);
-        }
 
             // create new App\Workspace;
-        $workspace = new Workspace;
-        $workspace->name = $name;
+        $workspace = new Workspace($request->except([
+            'slug', 
+            'logo', 
+            'username', 
+            'password', 
+            'avatar'
+        ]));
         $workspace->slug = $slug;
-        $workspace->city = $city;
-        $workspace->address = $address;
-        $workspace->state = $state;
-        $workspace->zipcode = $zipcode;
-        $workspace->email = $email;
-        $workspace->website = $website;
-        $workspace->phone_number = $phone_number;
-        $workspace->description = $description;
         $workspace->lon = $lon;
         $workspace->lat = $lat;
         $workspace->pub_key = 0;
@@ -191,83 +105,22 @@ class SpaceController extends Controller
             $workspace->logo = $request->root() . '/storage/logo/' . $logoName;
         }
 
-        $workspace->save();
+        $success = $workspace->save();
+        if (!$success) {
+            DB::rollBack();
+            return Response::json(['error' => 'Space not created.']);
+        }
 
         $spaceID = $workspace->id;
-
-            // Check for valid image upload
-        if (!empty($_FILES['avatar'])) {
-            // Check for file upload error
-            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-                return Response::json(["error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
-            }
-            // checks for valid image upload
-            $info = getimagesize($_FILES['avatar']['tmp_name']);
-
-            if ($info === false) {
-                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
-            }
-
-            // checks for valid image upload
-            if (($info[2] !== IMAGETYPE_GIF)
-                && ($info[2] !== IMAGETYPE_JPEG)
-                && ($info[2] !== IMAGETYPE_PNG)) {
-                return Response::json(["error" => "Not a gif/jpeg/png"]);
-            }
-
-                // Get profile image input
-            $avatar = $request->file('avatar');
-        }
-
-        $user = new User;
-            // Required input
-        $user->name = $username;
-        $user->email = $useremail;
-        $user->spaceID = $spaceID;
-        $user->roleID = 2;
-        $user->password = Hash::make($password);
-
-            // Profile Picture
-        if (!empty($avatar)) {
-            $avatarName = $avatar->getClientOriginalName();
-            $avatar->move('storage/avatar/', $avatarName);
-            $avatar = $request->root() . '/storage/avatar/' . $avatarName;
+        $roleID = 2;
+        
+        $signUpAttempt= $this->authController->signUp($request, $roleID, $spaceID);
+        if ($signUpAttempt['hasErrors']) {
+            DB::rollBack();
+            return Response::json(['error' => $signUpAttempt['message']]);
         } else {
-            $sub = substr($name, 0, 2);
-            $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
+            DB::commit();
         }
-
-        $user->avatar = $avatar;
-        $user->subscriber = 0;
-        $user->save();
-
-            // $url = 'http://challenges.innovationmesh.com/api/signUp';
-            // $data = array('email' => $useremail, 'name' => $username, 'password' => $unhash );
-
-            // $options = array(
-                // 'http' => array(
-                    // 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    // 'method'  => 'POST',
-                    // 'content' => http_build_query($data)
-                // )
-            // );
-
-            // $context  = stream_context_create($options);
-            // $result = file_get_contents($url, false, $context);
-
-            // $url = 'http://lms.innovationmesh.com/signUp/';
-            // $data = array('email' => $useremail, 'username' => $username, 'password' => $unhash );
-
-            // $options = array(
-                // 'http' => array(
-                    // 'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                    // 'method'  => 'POST',
-                    // 'content' => http_build_query($data)
-                // )
-            // );
-
-            // $context  = stream_context_create($options);
-            // $result = file_get_contents($url, false, $context);
 
         return Response::json($workspace->id);
     }

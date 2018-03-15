@@ -28,7 +28,6 @@ class BookingController extends Controller {
 
     public function getResources($spaceID) {
       $resources = Resource::where('spaceID', $spaceID)->get();
-
       return Response::json($resources);
     }
 
