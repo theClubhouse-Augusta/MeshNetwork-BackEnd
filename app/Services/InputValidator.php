@@ -13,7 +13,7 @@ class InputValidator {
     private $invalid = false;
     private $imageFails = false;
 
-    public function validateSignUp($request, $space_ID = NULL, $avatar) {
+    public function validateSignUp($request, $space_ID = NULL, $avatar = NULL) {
         // Validation Rules
         $rules = [
             'name' => 'required|string',
@@ -59,7 +59,7 @@ class InputValidator {
         }
     }
 
-    public function validateSpaceStore($request, $logo) {
+    public function validateSpaceStore($request, $logo = NULL) {
         $rules = [
             'name' => 'required|string',
             'city' => 'required|string',
@@ -76,7 +76,7 @@ class InputValidator {
         ];
         // Validate input against rules
         $validator = Validator::make(Purifier::clean($request->all()), $rules);
-        $imageFails = $this->validImageUpload($logo);
+        $imageFails = $logo != NULL ? $this->validImageUpload($logo) : false;
         $nameAlreadyInUse = !empty(Workspace::where('name', $request['name'])->first());
 
         if ($validator->fails()) {

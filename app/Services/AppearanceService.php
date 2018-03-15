@@ -12,8 +12,8 @@ class AppearanceService {
 
     public function getAllAppearances($spaceID) {
         $sortedAppearances = Appearance::where('spaceID', $spaceID)
-                                        ->orderBy('created_at', 'ASC')
-                                        ->get();
+                ->orderBy('created_at', 'ASC')
+                ->get();
         $appearanceCount = count($sortedAppearances);
 
         if ( $appearanceCount == 0 )
@@ -29,11 +29,11 @@ class AppearanceService {
         for ($year = $firstYear; $year <= $lastYear; $year++) {
             for ($month = 1; $month <= 12; $month++) {
                 $appearancesForMonth = count(Appearance::
-                                       where('spaceID', $spaceID)
-                                       ->whereYear('created_at', ( $year ) )
-                                       ->whereMonth('created_at', ( $month ) )
-                                       ->get()
-                                 );
+                        where('spaceID', $spaceID)
+                        ->whereYear('created_at', ( $year ) )
+                        ->whereMonth('created_at', ( $month ) )
+                        ->get()
+                );
                 if ( !empty($appearancesForMonth) ) {
                     if (array_key_exists("$month-$year", $appearances))
                         $appearances["$month-$year"] += $appearancesForMonth;
@@ -56,8 +56,8 @@ class AppearanceService {
 
     public function getAllJoins($spaceID) {
         $sortedJoins = User::where('spaceID', $spaceID)
-                                        ->orderBy('created_at', 'ASC')
-                                        ->get();
+                ->orderBy('created_at', 'ASC')
+                ->get();
         $joinsCount = count($sortedJoins);
 
         if ( $joinsCount == 0 )
@@ -99,13 +99,13 @@ class AppearanceService {
     }
 
     public function getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {
-        $start = date('Y-m-d', mktime(0, 0, 0, $startMonth, 1, $startYear));
-        $end = date('Y-m-d', mktime(0, 0, 0, ($endMonth + 1), 1, $endYear));
+        $start = date('YYYY-MM-DD HH:MM:SS', mktime(0, 0, 0, $startMonth, 1, $startYear));
+        $end = date('YYYY-MM-DD HH:MM:SS', mktime(0, 0, 0, ($endMonth + 1), 1, $endYear));
 
         $sortedAppearances = Appearance::where('spaceID', $spaceID)
-                                  ->whereBetween('created_at', [$start, $end])
-                                  ->orderBy('created_at', 'ASC')
-                                  ->get();
+                ->whereBetween('created_at', [$start, $end])
+                ->orderBy('created_at', 'ASC')
+                ->get();
 
         if (count($sortedAppearances) == 0)
             return Response::json(['error' => 'No appearances in this date range']);
@@ -130,6 +130,57 @@ class AppearanceService {
             ]);
         }
         return $appearancesArray;
+    }
+    
+    public function getUserSignUps($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay) {
+        $start = date('Y-m-d G:i:s', mktime(0, 0, 0, $month, $day, $year));
+        $end = date('Y-m-d G:i:s', mktime(23, 59, 59, $endMonth, $endDay, $endYear));
+
+        $sortedUsers = User::where('spaceID', $spaceID)
+                ->whereBetween('created_at', [$start, $end])
+                ->orderBy('created_at', 'ASC')
+                ->get();
+
+        if (count($sortedUsers) == 0)
+            return ['error' => 'No users signed up on that day'];
+        
+        $users = [];
+        foreach ($sortedUsers as $user) {
+            array_push($users, [
+                'time' => $user->created_at,
+                'name' => $user->name,
+                'email' => $user->email,
+            ]);
+        }
+
+        return ['users' => $users];
+    }
+    
+    public function getUserCheckins($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay) {
+        $start = date('Y-m-d G:i:s', mktime(0, 0, 0, $month, $day, $year));
+        $end = date('Y-m-d G:i:s', mktime(23, 59, 59, $endMonth, $endDay, $endYear));
+        $sortedAppearances = Appearance::where('spaceID', $spaceID)
+                ->whereBetween('created_at', [$start, $end])
+                ->orderBy('created_at', 'ASC')
+                ->get();
+
+        if (count($sortedAppearances) == 0)
+            return ['error' => 'No check-ins found'];
+
+        $users = [];
+        foreach ($sortedAppearances as $appearance) {
+           $user = User::find($appearance->userID);
+            array_push($users, [
+                'time' => $appearance->created_at,
+                'name' => $user->name,
+                'email' => $user->email,
+                'occasion' => $appearance->occasion,
+                'eventID' => $appearance->eventID,
+                'userID' => $appearance->userID
+            ]);
+        }
+
+        return ['users' => $users];
     }
 
     /**

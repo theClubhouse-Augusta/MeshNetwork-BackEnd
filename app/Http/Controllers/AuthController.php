@@ -5,12 +5,12 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Response;
-use Purifier;
-use Hash;
-use Auth;
-use JWTAuth;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Mews\Purifier\Facades\Purifier;
+use Illuminate\Support\Facades\Response;
 use App\User;
 use App\Userskill;
 use App\Skill;
@@ -20,7 +20,6 @@ use App\Eventdate;
 use App\Calendar;
 use App\SpaceSubscription;
 use App\SpaceCustomer;
-use Mail;
 use App\Services\InputValidator;
 use App\Services\Stripe\SubscriptionService;
 
@@ -56,8 +55,10 @@ class AuthController extends Controller
      */
     public function signUp(Request $request, $roleId = NULL, $spaceID = NULL) {
         $returnAsHttpResponse = (($roleId == NULL) && ($spaceID == NULL));
-        $userDidNotChooseFreeTier = ($plan != "free" && !empty($plan));
-        $validInput = $this->inputValidator->validateSignUp($request, $spaceID, $_FILES['avatar']);
+        
+        $validInput = array_key_exists('avatar', $_FILES) 
+            ? $this->inputValidator->validateSignUp($request, $spaceID, $_FILES['avatar'])
+            : $this->inputValidator->validateSignUp($request, $spaceID);
 
         if (!$validInput['isValid']) {
             if ($returnAsHttpResponse) {
@@ -69,6 +70,9 @@ class AuthController extends Controller
                 ];
             }
         }
+        
+        $plan = $request['plan'];
+        $userDidNotChooseFreeTier = ( ($plan != "free") && !empty($plan) );
         
         $avatar = $request->file('avatar');
 
@@ -89,7 +93,7 @@ class AuthController extends Controller
             $avatar->move('storage/avatar/', $avatarName);
             $avatar = $request->root() . '/storage/avatar/' . $avatarName;
         } else {
-            $sub = substr($name, 0, 2);
+            $sub = substr($request['name'], 0, 2);
             $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
         }
 

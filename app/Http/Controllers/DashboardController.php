@@ -16,8 +16,7 @@ use App\Services\JoinsService;
 use App\User;
 use App\Appearance;
 
-class DashBoardController extends Controller
-{
+class DashBoardController extends Controller {
     protected $appearanceService;
     protected $joinsService;
     public function __construct(
@@ -52,13 +51,25 @@ class DashBoardController extends Controller
         return Response::json($appearances);
     }
 
-    public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear)
-    {
+    public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $appearances = $this->appearanceService->getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear);
         return Response::json($appearances);
-
+    }
+    
+    public function getUserCheckins($slug, $month, $year, $day, $endMonth, $endYear, $endDay) {
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $users = $this->appearanceService->getUserCheckins($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay);
+        return Response::json($users);
+    }
+    
+    public function getUserSignUps($slug, $month, $year, $day, $endMonth, $endYear, $endDay)  {
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $users = $this->appearanceService->getUserSignUps($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay);
+        return Response::json($users);
     }
 
     public function inviteHelper()

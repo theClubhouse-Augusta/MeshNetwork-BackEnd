@@ -12,13 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Purifier;
-use Hash;
-use JWTAuth;
+use Illuminate\Support\Facades\Hash;
+use Mews\Purifier\Facades\Purifier;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use DateTime;
 use DateInterval;
 
-use App\Http\Controllers\AuthController;
 use App\Services\InputValidator;
 
 class SpaceController extends Controller
@@ -60,7 +59,10 @@ class SpaceController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-        $validInput = $this->inputValidator->validateSpaceStore($request, $_FILES['logo']);
+        
+        $validInput = array_key_exists('logo', $_FILES) 
+            ? $this->inputValidator->validateSpaceStore($request, $_FILES['logo'])
+            : $this->inputValidator->validateSpaceStore($request);
         
         if (!$validInput['isValid']) {
             return Response::json(['error' => $validInput['message']]);

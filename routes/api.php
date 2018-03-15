@@ -25,9 +25,10 @@ Route::get('joins/{slug}', 'DashboardController@Joins');
 Route::get('appearances/{slug}', 'DashboardController@Appearances');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 
-// AuthController
+Route::get('appearances/users/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserCheckins');
+Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserSignUps');
 
-Route::get('booboo', 'AuthController@booboo');  // sign up
+// AuthController
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
