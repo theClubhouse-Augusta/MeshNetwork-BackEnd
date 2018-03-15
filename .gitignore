@@ -9,3 +9,4 @@ foo.php
 Homestead.yaml
 .env
 .env.production
+.project

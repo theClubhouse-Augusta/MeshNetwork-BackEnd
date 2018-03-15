@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Response;
-use Purifier;
-use Hash;
-use Auth;
-use JWTAuth;
-
+use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Mews\Purifier\Facades\Purifier;
+use Illuminate\Support\Facades\Response;
 use App\User;
 use App\Userskill;
 use App\Skill;
@@ -17,13 +18,15 @@ use App\Workspace;
 use App\Event;
 use App\Eventdate;
 use App\Calendar;
-use Mail;
+use App\Services\InputValidator;
+use App\Services\Stripe\SubscriptionService;
 
 class AuthController extends Controller
 {
 
-    public function __construct()
-    {
+    protected $inputValidator;
+    public function __construct(InputValidator $inputValidator) {
+        $this->inputValidator = $inputValidator;
         $this->middleware('jwt.auth', ['only' => [
             // 'getUsers',
             'ban',
@@ -31,10 +34,16 @@ class AuthController extends Controller
             'getUser'
         ]]);
     }
-
+    
     public function checkAuth()
     {
         return Response::json(Auth::check());
+    }
+    
+    public function booboo() {
+        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $plans = $subscriptionService->getAllPlans();
+        return Response::json($plans);
     }
 
     /** SIGN UP
@@ -42,75 +51,39 @@ class AuthController extends Controller
      * @param Illuminate\Support\Facades\Request::class
      * @return  Illuminate\Support\Facades\Response::class
      */
-    public function signUp(Request $request)
-    {
-        // Validation Rules
-        $rules = [
-            'name' => 'required|string',
-            'password' => 'required|string',
-            'email' => 'required|string',
-            'spaceID' => 'required|string',
-            'plan' => 'nullable|string',
-            'customerToken' => 'nullable|string',
-            'tags' => 'nullable|string',
-        ];
-        // Validate input against rules
-        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+    public function signUp(Request $request, $roleId = NULL, $spaceID = NULL) {
+        $returnAsHttpResponse = (($roleId == NULL) && ($spaceID == NULL));
+        
+        $validInput = array_key_exists('avatar', $_FILES) 
+            ? $this->inputValidator->validateSignUp($request, $spaceID, $_FILES['avatar'])
+            : $this->inputValidator->validateSignUp($request, $spaceID);
 
-        if ($validator->fails()) {
-            return Response::json(['error' => 'You must fill out all fields.']);
-        }
-        // Form Input
-        $name = $request->input('name');
-        $email = $request->input('email');
-        $unhash = $request->input('password');
-        $password = $request->input('password');
-        $spaceID = $request->input('spaceID');
-        $bio = $request->input('bio');
-        $tags = $request->input('tags');
-
-        // Check for valid image upload
-        if (!empty($_FILES['avatar'])) {
-        // Check for file upload error
-            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-                return Response::json(["error" => "Upload failed with error code " . $_FILES['avatar']['error']]);
+        if (!$validInput['isValid']) {
+            if ($returnAsHttpResponse) {
+                return Response::json(['error' => $validInput['message']]);
+            } else {
+                return [
+                    'hasErrors' => true,
+                    'message' => $validInput['message']
+                ];
             }
-        // checks for valid image upload
-            $info = getimagesize($_FILES['avatar']['tmp_name']);
-
-            if ($info === false) {
-                return Response::json(["error" => "Unable to determine image type of uploaded file"]);
-            }
-
-        // checks for valid image upload
-            if (($info[2] !== IMAGETYPE_GIF)
-                && ($info[2] !== IMAGETYPE_JPEG)
-                && ($info[2] !== IMAGETYPE_PNG)) {
-                return Response::json(["error" => "Not a gif/jpeg/png"]);
-            }
-
-            // Get profile image input
-            $avatar = $request->file('avatar');
         }
-
-        // Ensure unique email
-        $check = User::where('email', $email)->first();
-
-        if (!empty($check)) {
-            return Response::json(['error' => 'Email already in use']);
-        }
+        
+        $plan = $request['plan'];
+        $userDidNotChooseFreeTier = ( ($plan != "free") && !empty($plan) );
+        
+        $avatar = $request->file('avatar');
 
         // Create new App\User;
-        $user = new User;
+        $user = $returnAsHttpResponse 
+            ? new User($request->except(['password', 'avatar']))
+            : new User($request->except(['email', 'name', 'password', 'avatar', 'useremail', 'username']));
         // Required input
-        $user->name = $name;
-        $user->bio = $bio;
-        $user->email = $email;
-        $user->spaceID = $spaceID;
-        $user->roleID = 3;
-        $user->password = Hash::make($password);
-        $user->skills = $tags;
-        // if (!empty($bio)) $user->bio = $bio;
+        $user->spaceID = $spaceID != NULL ? $spaceID : $request['spaceID'];
+        $user->roleID = $roleId != NULL ? $roleId : 3;
+        if ($request['useremail']) $user->email = $request['useremail'];
+        if ($request['username']) $user->name = $request['username'];
+        $user->password = Hash::make($request['password']);
 
         // Profile Picture
         if (!empty($avatar)) {
@@ -118,127 +91,65 @@ class AuthController extends Controller
             $avatar->move('storage/avatar/', $avatarName);
             $avatar = $request->root() . '/storage/avatar/' . $avatarName;
         } else {
-            $sub = substr($name, 0, 2);
+            $sub = substr($request['name'], 0, 2);
             $avatar = "https://invatar0.appspot.com/svg/" . $sub . ".jpg?s=100";
         }
 
         $user->avatar = $avatar;
 
         $plan = $request['plan'];
-        if ($plan != "free" && !empty($plan)) {
-            $cardToken = $request['customerToken'];
-            $space = Workspace::find($spaceID)->makeVisible('stripe');
-            $key = $space->stripe;
-            \Stripe\Stripe::setApiKey($key);
-            $customer = \Stripe\Customer::create(array(
-                "source" => $cardToken, // obtained with Stripe.js
-                "email" => $email
-            ));
-            \Stripe\Subscription::create(array(
-                "customer" => $customer['id'],
-                "items" => array(
-                    array(
-                        "plan" => $plan,
-                    ),
-                )
-            ));
+        if ($userDidNotChooseFreeTier) {
+            DB::beginTransaction();
+            $space = Workspace::find(($spaceID != NULL) ? $spaceID : $request['spaceID'])->makeVisible('stripe');
+            $customerData = [
+                "cardToken" => $request['customerToken'],
+                "customer_idempotency_key" => $request['customer_idempotency_key'],
+                "subscription_idempotency_key" => $request['subscription_idempotency_key'],
+                "email" => $request['email'],
+                "plan" => $plan
+            ];
+
+            $subscriptionService = new SubscriptionService($space->stripe);
+            $subscriptionService->createCustomer($customerData);
             $user->subscriber = 1;
         }
 
-        // Persist user to database
-        $success = $user->save();
-        if (!$success) {
-            return Response::json(['error' => 'Account not created']);
-        }
-
-        /*$url = 'https://challenges.innovationmesh.com/api/signUp';
-        $data = array('email' => $email, 'name' => $name, 'password' => $unhash );
-
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data),
-                "ssl"=>array(
-                  "verify_peer"=>false,
-                  "verify_peer_name"=>false,
-                )
-            )
-        );
-
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-
-        */
-
-        /*$url = 'https://lms.innovationmesh.com/signUp/';
-        $data = array('email' => $email, 'username' => $name, 'password' => $unhash );
-
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method'  => 'POST',
-                'content' => http_build_query($data),
-                "ssl"=>array(
-                  "verify_peer"=>false,
-                  "verify_peer_name"=>false,
-                )
-            )
-        );
-
-        $context  = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);*/
+        if (!$user->save()) {
+            if ($returnAsHttpResponse) {
+                DB::rollBack();
+                return Response::json(['error' => 'Account not created: Please try again']);
+            } else {
+                return [
+                    'hasErrors' => true,
+                    'message' => 'account not created: please try again'
+                ];
+            }
+        } 
         
 
-        Mail::send('emails.signUp', array(),
-        function($message) use ($name, $email)
-        {
-          $message->from('heythere@innovationmesh.com', 'Innovation Mesh');
-          $message->to($email)->subject('Thanks for Joining!');
-        });
+        // Mail::send('emails.signUp', array(),
+        // function($message) use ($name, $email)
+        // {
+        //   $message->from('heythere@innovationmesh.com', 'Innovation Mesh');
+        //   $message->to($email)->subject('Thanks for Joining!');
+        // });
 
-
-        // $userID = $user->id;
-
-      /*  // Update App\Skill;
-        if (!empty($tags)) {
-            foreach($tags as $key => $tag) {
-                if (!property_exists($tag, 'id'))  {
-                    $check = Skill::where('name', $tag->value)->first();
-                    if (empty($check)) {
-                        $newSkill = new Skill;
-                        $newSkill->name = $tag->value;
-                        // Persist App\Skill to database
-                        $success = $newSkill->save();
-                        if (!$success) return Response::json([ 'error' => 'database error' ]);
-                    }
-                }
-            }
-        }
-
-        // Update App\Userskill;
-        if (!empty($tags)) {
-            foreach ($tags as $key => $tag) {
-                $skillTag = Skill::where('name', $tag->value)->first();
-                // Create new EventSkill
-                $userSkill = new Userskill;
-                $userSkill->userID = $userID;
-                $userSkill->skillID = $skillTag->id;
-                $userSkill->name = $skillTag->name;
-                // Persist App\Skill to database
-                $success = $userSkill->save();
-                if (!$success) return Response::json([ 'error' => 'eventSkill database error' ]);
-            }
-        }
-         */
-
+        $email = $request['email'];
+        $password = $request['password'];
         $credentials = compact("email", "password");
         $token = JWTAuth::attempt($credentials);
-        return Response::json([
-            'id' => $user->id,
-            'roleID' => $user->roleID,
-            'token' => $token
-        ]);
+        if ($returnAsHttpResponse) {
+            DB::commit();
+            return Response::json([
+                'id' => $user->id,
+                'roleID' => $user->roleID,
+                'token' => $token
+            ]);
+        } else {
+            return [
+              'hasErrors' => false
+            ];
+        }
     }
 
 
