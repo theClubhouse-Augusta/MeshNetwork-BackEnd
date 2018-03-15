@@ -201,7 +201,6 @@ class ChallengesController extends Controller
     $rules = [
       'challengeTitle' => 'required',
       'challengeContent' => 'required',
-      'challengeCategories' => 'required'
     ];
 
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -250,7 +249,7 @@ class ChallengesController extends Controller
 
     $challengeTitle = $request->input('challengeTitle');
     $challengeContent = $request->input('challengeContent');
-    $challengeCategories = json_decode($request->input('challengeCategories'));
+    //$challengeCategories = json_decode($request->input('challengeCategories'));
     $startDate = $request->input('startDate');
     $endDate = $request->input('endDate');
     $status = 'Approved';
@@ -272,7 +271,7 @@ class ChallengesController extends Controller
     $challenge->status = $status;
     $challenge->save();
 
-    foreach($challengeCategories as $key => $category)
+    /*foreach($challengeCategories as $key => $category)
     {
       $categoryCheck = Cbind::where('challengeID', $challenge->id)->where('categoryID', $category->value)->first();
       if(empty($categoryCheck))
@@ -282,7 +281,7 @@ class ChallengesController extends Controller
         $cbind->categoryID = $category->value;
         $cbind->save();
       }
-    }
+    }*/
 
     return Response::json(['challenge' => $challenge->id]);
   }

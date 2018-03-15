@@ -48,7 +48,6 @@ class EventController extends Controller
             'deleteCalendar',
             'delete',
             'Sponsers',
-            'getTodaysEvents'
         ]]);
     }
 
@@ -833,7 +832,7 @@ class EventController extends Controller
 
     public function getDashboardEvents($spaceID)
     {
-        $events = Event::where('spaceID', $spaceID)->get();
+        $events = Event::where('spaceID', $spaceID)->orderBy('created_at', 'desc')->get();
 
         foreach ($events as $key => $event) {
             $date = Eventdate::where('eventID', $event->id)->first();
