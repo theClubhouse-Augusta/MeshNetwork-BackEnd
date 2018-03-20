@@ -2,10 +2,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Response;
-use Purifier;
-use Hash;
-use Auth;
-use JWTAuth;
+use \Mews\Purifier\Facades\Purifier;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -21,22 +21,26 @@ use App\Skill;
 use App\Event;
 use App\Eventdate;
 use App\Workspace;
+use App\Services\InputValidator;
+use App\Services\Stripe\SubscriptionService;
 
 class UserController extends Controller
 {
+    private  $inputValidator;
     /**
      * Apply jwt middleware to specific routes.
      * @param  void
      * @return void
      */
-    public function __construct()
-    {
+    public function __construct(InputValidator $inputValidator) {
+        $this->inputValidator = $inputValidator;
         $this->middleware('jwt.auth', ['only' => [
             'updateUser',
             'delete',
             'makeOrganizer',
             'getDashboardUsers',
-           //'showUser',
+            'updateCustomerMeshEmail'
+//            'showUser',
            //'user',
             //'searchName',
            //'search',
@@ -45,6 +49,24 @@ class UserController extends Controller
             // 'allSkills',
             // 'Organizers'
         ]]);
+    }
+
+    public function updateCustomerMeshEmail(Request $request) {
+        $user = Auth::user();
+        $spaceID = $user->spaceID;
+        $validInput = $this->inputValidator::validateUpdateCustomerMeshEmail($request);
+        if (!$validInput['isValid']) {
+            return Response::json(['error' => $validInput['message']]);
+        }
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $subscriptionService = new SubscriptionService($space->stripe);
+        $request['spaceID'] = $spaceID;
+        $success = $subscriptionService->updateCustomerMeshEmail($request);
+        if ($success) {
+            return Response::json(['emailUpdated' => $success ]);
+        } else {
+            return Response::json(['error' => 1 ]);
+        }
     }
 
     /**

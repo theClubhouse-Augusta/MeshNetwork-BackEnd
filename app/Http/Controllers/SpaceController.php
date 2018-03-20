@@ -2,21 +2,12 @@
 namespace App\Http\Controllers;
 
 use App\Workspace;
-use App\User;
-use App\Event;
-use App\Subscriptionplan;
-use App\Appearance;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Mews\Purifier\Facades\Purifier;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use DateTime;
-use DateInterval;
 
 use App\Services\InputValidator;
 

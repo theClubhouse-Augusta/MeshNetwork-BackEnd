@@ -2,10 +2,10 @@
 namespace App\Http\Controllers;
 
 use App\Workspace;
-use Response;
-use Auth;
-use JWTAuth;
-use Mail;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 // Service Classes
@@ -23,6 +23,9 @@ class DashBoardController extends Controller {
         AppearanceService $appearanceService,
         JoinsService $joinsService
     ) {
+        $this->middleware('jwt.auth', ['only' => [
+            'getCustomerSignUps'
+        ]]);
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
     }
@@ -69,6 +72,13 @@ class DashBoardController extends Controller {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $users = $this->appearanceService->getUserSignUps($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay);
+        return Response::json($users);
+    }
+
+    public function getCustomerSignUps($slug, $month, $year, $day, $endMonth, $endYear, $endDay)  {
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $users = $this->appearanceService->getCustomerSignUps($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay);
         return Response::json($users);
     }
 

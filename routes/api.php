@@ -27,14 +27,18 @@ Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{end
 
 Route::get('appearances/users/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserCheckins');
 Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserSignUps');
+Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getCustomerSignUps');
 
 // AuthController
+Route::get('users', 'AuthController@getUsers');  // admin get users
+Route::get('customers', 'AuthController@allCustomers');  // sign up
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
 Route::post('forgotpassword', 'AuthController@resetPassword');
 
 // UserController
+Route::post('customer/email', 'UserController@updateCustomerMeshEmail'); // logged in user profile update
 Route::get('user/auth', 'AuthController@getUser'); // get Auth User
 Route::get('user/profile/{id}', 'UserController@user'); // get user.id
 Route::post('user/update', 'UserController@updateUser'); // logged in user profile update
@@ -172,7 +176,6 @@ Route::get('approveAnswer/{qid}/{uid}/{i}','CoursesController@approveAnswer');
 
 
 // AuthController
-// Route::get('users', 'AuthController@getUsers');  // admin get users
 // Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
 
 // UserController

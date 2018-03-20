@@ -9,10 +9,6 @@ use App\Workspace;
 
 class InputValidator {
     
-    private $valid = true;
-    private $invalid = false;
-    private $imageFails = false;
-
     public function validateSignUp($request, $space_ID = NULL, $avatar = NULL) {
         // Validation Rules
         $rules = [
@@ -99,6 +95,26 @@ class InputValidator {
                 'isValid' => true,
             ];
         }
+    }
+
+    static public function validateUpdateCustomerMeshEmail($request) {
+        $rules = [
+            'email' => 'required|string',
+            'customer_id' => 'required|string',
+        ];
+        // Validate input against rules
+        $validator = Validator::make(Purifier::clean($request->all()), $rules);
+        if ($validator->fails()) {
+            return [
+                'isValid' => false,
+                'message' => $request['email'],
+            ];
+        } else {
+            return [
+                'isValid' => true,
+            ];
+        }
+
     }
 
     private function validImageUpload($image) {
