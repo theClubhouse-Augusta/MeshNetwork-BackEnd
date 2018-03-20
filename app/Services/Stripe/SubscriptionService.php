@@ -1,16 +1,16 @@
 <?php 
 namespace App\Services\Stripe;
+use App\Services\ExceptionFormatter;
+use App\User;
 use Stripe\Stripe;
 use Stripe\Customer as StripeCustomer;
 use Stripe\Subscription as StripeSubscription;
 
 class SubscriptionService {
-        
-    
     private $apiKey;
     private $stripeCustomer;
     private $stripeSubscription;
-    private $cardToken;
+    private $error;
     
     public function __construct($apiKey) {
         $this->apiKey = $apiKey;
@@ -18,11 +18,18 @@ class SubscriptionService {
     }
 
     public function getCustomer() { return $this->stripeCustomer; }
+    public function updateCustomer() { return $this->stripeCustomer; }
     public function getSubscription() { return $this->stripeSubscription; }
+    public function getError() { return $this->error; }
     
     public function getAllCustomers() { 
         $customerList = new CustomerList();
         return $customerList->getCustomers();
+    }
+    
+    public function getAllCustomersFromDateRange($start, $end) { 
+        $customerList = new CustomerList();
+        return $customerList->getCustomersFromDateRange($start, $end);
     }
     
     public function getAllSubscriptions() { 
@@ -36,41 +43,37 @@ class SubscriptionService {
     }
     
     public function createCustomer($customerData) {
+        $exceptionFormatter = new ExceptionFormatter();
         try {
-            $this->stripeCustomer = StripeCustomer::create(array(
+            $this->stripeCustomer = StripeCustomer::create([
                 "source" => $customerData['cardToken'], // obtained with Stripe.js
                 "email" => $customerData['email'],
-            ), array(
+                "metadata" => [
+                    'userID' => $customerData['userID']
+                ],
+            ], [
                 "idempotency_key" => $customerData['customer_idempotency_key']
-            ));
+            ]);
         } catch(\Stripe\Error\Card $e) {
-            return "card error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\RateLimit $e) {
-            return "rateLimit error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\InvalidRequest $e) {
-            $body = $e->getJsonBody();
-            $err  = $body['error'];
-            $error = 'Status is:' . $e->getHttpStatus() . "\n";
-            $error = $error.'Type is:' . $err['type'] . "\n";
-            $error = array_key_exists('code', $err) ? $error.'Code is:' . $err['code'] . "\n" : $error;
-            // param is '' in this case
-            $error = array_key_exists('param', $err) ? error.'Param is:' . $err['param'] . "\n" : $error;
-            $error = $error.'Message is:' . $err['message'] . "\n";
-            return $error;
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Authentication $e) {
-            return "auth error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\ApiConnection $e) {
-            return "apiconn error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Api $e) {
-            return "api error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Permission $e) {
-            return "permission error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\SignatureVerification $e) {
-            return "sig error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Base $e) {
-            return "base error";
+           $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Exception $e) {
-            return "error";
+            $this->error = $exceptionFormatter::formatException($e);
         } finally {
             if ($this->stripeCustomer != NULL) {
                 $this->createSubscription($this->stripeCustomer, $customerData);
@@ -81,44 +84,102 @@ class SubscriptionService {
     }
         
     private function createSubscription($customer, $customerData) {
+        $exceptionFormatter = new ExceptionFormatter();
         try {
-            $this->stripeSubscription = StripeSubscription::create(array(
+            $this->stripeSubscription = StripeSubscription::create([
                 "customer" => $customer['id'],
-                 "items" => array(
-                    array(
+                "metadata" => [ 'userID' => $customerData['userID'] ],
+                 "items" => [
+                    [
                         "plan" => $customerData['plan'],
-                    ),
-                )), array(
-                    "idempotency_key" => $customerData['subscription_idempotency_key']
-            ));
+                    ],
+                 ]
+                
+            ], [ "idempotency_key" => $customerData['subscription_idempotency_key']]
+                );
         } catch(\Stripe\Error\Card $e) {
-            return "card error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\RateLimit $e) {
-            return "rateLimit error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\InvalidRequest $e) {
-            $body = $e->getJsonBody();
-            $err  = $body['error'];
-            $error = 'Status is:' . $e->getHttpStatus() . "\n";
-            $error = $error.'Type is:' . $err['type'] . "\n";
-            $error = array_key_exists('code', $err) ? $error.'Code is:' . $err['code'] . "\n" : $error;
-            // param is '' in this case
-            $error = array_key_exists('param', $err) ? error.'Param is:' . $err['param'] . "\n" : $error;
-            $error = $error.'Message is:' . $err['message'] . "\n";
-            return $error;
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Authentication $e) {
-            return "auth error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\ApiConnection $e) {
-            return "apiconn error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Api $e) {
-            return "api error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Permission $e) {
-            return "permission error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\SignatureVerification $e) {
-            return "sig error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\Base $e) {
-            return "base error";
+            $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Exception $e) {
-            return "error";
+            $this->error = $exceptionFormatter::formatException($e);
+        }
+    }
+    
+    public function updateCustomerMeshEmail($customerData) {
+        $exceptionFormatter = new ExceptionFormatter();
+        try {
+            $this->stripeCustomer = StripeCustomer::retrieve($customerData['customer_id']);
+            $metadata = $this->stripeCustomer->metadata;
+            $user = User::where(['email' => $customerData['email'], 'spaceID' => $customerData['spaceID']])->first();
+            if (!empty($user)) {
+                $this->stripeCustomer->metadata['userID'] = $user['id'];
+                $this->stripeCustomer->metadata['updated'] = 1;
+                $this->stripeCustomer->save();
+            } else {
+                $this->stripeCustomer = NULL;
+            }
+        } catch(\Stripe\Error\Card $e) {
+            // var_dump($e);
+            $this->error = $e;
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+        } catch (\Stripe\Error\RateLimit $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\InvalidRequest $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\Authentication $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\ApiConnection $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\Api $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\Permission $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\SignatureVerification $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Stripe\Error\Base $e) {
+            // $this->error = $exceptionFormatter::formatStripeException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } catch (\Exception $e) {
+            // $this->error = $exceptionFormatter::formatException($e);
+            // var_dump($e);
+            $this->error = $e;
+        } 
+        finally {
+            if ($this->stripeCustomer != NULL) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     

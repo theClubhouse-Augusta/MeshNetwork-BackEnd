@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Response;
 use App\Appearance;
 use App\User;
 use App\Workspace;
+use App\Services\Stripe\SubscriptionService;
 
 class AppearanceService {
 
@@ -153,6 +154,15 @@ class AppearanceService {
             ]);
         }
 
+        return ['users' => $users];
+    }
+
+    public function getCustomerSignUps($spaceID, $month, $year, $day, $endMonth, $endYear, $endDay) {
+        $start = mktime(0, 0, 0, $month, $day, $year);
+        $end = mktime(23, 59, 59, $endMonth, $endDay, $endYear);
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $subscriptionService = new SubscriptionService($space->stripe);
+        $users = $subscriptionService->getAllCustomersFromDateRange($start, $end);
         return ['users' => $users];
     }
     

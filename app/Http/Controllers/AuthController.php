@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Hash;
 use Mews\Purifier\Facades\Purifier;
 use Illuminate\Support\Facades\Response;
 use App\User;
-use App\Userskill;
-use App\Skill;
 use App\Workspace;
 use App\Event;
 use App\Eventdate;
@@ -24,11 +22,11 @@ use App\Services\Stripe\SubscriptionService;
 class AuthController extends Controller
 {
 
-    protected $inputValidator;
+    private $inputValidator;
     public function __construct(InputValidator $inputValidator) {
         $this->inputValidator = $inputValidator;
         $this->middleware('jwt.auth', ['only' => [
-            // 'getUsers',
+            'getUsers',
             'ban',
             'checkAuth',
             'getUser'
@@ -42,8 +40,8 @@ class AuthController extends Controller
     
     public function booboo() {
         $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
-        $plans = $subscriptionService->getAllPlans();
-        return Response::json($plans);
+        $customers = $subscriptionService->getAllCustomers();
+        return Response::json($customers);
     }
 
     /** SIGN UP
@@ -98,21 +96,9 @@ class AuthController extends Controller
         $user->avatar = $avatar;
 
         $plan = $request['plan'];
-        if ($userDidNotChooseFreeTier) {
-            DB::beginTransaction();
-            $space = Workspace::find(($spaceID != NULL) ? $spaceID : $request['spaceID'])->makeVisible('stripe');
-            $customerData = [
-                "cardToken" => $request['customerToken'],
-                "customer_idempotency_key" => $request['customer_idempotency_key'],
-                "subscription_idempotency_key" => $request['subscription_idempotency_key'],
-                "email" => $request['email'],
-                "plan" => $plan
-            ];
-
-            $subscriptionService = new SubscriptionService($space->stripe);
-            $subscriptionService->createCustomer($customerData);
-            $user->subscriber = 1;
-        }
+        $user->subscriber = $userDidNotChooseFreeTier ?  1 : 0;
+        
+        if ($userDidNotChooseFreeTier) DB::beginTransaction();
 
         if (!$user->save()) {
             if ($returnAsHttpResponse) {
@@ -123,9 +109,27 @@ class AuthController extends Controller
                     'hasErrors' => true,
                     'message' => 'account not created: please try again'
                 ];
-            }
+            } 
         } 
         
+        if ($userDidNotChooseFreeTier) {
+            $space = Workspace::find(($spaceID != NULL) ? $spaceID : $request['spaceID'])->makeVisible('stripe');
+            $customerData = [
+                "cardToken" => $request['customerToken'],
+                "customer_idempotency_key" => $request['customer_idempotency_key'],
+                "subscription_idempotency_key" => $request['subscription_idempotency_key'],
+                "email" => $request['email'],
+                "plan" => $plan,
+                "userID" => $user->id
+            ];
+
+            $subscriptionService = new SubscriptionService($space->stripe);
+            $customerCreatedAndCharged = $subscriptionService->createCustomer($customerData);
+            if (!$customerCreatedAndCharged) {
+                DB::rollback();
+                return Response::json(['refresh_idempotency_key' => true]);
+            }
+        } 
 
         // Mail::send('emails.signUp', array(),
         // function($message) use ($name, $email)
@@ -140,11 +144,11 @@ class AuthController extends Controller
         $token = JWTAuth::attempt($credentials);
         if ($returnAsHttpResponse) {
             DB::commit();
-            return Response::json([
+            return Response::json(['user' =>[
                 'id' => $user->id,
                 'roleID' => $user->roleID,
                 'token' => $token
-            ]);
+            ]]);
         } else {
             return [
               'hasErrors' => false
@@ -268,7 +272,7 @@ class AuthController extends Controller
         $users = User::where('spaceID', $organizer->spaceID)->get();
 
         if (!empty($users)) {
-            return Response::json($users);
+            return Response::json(['users' => $users]);
         } else {
             return Response::json(['error' => 'no users for space']);
         }
