@@ -31,7 +31,7 @@ Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear
 
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users
-Route::get('booboo', 'AuthController@booboo');  // sign up
+Route::get('customers', 'AuthController@allCustomers');  // sign up
 Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login

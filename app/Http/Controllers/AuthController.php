@@ -29,7 +29,8 @@ class AuthController extends Controller
             'getUsers',
             'ban',
             'checkAuth',
-            'getUser'
+            'getUser',
+            'allCustomers',
         ]]);
     }
     
@@ -38,8 +39,11 @@ class AuthController extends Controller
         return Response::json(Auth::check());
     }
     
-    public function booboo() {
-        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+    public function allCustomers() {
+        $user = Auth::user();
+        $spaceID = $user->spaceID;
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $subscriptionService = new SubscriptionService($space->stripe);
         $customers = $subscriptionService->getAllCustomers();
         return Response::json($customers);
     }

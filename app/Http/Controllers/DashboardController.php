@@ -23,6 +23,9 @@ class DashBoardController extends Controller {
         AppearanceService $appearanceService,
         JoinsService $joinsService
     ) {
+        $this->middleware('jwt.auth', ['only' => [
+            'getCustomerSignUps'
+        ]]);
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
     }
