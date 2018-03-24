@@ -23,11 +23,15 @@ Route::resource('photos', 'PhotoController');
 // DashboardController
 Route::get('joins/{slug}', 'DashboardController@Joins');
 Route::get('appearances/{slug}', 'DashboardController@Appearances');
+Route::get('events/metrics/{slug}', 'DashboardController@Events');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
 
 Route::get('appearances/users/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserCheckins');
 Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserSignUps');
 Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getCustomerSignUps');
+Route::get('balance/current/{pastMonth}/{now}', 'DashboardController@allBalancesFromDate'); 
+Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMonthsCustomers');
+
 
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users

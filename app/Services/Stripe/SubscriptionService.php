@@ -32,6 +32,16 @@ class SubscriptionService {
         return $customerList->getCustomersFromDateRange($start, $end);
     }
     
+    public function getThisMonthsCustomers($start, $end) { 
+        $customerList = new CustomerList();
+        return $customerList->getThisMonthsCustomers($start, $end);
+    }
+
+    public function getBalancesFromDateRange($start, $end) { 
+        $balanceList = new BalanceList();
+        return $balanceList->getBalancesFromDateRange($start, $end);
+    }
+    
     public function getAllSubscriptions() { 
         $subscriptionList = new SubscriptionList();
         return $subscriptionList->getSubscriptions();

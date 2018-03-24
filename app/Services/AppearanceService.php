@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Response;
 use App\Appearance;
 use App\User;
 use App\Workspace;
+use App\Event;
 use App\Services\Stripe\SubscriptionService;
 
 class AppearanceService {
@@ -18,7 +19,7 @@ class AppearanceService {
         $appearanceCount = count($sortedAppearances);
 
         if ( $appearanceCount == 0 )
-            return Response::json(['error' => 'No appearance data available']);
+            return ['error' => 'No appearance data available'];
 
         $firstAppearance = $sortedAppearances[0]->created_at;
         $firstYear = $firstAppearance->year;
@@ -45,14 +46,18 @@ class AppearanceService {
 
             }
         }
-        $appearancesArray = [];
+
+        $labels = [];
+        $series = [];
+
         foreach ($appearances as $key => $appearance) {
-            array_push($appearancesArray, [
-                'name' => $key,
-                'check-ins' => $appearance,
-            ]);
+            array_push($labels, $key);
+            array_push($series, $appearance);
         }
-        return $appearancesArray;
+        return [
+            'labels' => $labels,
+            'series' => [$series],
+        ];
     }
 
     public function getAllJoins($spaceID) {
@@ -62,7 +67,7 @@ class AppearanceService {
         $joinsCount = count($sortedJoins);
 
         if ( $joinsCount == 0 )
-            return Response::json(['error' => 'No data available']);
+            return ['error' => 'No data available'];
 
         $firstJoin = $sortedJoins[0]->created_at;
         $firstYear = $firstJoin->year;
@@ -89,14 +94,64 @@ class AppearanceService {
 
             }
         }
-        $joinsArray = [];
+        $labels = [];
+        $series = [];
+
         foreach ($joins as $key => $join) {
-            array_push($joinsArray, [
-                'name' => $key,
-                'joins' => $join,
-            ]);
+            array_push($labels, $key);
+            array_push($series, $join);
         }
-        return $joinsArray;
+        return [
+            'labels' => $labels,
+            'series' => [$series],
+        ];
+    }
+
+    public function getAllEvents($spaceID) {
+        $sortedEvents = Event::where('spaceID', $spaceID)
+                ->orderBy('created_at', 'ASC')
+                ->get();
+        $eventsCount = count($sortedEvents);
+
+        if ( $eventsCount == 0 )
+            return ['error' => 'No event data available'];
+
+        $firstEvent = $sortedEvents[0]->created_at;
+        $firstYear = $firstEvent->year;
+
+        $lastEvent = $sortedEvents[( $eventsCount - 1 )]->created_at;
+        $lastYear = $lastEvent->year;
+
+        $events = array();
+        for ($year = $firstYear; $year <= $lastYear; $year++) {
+            for ($month = 1; $month <= 12; $month++) {
+                $eventsForMonth = count(User::
+                where('spaceID', $spaceID)
+                    ->whereYear('created_at', ( $year ) )
+                    ->whereMonth('created_at', ( $month ) )
+                    ->get()
+                );
+                if ( !empty($eventsForMonth) ) {
+                    if (array_key_exists("$month-$year", $events))
+                        $events["$month-$year"] += $eventsForMonth;
+                    else
+                        $events["$month-$year"] = $eventsForMonth;
+
+                }
+
+            }
+        }
+        $labels = [];
+        $series = [];
+
+        foreach ($events as $key => $event) {
+            array_push($labels, $key);
+            array_push($series, $event);
+        }
+        return [
+            'labels' => $labels,
+            'series' => [$series],
+        ];
     }
 
     public function getAppearancesForMonthYear($spaceID, $startMonth, $startYear, $endMonth, $endYear) {

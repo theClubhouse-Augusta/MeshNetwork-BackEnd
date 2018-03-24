@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\Log;
 // Service Classes
 use App\Services\AppearanceService;
 use App\Services\JoinsService;
-
+use App\Services\Stripe\SubscriptionService;
 // Eloquent Models
 use App\User;
 use App\Appearance;
+use DateTime;
 
 class DashBoardController extends Controller {
     protected $appearanceService;
@@ -24,10 +25,36 @@ class DashBoardController extends Controller {
         JoinsService $joinsService
     ) {
         $this->middleware('jwt.auth', ['only' => [
-            'getCustomerSignUps'
+            'getCustomerSignUps',
+            // 'allBalancesFromDate',
+            //'getThisMonthsCustomers'
         ]]);
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
+    }
+
+    public function allBalancesFromDate($start, $end) {
+        // $user = Auth::user();
+        // $spaceID = $user->spaceID;
+        // $space = Workspace::find($spaceID)->makeVisible('stripe');
+        // $subscriptionService = new SubscriptionService($space->stripe);
+        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $balances = $subscriptionService->getBalancesFromDateRange($start, $end);
+        if (array_key_exists('error', $balances)) {
+            return Response::json(['error' => $balances['error']]);
+        } else {
+            return Response::json(['balances' => $balances]);
+        }
+    }
+    
+    public function getThisMonthsCustomers($start, $end) {
+        // $user = Auth::user();
+        // $spaceID = $user->spaceID;
+        // $space = Workspace::find($spaceID)->makeVisible('stripe');
+        // $subscriptionService = new SubscriptionService($space->stripe);
+        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $customers = $subscriptionService->getThisMonthsCustomers($start, $end);
+        return Response::json($customers);
     }
 
     /**
@@ -39,7 +66,18 @@ class DashBoardController extends Controller {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $joins = $this->appearanceService->getAllJoins($spaceID);
-        return Response::json($joins);
+        $unixTimeStamp = time();
+        if (array_key_exists('error', $joins)) {
+            return Response::json([
+                'updatedAt' => $unixTimeStamp,
+                'error' => $joins['error']
+            ]);
+        } else {
+            return Response::json([
+                'data' => $joins,
+                'updatedAt' => $unixTimeStamp,
+            ]);
+        }
     }
 
     /**
@@ -51,7 +89,38 @@ class DashBoardController extends Controller {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $appearances = $this->appearanceService->getAllAppearances($spaceID);
-        return Response::json($appearances);
+        $unixTimeStamp = time();
+        if (array_key_exists('error', $appearances)) {
+            return Response::json([
+                'error' => $appearances['error'],
+                'updatedAt' => $unixTimeStamp,
+            ]);
+        } else {
+            $unixTimeStamp = time();
+            return Response::json([
+                'data' => $appearances,
+                'updatedAt' => $unixTimeStamp,
+            ]);
+        }
+    }
+
+    public function Events($slug)
+    {
+        $space = Workspace::where('slug', $slug)->first();
+        $spaceID = $space->id;
+        $events = $this->appearanceService->getAllEvents($spaceID);
+        $unixTimeStamp = time();
+        if (array_key_exists('error', $events)) {
+            return Response::json([
+                'error' => $events['error'],
+                'updatedAt' => $unixTimeStamp,
+            ]);
+        } else {
+            return Response::json([
+                'data' => $events,
+                'updatedAt' => $unixTimeStamp,
+            ]);
+        }
     }
 
     public function appearanceForMonthYear($slug, $startMonth, $startYear, $endMonth, $endYear) {
