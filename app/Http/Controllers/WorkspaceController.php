@@ -309,6 +309,17 @@ class WorkspaceController extends Controller
         if (empty($space)) {
             return Response::json(['error' => 'No space with id: ' . $slugOrSpaceID]);
         }
+
+        if($space->twitter != "NULL" && $space->twitter != " ");
+        {
+            $url = $space->twitter;
+            $handle = explode("/", $url);
+            if(count($handle) == 4)
+            {
+                $space->twitterHandle = $handle[3];
+            }
+        }
+
         return Response::json($space);
     }
 

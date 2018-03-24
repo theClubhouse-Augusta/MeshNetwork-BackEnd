@@ -14,6 +14,7 @@ use App\Challenge;
 use App\Cbind;
 use App\Ptbind;
 use App\Upload;
+use App\Submission;
 //use App\Team;
 use App\User;
 use App\Workspace;
@@ -26,7 +27,7 @@ class ChallengesController extends Controller
 {
   public function __construct()
   {
-    $this->middleware('jwt.auth', ['only' => ['store', 'joinChallenge', 'uploadFile']]);
+    $this->middleware('jwt.auth', ['only' => ['store', 'joinChallenge', 'uploadFile', 'storeSubmission', 'deleteSubmission']]);
   }
 
   public function index($count)
@@ -201,7 +202,6 @@ class ChallengesController extends Controller
     $rules = [
       'challengeTitle' => 'required',
       'challengeContent' => 'required',
-      'challengeCategories' => 'required'
     ];
 
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -250,9 +250,7 @@ class ChallengesController extends Controller
 
     $challengeTitle = $request->input('challengeTitle');
     $challengeContent = $request->input('challengeContent');
-    $challengeCategories = json_decode($request->input('challengeCategories'));
-    $startDate = $request->input('startDate');
-    $endDate = $request->input('endDate');
+    //$challengeCategories = json_decode($request->input('challengeCategories'));
     $status = 'Approved';
 
     /*$challengeSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $challengeTitle)));
@@ -267,12 +265,10 @@ class ChallengesController extends Controller
     $challenge->challengeTitle = $challengeTitle;
     //$challenge->challengeSlug = $challengeSlug;
     $challenge->challengeContent = $challengeContent;
-    $challenge->startDate = $startDate;
-    $challenge->endDate = $endDate;
     $challenge->status = $status;
     $challenge->save();
 
-    foreach($challengeCategories as $key => $category)
+    /*foreach($challengeCategories as $key => $category)
     {
       $categoryCheck = Cbind::where('challengeID', $challenge->id)->where('categoryID', $category->value)->first();
       if(empty($categoryCheck))
@@ -282,7 +278,7 @@ class ChallengesController extends Controller
         $cbind->categoryID = $category->value;
         $cbind->save();
       }
-    }
+    }*/
 
     return Response::json(['challenge' => $challenge->id]);
   }
@@ -558,5 +554,91 @@ class ChallengesController extends Controller
 
     return Response::json(['challenges' => $challenges]);
 
+  }
+
+  public function getSubmissions($id)
+  {
+    $submissions = Submission::where('submissions.challengeID', $id)->join('users', 'submissions.userID', '=', 'users.id')->select('submissions.id', 'users.name', 'users.avatar', 'submissions.submissionTitle', 'submissions.submissionDescription', 'submissions.submissionGithub', 'submissions.submissionVideo', 'submissions.submissionFile')->get();
+
+    return Response::json(['submissions' => $submissions]);
+  }
+
+  public function storeSubmission(Request $request)
+  {
+    $rules = [
+      'submissionTitle' => 'required',
+      'submissionDescription' => 'required',
+      'submissionFile' => 'required',
+      'challengeID' => 'required'
+    ];
+
+    $validator = Validator::make(Purifier::clean($request->all()), $rules);
+    if($validator->fails())
+    {
+      return Response::json(['error' => 'Please fill out all fields.']);
+    }
+
+    $user = Auth::user();
+    $challengeID = $request->input('challengeID');
+
+    $challengeCheck = Submission::where('userID', $user->id)->where('challengeID', $challengeID)->first();
+    if(!empty($challengeCheck)) 
+    {
+      return Response::json(['error' => 'You have already submitted a solution']);
+    }
+
+    $submissionTitle = $request->input('submissionTitle');
+    $submissionDescription = $request->input('submissionDescription');
+    $submissionGithub = $request->input('submissionGithub');
+    $submissionVideo = $request->input('submissionVideo');
+    $submissionFile = $request->file('submissionFile');
+
+    $extension = $submissionFile->getClientOriginalExtension();
+    if($extension != 'zip')
+    {
+      return Response::json(['error' => 'This is not a valid ZIP.']);
+    }
+
+    $size = $submissionFile->getClientSize();
+    if($size > 8388608)
+    {
+      return Response::json(['error' => 'This ZIP is too large.']);
+    }
+
+    if (!is_dir("submissions/".$challengeID)) {
+      mkdir("submissions/".$challengeID,0777,true);
+    }
+
+    $fileName = $submissionFile->getClientOriginalName();
+    $submissionFile->move("submissions/".$challengeID, $fileName);
+
+    $submission = new Submission;
+    $submission->userID = $user->id;
+    $submission->challengeID = $challengeID;
+    $submission->submissionTitle = $submissionTitle;
+    $submission->submissionDescription = $submissionDescription;
+    $submission->submissionGithub = $submissionGithub;
+    $submission->submissionVideo = $submissionVideo;
+    $submission->submissionFile = $request->root()."/submissions/".$challengeID.'/'.$fileName;
+    $submission->save();
+
+    return Response::json(['success' => 'Solution Submitted']);
+
+  }
+
+  public function deleteSubmission($id)
+  {
+    $user = Auth::user();
+    $submission = Submission::find($id);
+
+    if($user->roleID == 2 || $submission->userID == $user->id)
+    {
+      $submission->delete();
+
+      return Response::json(['success' => 'Submission Deleted']);
+    }
+    else {
+      return Response::json(['error' => 'You do not have permission.']);
+    }
   }
 }
