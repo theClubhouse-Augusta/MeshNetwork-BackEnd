@@ -103,6 +103,8 @@ Route::get('event/{eventID}', 'EventController@show');
 Route::get('spaceEvents/{spaceID}', 'WorkspaceController@getSpaceEvents'); //Formatted Events for the Calendar
 Route::get('spacename/{spaceID}', 'WorkspaceController@getName');
 Route::get('attend/{eventID}', 'EventController@attend');
+Route::post('deleteEvent/{id}', 'EventController@deleteEvent');
+Route::post('updateEvent', 'EventController@updateEvent');
 //
 Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('events/{spaceID}', 'EventController@getDashboardEvents');
@@ -128,7 +130,9 @@ Route::get('showChallenge/{id}', 'ChallengesController@show');
 Route::post('searchChallenges', 'ChallengesController@search');
 Route::get('joinChallenge/{id}', 'ChallengesController@joinChallenge');
 Route::post('uploadFile', 'ChallengesController@uploadFile');
-
+Route::get('getSubmissions/{id}', 'ChallengesController@getSubmissions');
+Route::post('storeSubmission', 'ChallengesController@storeSubmission');
+Route::post('deleteSubmission/{id}', 'ChallengesController@deleteSubmission');
 
 //LMS Routes
 Route::get('getCourses/{category}/{count}', 'CoursesController@getCourses');

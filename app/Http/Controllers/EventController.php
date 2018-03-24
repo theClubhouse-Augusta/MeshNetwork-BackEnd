@@ -24,6 +24,7 @@ use App\Calendar;
 use App\Opt;
 use App\File;
 use App\Challenge;
+use App\Upload;
 use Carbon\Carbon;
 use DB;
 
@@ -40,13 +41,13 @@ class EventController extends Controller
             'get',
             'attend',
             'store',
-            'update',
             'search',
             'opt',
             'getCalendar',
             'storeCalendar',
             'deleteCalendar',
-            'delete',
+            'deleteEvent',
+            'updateEvent',
             'Sponsers',
         ]]);
     }
@@ -249,8 +250,10 @@ class EventController extends Controller
         return Response::json(['success' => $events]);
     }
 
-    public function update(Request $request) 
+    public function updateEvent(Request $request) 
     {
+        $userID = Auth::id();
+        $spaceID = User::find($userID)->spaceID;
         $rules = [
             'eventID' => 'required|string',
             'name' => 'required|string',
@@ -270,7 +273,33 @@ class EventController extends Controller
             return Response::json(['error' => 'You must fill out all fields.']);
         }
 
+        $eventID = $request->input('eventID');
         $event = Event::find($request['eventID']);
+
+        $oldSponsors = Sponserevent::where('eventID', $event->id)->get();
+        foreach($oldSponsors as $sKey => $sponsor)
+        {
+            $sponsor->delete();
+        }
+
+        $oldOrganizers = Eventorganizer::where('eventID', $event->id)->get();
+        foreach($oldOrganizers as $sKey => $organizer)
+        {
+            $organizer->delete();
+        }
+
+        $oldSkills = Eventskill::where('eventID', $event->id)->get();
+        foreach($oldSkills as $sKey => $skill)
+        {
+            $skill->delete();
+        }
+
+        $oldDates = Eventdate::where('eventID', $event->id)->get();
+        foreach($oldDates as $sKey => $date)
+        {
+            $date->delete();
+        }
+        
         $sponsors = $request->input('sponsors');
         $sponserIDs = [];
 
@@ -278,7 +307,9 @@ class EventController extends Controller
             $sponsorArray = explode(',', $sponsors);
             foreach ($sponsorArray as $s) {
                 $sponsor = Sponser::where('name', $s)->first();
-                array_push($sponserIDs, $sponsor->id);
+                if(!empty($sponsor)) {
+                    array_push($sponserIDs, $sponsor->id);
+                }
             }
         }
 
@@ -306,11 +337,7 @@ class EventController extends Controller
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
         $dates = json_decode($request->input('dates'));
-        foreach ($dates as $date) {
-            if (date) {
-
-            }
-        }
+        
         $url = $request->input('url');
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
@@ -326,14 +353,17 @@ class EventController extends Controller
                 $eventorganizer = new Eventorganizer;
                 $eventorganizer->eventID = $eventID;
                 $user = User::where('email', $organizer)->first();
-                $eventorganizer->userID = $user->id;
-                if (!$eventorganizer->save()) return Response::json(['error' => 'e org']);
-                $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
-                if (empty($check)) {
-                    $calendar = new Calendar;
-                    $calendar->userID = $eventorganizer->userID;
-                    $calendar->eventID = $eventID;
-                    $calendar->save();
+                if(!empty($user)) 
+                {
+                    $eventorganizer->userID = $user->id;
+                    if (!$eventorganizer->save()) return Response::json(['error' => 'e org']);
+                    $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
+                    if (empty($check)) {
+                        $calendar = new Calendar;
+                        $calendar->userID = $eventorganizer->userID;
+                        $calendar->eventID = $eventID;
+                        $calendar->save();
+                    }
                 }
             }
         }
@@ -401,7 +431,7 @@ class EventController extends Controller
             $calendar->eventID = $eventID;
             $calendar->save();
         }
-        return Response::json(['success' => 'Event Added!', 'eventID' => $eventID]);
+        return Response::json(['success' => 'Event Updated!', 'eventID' => $eventID]);
 
 
     }
@@ -428,6 +458,12 @@ class EventController extends Controller
         }
 
         //$challenge = $event->challenge;
+
+        foreach($challenges as $key => $challenge)
+        {
+            $challengeFiles = Upload::where('challengeID', $challenge->id)->get();
+            $challenge->challengeFiles = $challengeFiles;
+        }
 
         return Response::json([
             'event' => $event,
@@ -674,9 +710,16 @@ class EventController extends Controller
     }
 
     // delete event
-    public function delete($eventID)
+    public function deleteEvent($eventID)
     {
+        $user = Auth::user();
         $event = Event::find($eventID);
+        $space = Workspace::where('id', $event->spaceID)->first();
+
+        if($user->spaceID != $space->id && $user->roleID != 2)
+        {
+            return Response::json(['error' => 'You do not have permission.']);
+        }
 
         if (empty($event)) {
             return Response::json(['error' => 'No event with ' . $eventID]);
@@ -684,6 +727,7 @@ class EventController extends Controller
 
         $event->delete();
 
+        return Response::json(['success' => 'Event Deleted.']);
     }
 
     public function storeCalendar($eventID)
