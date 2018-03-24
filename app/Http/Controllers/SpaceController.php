@@ -38,7 +38,12 @@ class SpaceController extends Controller
      */
     public function index()
     {
-        return Response::json(Workspace::all());
+        $haus = Workspace::where('id', 5)->first();
+        $spaces = Workspace::where('id', '!=', 5)->get()->toArray();
+
+        array_unshift($spaces,$haus);
+
+        return Response::json($spaces);
     }
 
     /**
