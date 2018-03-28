@@ -22,7 +22,7 @@ class CustomerList {
         if (!empty($this->customers)) {
             return $this->customers;
         } else {
-            return $this->error; 
+            return 0; 
         }
     }
     

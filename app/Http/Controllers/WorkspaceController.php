@@ -31,7 +31,7 @@ class WorkspaceController extends Controller
         $this->middleware('jwt.auth', ['only' => [
         // 'store',
         // 'get',
-        // 'show',
+        'showAuth',
         // 'approve',
             'update',
         // 'events',
@@ -314,8 +314,7 @@ class WorkspaceController extends Controller
         {
             $url = $space->twitter;
             $handle = explode("/", $url);
-            if(count($handle) == 4)
-            {
+            if(count($handle) == 4) {
                 $space->twitterHandle = $handle[3];
             }
         }
@@ -323,15 +322,28 @@ class WorkspaceController extends Controller
         return Response::json($space);
     }
 
+    public function showAuth($slugOrSpaceID) {
+        $user = Auth::user();
+        // $role = Role::find($user->roleID);
+        // $userRole = $role->name;
+        $spaceID = $user->spaceID;
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        if (empty($space))
+            return Response::json(['error' => 'No space with id: ' . $slugOrSpaceID]);
+        // if ($space->stripe != NULL && $userRole == 'organizer') {
+        if ($space->stripe != NULL) {
+            $space = Workspace::find($spaceID)->makeHidden('stripe');
+            $space->crm = 1;
+            return Response::json($space);
+        } else {
+            $space = Workspace::find($spaceID)->makeHidden('stripe');
+            $space->crm = 0;
+            return Response::json($space);
+        }
+    }
 
-    public function approve($spaceID, $status)
-    {
-        // // Ensure user has admin privalages
-        // $admin = Auth::user();
-        // $id = $admin->roleID;
-        // if ($id != 1) {
-        //   return Response::json(['error' => 'invalid credentials']);
-        // }
+
+    public function approve($spaceID, $status) {
         $workspace = Workspace::where('id', $spaceID)->orWhere('slug', $spaceID)->first();
         $workspace->status = $status;
         if (!$workspace->save()) {
@@ -340,8 +352,7 @@ class WorkspaceController extends Controller
         return Response::json(['success' => 'Workspace status: ' . $status]);
     }
 
-    public function update(Request $request)
-    {
+    public function update(Request $request) {
 
         // Ensure user has admin privalages
         // $org = Auth::user();

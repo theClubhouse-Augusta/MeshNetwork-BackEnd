@@ -43,9 +43,13 @@ class AuthController extends Controller
         $user = Auth::user();
         $spaceID = $user->spaceID;
         $space = Workspace::find($spaceID)->makeVisible('stripe');
-        $subscriptionService = new SubscriptionService($space->stripe);
-        $customers = $subscriptionService->getAllCustomers();
-        return Response::json($customers);
+        if ($space->stripe != NULL) {
+            $subscriptionService = new SubscriptionService($space->stripe);
+            $customers = $subscriptionService->getAllCustomers();
+            return Response::json(['customers' => $customers]);
+        } else {
+            return Response::json(['error' => true]);
+        }
     }
 
     /** SIGN UP

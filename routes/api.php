@@ -100,6 +100,7 @@ Route::get('today/event', 'EventController@getTodaysEvents');*/
 Route::get('users/{spaceID}', 'UserController@getSpaceUsers');
 Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
 Route::get('workspace/{slugOrSpaceID}', 'WorkspaceController@show');
+Route::get('workspace/auth/{slugOrSpaceID}', 'WorkspaceController@showAuth');
 Route::get('events/space/{spaceID}', 'WorkspaceController@events');
 Route::get('plans/{slug}', 'WorkspaceController@getSubscriptions');
 Route::get('publickey/{slug}', 'WorkspaceController@getKey');

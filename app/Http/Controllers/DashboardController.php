@@ -25,20 +25,19 @@ class DashBoardController extends Controller {
         JoinsService $joinsService
     ) {
         $this->middleware('jwt.auth', ['only' => [
-            'getCustomerSignUps',
-            // 'allBalancesFromDate',
-            //'getThisMonthsCustomers'
+            // 'getCustomerSignUps',
+             'allBalancesFromDate',
+            'getThisMonthsCustomers'
         ]]);
         $this->appearanceService = $appearanceService;
         $this->joinsService = $joinsService;
     }
 
     public function allBalancesFromDate($start, $end) {
-        // $user = Auth::user();
-        // $spaceID = $user->spaceID;
-        // $space = Workspace::find($spaceID)->makeVisible('stripe');
-        // $subscriptionService = new SubscriptionService($space->stripe);
-        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $user = Auth::user();
+        $spaceID = $user->spaceID;
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $subscriptionService = new SubscriptionService($space->stripe);
         $balances = $subscriptionService->getBalancesFromDateRange($start, $end);
         if (array_key_exists('error', $balances)) {
             return Response::json(['error' => $balances['error']]);
@@ -48,21 +47,24 @@ class DashBoardController extends Controller {
     }
     
     public function getThisMonthsCustomers($start, $end) {
-        // $user = Auth::user();
-        // $spaceID = $user->spaceID;
-        // $space = Workspace::find($spaceID)->makeVisible('stripe');
-        // $subscriptionService = new SubscriptionService($space->stripe);
-        $subscriptionService = new SubscriptionService("sk_test_mFK7v2MxoaazV6TqJ0dHURiM");
+        $user = Auth::user();
+        $spaceID = $user->spaceID;
+        $space = Workspace::find($spaceID)->makeVisible('stripe');
+        $subscriptionService = new SubscriptionService($space->stripe);
         $customers = $subscriptionService->getThisMonthsCustomers($start, $end);
-        return Response::json($customers);
+        if ($customers == 0) {
+            return Response::json(['error' => true]);
+        } else {
+            return Response::json(['customers'  => $customers]);
+        }
+
     }
 
     /**
      * @param $spaceId
      * @return Illuminate\Support\Facades\Response::class
      */
-    public function Joins($slug)
-    {
+    public function Joins($slug) {
         $space = Workspace::where('slug', $slug)->first();
         $spaceID = $space->id;
         $joins = $this->appearanceService->getAllJoins($spaceID);
@@ -151,17 +153,14 @@ class DashBoardController extends Controller {
         return Response::json($users);
     }
 
-    public function inviteHelper()
-    {
+    public function inviteHelper(){
 
     }
 
-    public function log($message)
-    {
+    public function log($message) {
         Log::error($message);
     }
-    public function email()
-    {
+    public function email() {
 
         Mail::send('emails.welcome', array('key' => 'value'), function ($message) {
             $message->to('austin.conder@outlook.com', 'Austin Conder')->subject('Welcome!');
