@@ -4,6 +4,7 @@
 /.idea
 /.vscode
 ./public/storage/events/*
+./public/storage
 Homestead.json
 foo.php
 Homestead.yaml
