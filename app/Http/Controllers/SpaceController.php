@@ -27,13 +27,8 @@ class SpaceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $haus = Workspace::where('id', 5)->first();
-        $spaces = Workspace::where('id', '!=', 5)->get()->toArray();
-
-        array_unshift($spaces,$haus);
-
+    public function index() {
+        $spaces = Workspace::all();
         return Response::json($spaces);
     }
 
