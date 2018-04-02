@@ -12,7 +12,7 @@ Homestead.yaml
 .env.production
 .project
 myapp.zip
-
+bean.sh
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
