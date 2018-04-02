@@ -1,9 +1,9 @@
 branch-defaults:
   master:
-    environment: MeshNetwork-BackEnd-dev
+    environment: MeshBack-dev
     group_suffix: null
 global:
-  application_name: MeshNetwork-BackEnd
+  application_name: MeshBack
   branch: null
   default_ec2_keyname: mesh_rsa
   default_platform: PHP 7.1
