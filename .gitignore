@@ -15,7 +15,6 @@ myapp.zip
 
 
 # Elastic Beanstalk Files
-.ebextensions/
 .elasticbeanstalk/*
 .vagrant
 !.elasticbeanstalk/*.cfg.yml
