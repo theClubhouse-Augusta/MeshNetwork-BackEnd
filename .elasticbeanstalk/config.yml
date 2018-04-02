@@ -5,7 +5,6 @@ branch-defaults:
 environment-defaults:
   MeshBack-dev:
     branch: master
-    repository: origin2
 global:
   application_name: MeshBack
   branch: null
