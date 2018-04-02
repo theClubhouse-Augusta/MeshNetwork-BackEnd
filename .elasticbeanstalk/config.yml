@@ -2,6 +2,10 @@ branch-defaults:
   master:
     environment: MeshBack-dev
     group_suffix: null
+environment-defaults:
+  MeshBack-dev:
+    branch: master
+    repository: origin2
 global:
   application_name: MeshBack
   branch: null
