@@ -1,10 +1,10 @@
 branch-defaults:
   master:
-    environment: null
+    environment: MeshNetwork-BackEnd-dev
     group_suffix: null
 global:
   application_name: MeshNetwork-BackEnd
-  branch: master
+  branch: null
   default_ec2_keyname: mesh_rsa
   default_platform: PHP 7.1
   default_region: us-east-1
@@ -13,6 +13,6 @@ global:
   platform_name: null
   platform_version: null
   profile: null
-  repository: origin
+  repository: null
   sc: git
   workspace_type: Application
