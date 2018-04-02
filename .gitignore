@@ -12,3 +12,8 @@ Homestead.yaml
 .env.production
 .project
 myapp.zip
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
