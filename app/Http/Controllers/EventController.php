@@ -11,6 +11,7 @@ use Auth;
 use JWTAuth;
 use DateTime;
 
+use App\Eventz;
 use App\Event;
 use App\Eventskill;
 use App\Eventdate;
@@ -27,6 +28,7 @@ use App\Challenge;
 use App\Upload;
 use Carbon\Carbon;
 use DB;
+use MaddHatter\LaravelFullcalendar\Facades\Calendar as Fullcalendar;
 
 class EventController extends Controller
 {
@@ -52,6 +54,52 @@ class EventController extends Controller
         ]]);
     }
 
+    public function eventzs() {
+        $events = [];
+        $data = Eventz::all();
+        if($data->count()) {
+            foreach ($data as $key => $value) {
+                $cal = new Fullcalendar();
+                $cal::setOptions([
+                    'defaultDate' => '2017-09-01',
+                    'editable' => true,
+                    'navLinks' => false,
+                ]);
+                $event = $cal::event(
+                    $value->title,
+                    true,
+                    new \DateTime($value->start_date),
+                    new \DateTime($value->end_date.' +1 day'),
+                    null,
+                    // Add color and link on event
+                    [
+                        'color' => '#ff0000',
+                        'url' => '',
+                    ]
+                );
+
+                $events[] = $event;
+            }
+        }
+        $event = Fullcalendar::event(
+            null,
+            true,
+            new \DateTime('2017-09-01'),
+            new \DateTime('2017-09-02'),
+            null,
+            // Add color and link on event
+            [
+                'color' => '#ff0000',
+                'url' => '',
+                'overlap' => false,
+                'rendering' => 'background',
+                'color' => '#ff9f89'
+            ]
+        );
+        $events[] = $event;
+        $calendar = Fullcalendar::addEvents($events);
+        return view('fullcalendar', compact('calendar'));
+    }
     public function store(Request $request) 
     {
         // user currently signed in
@@ -238,9 +286,7 @@ class EventController extends Controller
     }
 
     // all events all spaces
-    public function get()
-    {
-
+    public function get() {
         $now = date();
         $events = $Event::where('start' > $now)->get();
 

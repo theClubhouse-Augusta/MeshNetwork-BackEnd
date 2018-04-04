@@ -167,6 +167,7 @@ return [
         Intervention\Image\ImageServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
         Fideloper\Proxy\TrustedProxyServiceProvider::class,
+        MaddHatter\LaravelFullcalendar\ServiceProvider::class,
 
         /*
          * Package Service Providers...

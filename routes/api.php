@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 // WORKS
 
 // SpaceController
+Route::get('eventzs', 'EventController@eventzs');
 Route::resource('workspaces', 'SpaceController');
 // PhotoController
 Route::resource('photos', 'PhotoController');
