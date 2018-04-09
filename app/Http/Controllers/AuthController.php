@@ -34,9 +34,9 @@ class AuthController extends Controller
         ]]);
     }
     
-    public function checkAuth()
-    {
-        return Response::json(Auth::check());
+    public function checkAuth() {
+        $user = Auth::user();
+        return Response::json([ 'user' => $user ]);
     }
     
     public function allCustomers() {

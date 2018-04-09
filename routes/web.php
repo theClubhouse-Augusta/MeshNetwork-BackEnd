@@ -9,7 +9,8 @@
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 |
-*/
+ */
 
-Route::get('booking/approve/{token}','BookingController@approve');
-Route::get('booking/deny/{token}','BookingController@deny');
+Route::get('booking/approve/{token}', 'BookingController@approve');
+Route::get('booking/deny/{token}', 'BookingController@deny');
+Route::any('{path?}', 'MainController@index')->where("path", ".+");

@@ -15,7 +15,10 @@ class SpaceController extends Controller
 {
 
     protected $authController;
-    public function __construct(AuthController $authController, InputValidator $inputValidator) {
+    public function __construct(
+        AuthController $authController,
+        InputValidator $inputValidator
+    ) {
         $this->authController = $authController;
         $this->inputValidator = $inputValidator;
         $this->middleware('jwt.auth', ['only' => [
@@ -27,12 +30,13 @@ class SpaceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
+    public function index()
+    {
         $haus = Workspace::where('id', 5)->first();
         $spaces = Workspace::where('id', '!=', 5)->get()->toArray();
 
         if (!empty($haus)) {
-            array_unshift($spaces,$haus);
+            array_unshift($spaces, $haus);
         }
         return Response::json($spaces);
     }
@@ -55,11 +59,11 @@ class SpaceController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-        
-        $validInput = array_key_exists('logo', $_FILES) 
+
+        $validInput = array_key_exists('logo', $_FILES)
             ? $this->inputValidator->validateSpaceStore($request, $_FILES['logo'])
             : $this->inputValidator->validateSpaceStore($request);
-        
+
         if (!$validInput['isValid']) {
             return Response::json(['error' => $validInput['message']]);
         }
@@ -69,7 +73,7 @@ class SpaceController extends Controller
         $slug = str_replace(' ', '-', $slug);
         $slug = preg_replace('/[^A-Za-z0-9\-]/', '', $slug);
         $slug = preg_replace('/-+/', '-', $slug);
-        
+
         $slugCheck = Workspace::where('slug', $slug)->first();
         if (!empty($slugCheck)) {
             $string = str_random(3);
@@ -84,10 +88,10 @@ class SpaceController extends Controller
 
             // create new App\Workspace;
         $workspace = new Workspace($request->except([
-            'slug', 
-            'logo', 
-            'username', 
-            'password', 
+            'slug',
+            'logo',
+            'username',
+            'password',
             'avatar'
         ]));
         $workspace->slug = $slug;
@@ -109,8 +113,8 @@ class SpaceController extends Controller
 
         $spaceID = $workspace->id;
         $roleID = 2;
-        
-        $signUpAttempt= $this->authController->signUp($request, $roleID, $spaceID);
+
+        $signUpAttempt = $this->authController->signUp($request, $roleID, $spaceID);
         if ($signUpAttempt['hasErrors']) {
             DB::rollBack();
             return Response::json(['error' => $signUpAttempt['message']]);

@@ -54,53 +54,7 @@ class EventController extends Controller
         ]]);
     }
 
-    public function eventzs() {
-        $events = [];
-        $data = Eventz::all();
-        if($data->count()) {
-            foreach ($data as $key => $value) {
-                $cal = new Fullcalendar();
-                $cal::setOptions([
-                    'defaultDate' => '2017-09-01',
-                    'editable' => true,
-                    'navLinks' => false,
-                ]);
-                $event = $cal::event(
-                    $value->title,
-                    true,
-                    new \DateTime($value->start_date),
-                    new \DateTime($value->end_date.' +1 day'),
-                    null,
-                    // Add color and link on event
-                    [
-                        'color' => '#ff0000',
-                        'url' => '',
-                    ]
-                );
-
-                $events[] = $event;
-            }
-        }
-        $event = Fullcalendar::event(
-            null,
-            true,
-            new \DateTime('2017-09-01'),
-            new \DateTime('2017-09-02'),
-            null,
-            // Add color and link on event
-            [
-                'color' => '#ff0000',
-                'url' => '',
-                'overlap' => false,
-                'rendering' => 'background',
-                'color' => '#ff9f89'
-            ]
-        );
-        $events[] = $event;
-        $calendar = Fullcalendar::addEvents($events);
-        return view('fullcalendar', compact('calendar'));
-    }
-    public function store(Request $request) 
+    public function store(Request $request)
     {
         // user currently signed in
         $userID = Auth::id();
@@ -183,8 +137,8 @@ class EventController extends Controller
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
-        
-        if ( (!empty($city) && !empty($state) && !empty($address)) ) {
+
+        if ((!empty($city) && !empty($state) && !empty($address))) {
             $event->city = $city;
             $event->address = $address;
             $event->state = $state;
@@ -265,7 +219,7 @@ class EventController extends Controller
             $eventDate->start = $startStamp;
             $eventDate->end = $endStamp;
             if (!$eventDate->save()) return Response::json(['error' => 'evenDate error']);
-        } 
+        }
         if (!empty($sponserIDs)) {
             foreach ($sponserIDs as $sponserID) {
                 $sponserevent = new Sponserevent;
@@ -286,7 +240,8 @@ class EventController extends Controller
     }
 
     // all events all spaces
-    public function get() {
+    public function get()
+    {
         $now = date();
         $events = $Event::where('start' > $now)->get();
 
@@ -296,7 +251,7 @@ class EventController extends Controller
         return Response::json(['success' => $events]);
     }
 
-    public function updateEvent(Request $request) 
+    public function updateEvent(Request $request)
     {
         $userID = Auth::id();
         $spaceID = User::find($userID)->spaceID;
@@ -310,6 +265,9 @@ class EventController extends Controller
             'newSponsors' => 'nullable|string',
             'description' => 'required|string',
             'dates' => 'required|string',
+            'city' => 'nullable|string',
+            'address' => 'nullable|string',
+            'state' => 'nullable|string',
         ];
 
         // Validate input against rules
@@ -323,29 +281,25 @@ class EventController extends Controller
         $event = Event::find($request['eventID']);
 
         $oldSponsors = Sponserevent::where('eventID', $event->id)->get();
-        foreach($oldSponsors as $sKey => $sponsor)
-        {
+        foreach ($oldSponsors as $sKey => $sponsor) {
             $sponsor->delete();
         }
 
         $oldOrganizers = Eventorganizer::where('eventID', $event->id)->get();
-        foreach($oldOrganizers as $sKey => $organizer)
-        {
+        foreach ($oldOrganizers as $sKey => $organizer) {
             $organizer->delete();
         }
 
         $oldSkills = Eventskill::where('eventID', $event->id)->get();
-        foreach($oldSkills as $sKey => $skill)
-        {
+        foreach ($oldSkills as $sKey => $skill) {
             $skill->delete();
         }
 
         $oldDates = Eventdate::where('eventID', $event->id)->get();
-        foreach($oldDates as $sKey => $date)
-        {
+        foreach ($oldDates as $sKey => $date) {
             $date->delete();
         }
-        
+
         $sponsors = $request->input('sponsors');
         $sponserIDs = [];
 
@@ -353,7 +307,7 @@ class EventController extends Controller
             $sponsorArray = explode(',', $sponsors);
             foreach ($sponsorArray as $s) {
                 $sponsor = Sponser::where('name', $s)->first();
-                if(!empty($sponsor)) {
+                if (!empty($sponsor)) {
                     array_push($sponserIDs, $sponsor->id);
                 }
             }
@@ -379,12 +333,25 @@ class EventController extends Controller
 
         /* Event Info */
         $title = $request->input('name');
+        $city = $request->input('city');
+        $address = $request->input('address');
+        $state = $request->input('state');
         $description = $request->input('description');
         $tags = explode(',', $request->input('tags'));
         $organizers = explode(',', $request->input('organizers'));
         $dates = json_decode($request->input('dates'));
-        
         $url = $request->input('url');
+        if (!empty($address)) {
+            $event->address = $address;
+        }
+
+        if (!empty($state)) {
+            $event->state = $state;
+        }
+
+        if (!empty($city)) {
+            $event->city = $city;
+        }
         $event->title = $title;
         count($dates) > 1 ? $event->multiday = 1 : $event->multiday = 0;
         $event->description = $description;
@@ -399,8 +366,7 @@ class EventController extends Controller
                 $eventorganizer = new Eventorganizer;
                 $eventorganizer->eventID = $eventID;
                 $user = User::where('email', $organizer)->first();
-                if(!empty($user)) 
-                {
+                if (!empty($user)) {
                     $eventorganizer->userID = $user->id;
                     if (!$eventorganizer->save()) return Response::json(['error' => 'e org']);
                     $check = Calendar::where('eventID', $eventID)->where('userID', $eventorganizer->userID)->first();
@@ -460,7 +426,7 @@ class EventController extends Controller
             $eventDate->start = $startStamp;
             $eventDate->end = $endStamp;
             if (!$eventDate->save()) return Response::json(['error' => 'evenDate error']);
-        } 
+        }
         if (!empty($sponserIDs)) {
             foreach ($sponserIDs as $sponserID) {
                 $sponserevent = new Sponserevent;
@@ -505,8 +471,7 @@ class EventController extends Controller
 
         //$challenge = $event->challenge;
 
-        foreach($challenges as $key => $challenge)
-        {
+        foreach ($challenges as $key => $challenge) {
             $challengeFiles = Upload::where('challengeID', $challenge->id)->get();
             $challenge->challengeFiles = $challengeFiles;
         }
@@ -643,7 +608,7 @@ class EventController extends Controller
             foreach ($sponsorevents as $sponsorevent) {
                 $sponsor = Sponser::where('id', $sponsorevent->sponserID)->first();
 
-                if (count($sponsor) !== 0) {
+                if (!empty($sponsor)) {
                     array_push($sponsors, $sponsor);
                 }
             }
@@ -762,8 +727,7 @@ class EventController extends Controller
         $event = Event::find($eventID);
         $space = Workspace::where('id', $event->spaceID)->first();
 
-        if($user->spaceID != $space->id && $user->roleID != 2)
-        {
+        if ($user->spaceID != $space->id && $user->roleID != 2) {
             return Response::json(['error' => 'You do not have permission.']);
         }
 
@@ -843,8 +807,7 @@ class EventController extends Controller
         $event = Event::find($eventID);
 
         $check = Calendar::where('eventID', $eventID)->where('userID', $userID)->first();
-        if(!empty($check))
-        {
+        if (!empty($check)) {
             return Response::json(['duplicate' => 'You are already attending this event.']);
         }
         $attendEvent = new Calendar;
@@ -926,10 +889,10 @@ class EventController extends Controller
 
         foreach ($events as $key => $event) {
             $date = Eventdate::where('eventID', $event->id)->first();
-            if(!empty($date)) {
-              $date = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y');
+            if (!empty($date)) {
+                $date = Carbon::createFromTimeStamp(strtotime($date->start))->format('l jS \\of F Y');
             } else {
-              $date = "No Start Date";
+                $date = "No Start Date";
             }
             $event->date = $date;
 
@@ -940,7 +903,8 @@ class EventController extends Controller
         return Response::json($events);
     }
 
-    public function resetPassword(Request $request) {
+    public function resetPassword(Request $request)
+    {
         // Validation Rules
         $rules = [
             'email' => 'required|string',

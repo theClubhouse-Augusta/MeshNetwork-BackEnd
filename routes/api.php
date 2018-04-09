@@ -30,7 +30,7 @@ Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{end
 Route::get('appearances/users/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserCheckins');
 Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserSignUps');
 Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getCustomerSignUps');
-Route::get('balance/current/{pastMonth}/{now}', 'DashboardController@allBalancesFromDate'); 
+Route::get('balance/current/{pastMonth}/{now}', 'DashboardController@allBalancesFromDate');
 Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMonthsCustomers');
 
 
@@ -177,8 +177,7 @@ Route::get('getSubjects', 'CoursesController@getSubjects');
 Route::get('enrollCourse/{id}', 'CoursesController@enrollCourse');
 Route::get('publishCourse/{id}', 'CoursesController@publishCourse');
 Route::get('getCourseStudent/{cid}/{uid}', 'CoursesController@getCourseStudent');
-Route::get('approveAnswer/{qid}/{uid}/{i}','CoursesController@approveAnswer');
-
+Route::get('approveAnswer/{qid}/{uid}/{i}', 'CoursesController@approveAnswer');
 
 
 // Route::get('log/{message}', 'DashboardController@log');
