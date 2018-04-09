@@ -13,6 +13,7 @@ Homestead.yaml
 .project
 myapp.zip
 bean.sh
+Vagrantfile
 /.settings
 /.ebextenstions
 # Elastic Beanstalk Files
