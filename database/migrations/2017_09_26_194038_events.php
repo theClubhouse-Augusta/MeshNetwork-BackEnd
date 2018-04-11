@@ -29,6 +29,7 @@ class Events extends Migration
             $table->float('lat')->nullable();
             $table->float('lon')->nullable();
             $table->string('url')->nullable();
+            $table->tinyInteger('challenge')->nullable();
             $table->timestamps();
         });
     }

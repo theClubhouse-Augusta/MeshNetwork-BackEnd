@@ -16,7 +16,7 @@ class Courses extends Migration
         Schema::create('courses', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userID');
-            $table->integer('categoryID');
+            $table->integer('courseCategory');
             $table->string('courseName')->nullable();
             $table->longText('courseSummary')->nullable();
             $table->longText('courseInformation')->nullable();

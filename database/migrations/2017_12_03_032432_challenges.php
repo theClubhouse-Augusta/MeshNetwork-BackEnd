@@ -20,7 +20,9 @@ class Challenges extends Migration
             $table->longText('challengeImage');
             $table->string('challengeTitle');
             $table->string('challengeSlug');
-            $table->longText('challengeContent');
+            $table->string('startDate');
+            $table->string('endDate');
+            $table->mediumText('challengeContent');
             $table->string('status')->default('Pending');
             $table->timestamps();
         });

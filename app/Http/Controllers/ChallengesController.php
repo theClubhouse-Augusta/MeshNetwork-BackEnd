@@ -40,6 +40,8 @@ class ChallengesController extends Controller
                 'challenges.challengeContent',
                 'challenges.challengeSlug',
                 'challenges.spaceID',
+                'challenges.startDate',
+                'challenges.endDate',
                 'workspaces.logo',
                 'workspaces.name',
                 'workspaces.city'

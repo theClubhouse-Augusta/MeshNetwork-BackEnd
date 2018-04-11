@@ -37,14 +37,14 @@ class CoursesController extends Controller
             'editCourse',
             'updateCorrectAnswer',
             'completeLecture',
-            'completeCourse', 
+            'completeCourse',
             'storeLesson',
             'updateLesson',
             'deleteLesson',
-            'storeLecture', 
+            'storeLecture',
             'updateLecture',
             'deleteLecture',
-            'storeFiles', 
+            'storeFiles',
             'deleteFile',
             'storeQuestion',
             'updateQuestion',
@@ -61,11 +61,9 @@ class CoursesController extends Controller
 
     public function getCourses($category, $count)
     {
-        if($category == 0)
-        {
+        if ($category == 0) {
             $courses = Course::where('archive', 0)->where('courseStatus', 'Published')->select('id', 'courseName', 'courseCategory', 'courseSummary', 'courseImage')->paginate($count);
-        }
-        else {
+        } else {
             $courses = Course::where('archive', 0)->where('courseCategory', $category)->where('courseStatus', 'Published')->select('id', 'courseName', 'courseCategory', 'courseSummary', 'courseImage')->paginate($count);
         }
 
@@ -106,62 +104,53 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($id);
 
-        if($user->id != $course->userID)
-        {
+        if ($user->id != $course->userID) {
             return Response::json(['error' => 'You do not have permission.']);
         }
 
-        if($request->has('courseName'))
-        {
+        if ($request->has('courseName')) {
             $courseName = $request->input('courseName');
         } else {
             $courseName = $course->courseName;
         }
 
-        if($request->has('courseCategory'))
-        {
+        if ($request->has('courseCategory')) {
             $courseCategory = $request->input('courseCategory');
         } else {
             $courseCategory = $course->courseCategory;
         }
 
-        if($request->has('courseSummary'))
-        {
+        if ($request->has('courseSummary')) {
             $courseSummary = $request->input('courseSummary');
         } else {
             $courseSummary = $course->courseSummary;
         }
 
-        if($request->has('courseInformation'))
-        {
+        if ($request->has('courseInformation')) {
             $courseInformation = $request->input('courseInformation');
         } else {
             $courseInformation = $course->courseInformation;
         }
 
-        if($request->has('courseInstructorName'))
-        {
+        if ($request->has('courseInstructorName')) {
             $courseInstructorName = $request->input('courseInstructorName');
         } else {
             $courseInstructorName = $course->courseInstructorName;
         }
 
-        if($request->has('courseInstructorInfo'))
-        {
+        if ($request->has('courseInstructorInfo')) {
             $courseInstructorInfo = $request->input('courseInstructorInfo');
         } else {
             $courseInstructorInfo = $course->courseInstructorInfo;
         }
 
-        if($request->has('courseStatus'))
-        {
+        if ($request->has('courseStatus')) {
             $courseStatus = $request->input('courseStatus');
         } else {
             $courseStatus = $course->courseStatus;
         }
 
-        if($request->has('coursePrice'))
-        {
+        if ($request->has('coursePrice')) {
             $coursePrice = $request->input('coursePrice');
         } else {
             $coursePrice = $course->coursePrice;
@@ -177,7 +166,7 @@ class CoursesController extends Controller
         $course->courseInstructorInfo = $courseInstructorInfo;
         $course->coursePrice = $coursePrice;
         $course->courseStatus = $courseStatus;
-        $course->archive = $archive; 
+        $course->archive = $archive;
         $course->save();
 
         return Response::json(['success' => 'Course Updated']);
@@ -188,7 +177,7 @@ class CoursesController extends Controller
         $user = Auth::user();
 
         $course = Course::find($id);
-        if($course->userID != $user->id) {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission.']);
         }
 
@@ -197,7 +186,7 @@ class CoursesController extends Controller
 
         return Response::json(['success' => 'Course Removed']);
     }
-    
+
 
     public function updateCourseImage(Request $request, $id)
     {
@@ -214,8 +203,7 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($id);
 
-        if($user->id != $course->userID)
-        {
+        if ($user->id != $course->userID) {
             return Response::json(['error' => 'You do not have permission.']);
         }
 
@@ -293,8 +281,7 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($id);
 
-        if($user->id != $course->userID)
-        {
+        if ($user->id != $course->userID) {
             return Response::json(['error' => 'You do not have permission.']);
         }
 
@@ -370,7 +357,7 @@ class CoursesController extends Controller
 
         $searchContent = $request->input('courseContent');
 
-        $courses = Course::where('courseName', 'LIKE', '%'.$courseContent.'%')->orWhere('courseInformation', 'LIKE', '%'.$courseContent.'%')->get();
+        $courses = Course::where('courseName', 'LIKE', '%' . $courseContent . '%')->orWhere('courseInformation', 'LIKE', '%' . $courseContent . '%')->get();
 
         return Response::json($courses);
     }
@@ -379,41 +366,33 @@ class CoursesController extends Controller
     {
         $user = Auth::user();
 
-        if($user->roleID == 3 || $user->roleID == 2)
-        {
+        if ($user->roleID == 3 || $user->roleID == 2) {
             $courses = Enroll::where('enrolls.userID', $user->id)->join('courses', 'enrolls.courseID', '=', 'courses.id')->select('courses.id', 'courses.courseName', 'courses.userID', 'courses.courseCategory', 'courses.courseSummary', 'courses.courseImage')->paginate(16);
 
-            foreach($courses as $courkey => $course)
-            {
+            foreach ($courses as $courkey => $course) {
                 $complete = 0;
                 $percent = 0;
                 $lectureCount = 0;
 
                 $lessons = Lesson::where('courseID', $course->id)->get();
-                foreach($lessons as $leskey => $lesson)
-                {
+                foreach ($lessons as $leskey => $lesson) {
                     $lectures = Lecture::where('lessonID', '=', $lesson->id)->get();
                     $lectureCount = count($lectures);
-                    foreach($lectures as $lecKey => $lecture)
-                    {
+                    foreach ($lectures as $lecKey => $lecture) {
                         $completes = Complete::where('userID', '=', $user->id)->where('lectureID', '=', $lecture->id)->get();
-                        if(!$completes->isEmpty())
-                        {
+                        if (!$completes->isEmpty()) {
                             $complete = count($completes);
                         }
                     }
                 }
 
-                if($lectureCount > 0)
-                {
-                    $course->percent = $complete/$lectureCount * 100;
+                if ($lectureCount > 0) {
+                    $course->percent = $complete / $lectureCount * 100;
                     $course->complete = $complete . '/' . $lectureCount;
                 }
             }
 
-        }
-        else if($user->roleID == 4 || $user->roleID == 1)
-        {
+        } else if ($user->roleID == 4 || $user->roleID == 1) {
             $courses = Course::where('archive', '=', 0)->where('userID', '=', $user->id)->select('id', 'userID', 'courseName', 'courseCategory', 'courseSummary', 'courseImage', 'courseStatus')->paginate(12);
         }
 
@@ -423,21 +402,16 @@ class CoursesController extends Controller
     public function detailCourse($id)
     {
         $course = Course::where('id', $id)->where('archive', '=', 0)->first();
-        
-        if(!empty($course))
-        {
+
+        if (!empty($course)) {
             $lessons = Lesson::where('courseID', $course->id)->get();
             $lectures = [];
 
-            if(!$lessons->isEmpty())
-            {
-                foreach($lessons as $lKey => $lesson)
-                {
+            if (!$lessons->isEmpty()) {
+                foreach ($lessons as $lKey => $lesson) {
                     $lecture = Lecture::where('lessonID', $lesson->id)->select('id', 'lessonID', 'lectureName', 'lectureType')->get();
-                    if(!$lecture->isEmpty())
-                    {
-                        foreach($lecture as $lecKey => $l)
-                        {
+                    if (!$lecture->isEmpty()) {
+                        foreach ($lecture as $lecKey => $l) {
                             $lectures[] = $l;
                         }
                     }
@@ -452,15 +426,13 @@ class CoursesController extends Controller
         $course = Course::where('id', $id)->where('archive', '=', 0)->first();
         $user = Auth::user();
 
-        if($user->id == $uid || $course->userID == $user->id)
-        {
+        if ($user->id == $uid || $course->userID == $user->id) {
             $user = User::find($uid);
         } else {
             return Response::json(['authError' => 'You do not have access to this page.']);
         }
 
-        if(!empty($course))
-        {
+        if (!empty($course)) {
             $lessons = Lesson::where('courseID', $course->id)->get();
             $lectures = [];
             $students = [];
@@ -471,31 +443,24 @@ class CoursesController extends Controller
             $percent = 0;
             $enrolled = 0;
 
-            if(!$lessons->isEmpty())
-            {
+            if (!$lessons->isEmpty()) {
                 $enroll = Enroll::where('userID', $user->id)->where('courseID', $id)->first();
 
-                if(!empty($enroll) || $course->userID == $user->id)
-                {
+                if (!empty($enroll) || $course->userID == $user->id) {
                     $enrolled = 1;
 
-                    foreach($lessons as $lesKey => $lesson)
-                    {
+                    foreach ($lessons as $lesKey => $lesson) {
                         $lecture = Lecture::where('lessonID', $lesson->id)->get();
-                        if(!$lecture->isEmpty())
-                        {
-                            foreach($lecture as $lecKey => $l)
-                            {
+                        if (!$lecture->isEmpty()) {
+                            foreach ($lecture as $lecKey => $l) {
                                 $lecComplete = Complete::where('userID', $user->id)->where('lectureID', $l->id)->first();
                                 $lecStatus = 0;
 
-                                if(!empty($lecComplete))
-                                {
+                                if (!empty($lecComplete)) {
                                     $lecStatus = $lecStatus + 1;
                                     $l->complete = 1;
                                     $l->grade = $lecComplete->grade;
-                                }
-                                else {
+                                } else {
                                     $l->complete = 0;
                                     $l->grade = 0;
                                 }
@@ -505,40 +470,30 @@ class CoursesController extends Controller
                                 $lectures[] = $l;
 
                                 $filesGet = Document::where('lectureID', $l->id)->get();
-                                if(!$filesGet->isEmpty())
-                                {
-                                    foreach($filesGet as $filKey => $lectureFile)
-                                    {
-                                        if($lectureFile->lectureID == $l->id)
-                                        {
+                                if (!$filesGet->isEmpty()) {
+                                    foreach ($filesGet as $filKey => $lectureFile) {
+                                        if ($lectureFile->lectureID == $l->id) {
                                             $files[] = $lectureFile;
                                         }
                                     }
                                 }
 
                                 $questionsGet = Question::where('lectureID', $l->id)->get();
-                                if(!$questionsGet->isEmpty())
-                                {
-                                    foreach($questionsGet as $qKey => $question)
-                                    {                                        
-                                        if(!empty($lecComplete)) {
+                                if (!$questionsGet->isEmpty()) {
+                                    foreach ($questionsGet as $qKey => $question) {
+                                        if (!empty($lecComplete)) {
                                             $answersGet = Answer::where('questionID', $question->id)->select('id', 'questionID', 'answerContent', 'isCorrect')->get();
                                         } else {
                                             $answersGet = Answer::where('questionID', $question->id)->select('id', 'questionID', 'answerContent')->get();
                                         }
-                                        if(!$answersGet->isEmpty())
-                                        {
-                                            foreach($answersGet as $aKey => $answer)
-                                            {
-                                                if($question->questionType == 'multiple')
-                                                {
+                                        if (!$answersGet->isEmpty()) {
+                                            foreach ($answersGet as $aKey => $answer) {
+                                                if ($question->questionType == 'multiple') {
                                                     $solution = Solution::where('userID', $user->id)->where('questionID', $question->id)->where('answer', $answer->id)->first();
-                                                    if(!empty($solution))
-                                                    {
+                                                    if (!empty($solution)) {
                                                         $answer->solution = 1;
                                                         $answer->solCorrect = $solution->solCorrect;
-                                                    }
-                                                    else {
+                                                    } else {
                                                         $answer->solution = 0;
 
                                                     }
@@ -547,15 +502,12 @@ class CoursesController extends Controller
                                             }
                                         }
 
-                                        if($question->questionType == 'open')
-                                        {
+                                        if ($question->questionType == 'open') {
                                             $solution = Solution::where('userID', $user->id)->where('questionID', $question->id)->first();
-                                            if(!empty($solution))
-                                            {
+                                            if (!empty($solution)) {
                                                 $question->solution = $solution->openContent;
                                                 $question->solCorrect = $solution->solCorrect;
-                                            }
-                                            else {
+                                            } else {
                                                 $question->solution = "";
                                             }
                                         }
@@ -569,25 +521,21 @@ class CoursesController extends Controller
 
                     $enrolls = Enroll::where('courseID', $id)->get();
 
-                    foreach($enrolls as $eKey => $enroll)
-                    {
+                    foreach ($enrolls as $eKey => $enroll) {
                         $profile = User::where('id', $enroll->userID)->first();
                         $complete = 0;
 
-                        foreach($lessons as $lKey => $lesson)
-                        {
+                        foreach ($lessons as $lKey => $lesson) {
                             $lecture = Lecture::where('lessonID', $lesson->id)->get();
-                            if(!$lecture->isEmpty())
-                            {
-                                foreach($lecture as $lecKey => $l)
-                                {
+                            if (!$lecture->isEmpty()) {
+                                foreach ($lecture as $lecKey => $l) {
                                     $completes = Complete::where('userID', $enroll->userID)->where('lectureID', $l->id)->get();
                                     $complete = $complete + count($completes);
                                 }
                             }
                         }
 
-                        $percent = $complete/count($lectures) * 100;
+                        $percent = $complete / count($lectures) * 100;
                         $complete = $complete . '/' . count($lectures);
                         $student = [
                             'profile' => $profile,
@@ -598,15 +546,11 @@ class CoursesController extends Controller
                         //$student = json_encode($student);
                         $students[] = $student;
                     }
-                }
-                else {
-                    foreach($lessons as $lKey => $lesson)
-                    {
+                } else {
+                    foreach ($lessons as $lKey => $lesson) {
                         $lecture = Lecture::where('lessonID', $lesson->id)->get();
-                        if(!$lecture->isEmpty())
-                        {
-                            foreach($lecture as $lecKey => $l)
-                            {
+                        if (!$lecture->isEmpty()) {
+                            foreach ($lecture as $lecKey => $l) {
                                 $lectures[] = $l;
                             }
                         }
@@ -615,9 +559,7 @@ class CoursesController extends Controller
             }
 
             return Response::json(['course' => $course, 'lessons' => $lessons, 'lectures' => $lectures, 'students' => $students, 'questions' => $questions, 'answers' => $answers, 'files' => $files, 'enrolled' => $enrolled]);
-        }
-
-        else {
+        } else {
             return Response::json(['course' => [], 'lessons' => [], 'lectures' => []]);
         }
     }
@@ -627,8 +569,7 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($id);
 
-        if($user->id != $course->userID)
-        {
+        if ($user->id != $course->userID) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -640,38 +581,28 @@ class CoursesController extends Controller
         $course = Course::where('archive', 0)->where('id', $id)->first();
         $lessons = Lesson::where('courseID', $course->id)->get();
 
-        if(!$lessons->isEmpty())
-        {
-            foreach($lessons as $lesKey => $lesson)
-            {
+        if (!$lessons->isEmpty()) {
+            foreach ($lessons as $lesKey => $lesson) {
                 $lecturesGet = Lecture::where('lessonID', $lesson->id)->get();
-                if(!$lecturesGet->isEmpty())
-                {
-                    foreach($lecturesGet as $lecKey => $lecture)
-                    {
+                if (!$lecturesGet->isEmpty()) {
+                    foreach ($lecturesGet as $lecKey => $lecture) {
                         $lectures[] = $lecture;
 
                         $docsGet = Document::where('lectureID', $lecture->id)->get();
-                        if(!$docsGet->isEmpty())
-                        {
-                            foreach($docsGet as $docsKey => $lectureFile)
-                            {
+                        if (!$docsGet->isEmpty()) {
+                            foreach ($docsGet as $docsKey => $lectureFile) {
                                 $documents[] = $lectureFile;
                             }
                         }
 
                         $questionsGet = Question::where('lectureID', $lecture->id)->get();
-                        if(!$questionsGet->isEmpty())
-                        {
-                            foreach($questionsGet as $quesKey => $question)
-                            {
+                        if (!$questionsGet->isEmpty()) {
+                            foreach ($questionsGet as $quesKey => $question) {
                                 $questions[] = $question;
 
                                 $answersGet = Answer::where('questionID', $question->id)->get();
-                                if(!$answersGet->isEmpty())
-                                {
-                                    foreach($answersGet as $ansKey => $answer)
-                                    {
+                                if (!$answersGet->isEmpty()) {
+                                    foreach ($answersGet as $ansKey => $answer) {
                                         $answers[] = $answer;
                                     }
                                 }
@@ -690,13 +621,12 @@ class CoursesController extends Controller
         $course = Course::find($id);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
         $answers = Answer::where('questionID', $lid)->get();
-        foreach($answers as $aKey => $answer) {
+        foreach ($answers as $aKey => $answer) {
             $answer->isCorrect = 0;
             $answer->save();
         }
@@ -724,58 +654,46 @@ class CoursesController extends Controller
 
         $enroll = Enroll::where('userID', $user->id)->where('courseID', $courseID)->first();
 
-        if(empty($enroll)) {
+        if (empty($enroll)) {
             return Response::json(['error' => 'You are not enrolled in this course.']);
         }
 
         $lecture = Lecture::find($lectureID);
         $completeCheck = Complete::where('lectureID', $lecture->id)->where('userID', $user->id)->first();
 
-        if(empty($completeCheck))
-        {
-            if($lecture->lectureType == "Exam")
-            {
+        if (empty($completeCheck)) {
+            if ($lecture->lectureType == "Exam") {
                 $questionCount = 0;
                 $answerCount = 0;
 
                 $questions = Question::where('lectureID', $lectureID)->get();
                 $questionCount = count($questions);
 
-                if(empty($answers))
-                {
+                if (empty($answers)) {
                     return Response::json(['error' => 'Please answer all questions.']);
                 }
 
-                foreach($questions as $quesKey => $question)
-                {
+                foreach ($questions as $quesKey => $question) {
                     $answerGet = Answer::where('questionID', $question->id)->get();
 
-                    foreach($answerGet as $ansKey => $a)
-                    {
-                        foreach($answers as $aKey => $answer)
-                        {
-                            if($question->id == $answer->questionID)
-                            {
-                                if($question->questionType == 'multiple')
-                                {
+                    foreach ($answerGet as $ansKey => $a) {
+                        foreach ($answers as $aKey => $answer) {
+                            if ($question->id == $answer->questionID) {
+                                if ($question->questionType == 'multiple') {
                                     $solution = new Solution;
                                     $solution->userID = $user->id;
                                     $solution->questionID = $question->id;
                                     $solution->answer = $answer->answerID;
-        
-                                    if($a->id == $answer->answerID && $a->isCorrect == 1)
-                                    {
+
+                                    if ($a->id == $answer->answerID && $a->isCorrect == 1) {
                                         $solution->solCorrect = 1;
                                         $answerCount = $answerCount + 1;
-                                    }
-                                    else {
+                                    } else {
                                         $solution->solCorrect = 0;
                                     }
 
                                     $solution->save();
-                                }
-                                else if($question->questionType == 'open') 
-                                {
+                                } else if ($question->questionType == 'open') {
                                     $solution = new Solution;
                                     $solution->userID = $user->id;
                                     $solution->questionID = $question->id;
@@ -788,7 +706,7 @@ class CoursesController extends Controller
                     }
                 }
 
-                $grade = $answerCount/$questionCount * 100;
+                $grade = $answerCount / $questionCount * 100;
                 $complete = new Complete;
                 $complete->userID = $user->id;
                 $complete->lectureID = $lectureID;
@@ -796,8 +714,7 @@ class CoursesController extends Controller
                 $complete->save();
 
                 return Response::json(['success' => 'You have completed this exam', 'grade' => $grade]);
-            }
-            else {
+            } else {
                 $complete = new Complete;
                 $complete->userID = $user->id;
                 $complete->lectureID = $lectureID;
@@ -806,8 +723,7 @@ class CoursesController extends Controller
 
                 return Response::json(['success' => 'You have completed this lecture.']);
             }
-        }
-        else {
+        } else {
             return Response::json(['success' => 'You have already completed this Exam.', 'grade' => $completeCheck->grade]);
         }
     }
@@ -820,8 +736,7 @@ class CoursesController extends Controller
 
         $enroll = Enroll::where('userID', $user->id)->where('courseID', $courseID)->first();
 
-        if(empty($enroll))
-        {
+        if (empty($enroll)) {
             return Response::json(['error' => 'You are not enrolled in this course']);
         }
 
@@ -830,46 +745,38 @@ class CoursesController extends Controller
         $exams = [];
         $lessons = Lesson::where('courseID', $courseID)->get();
 
-        foreach($lessons as $lesKey => $lesson)
-        {
+        foreach ($lessons as $lesKey => $lesson) {
             $lectures = Lecture::where('lessonID', $lesson->id)->get();
-            foreach($lectures as $lecKey => $lecture)
-            {
+            foreach ($lectures as $lecKey => $lecture) {
                 $lectureCount = $lectureCount + 1;
-                if($lecture->lectureType == "Exam")
-                {
+                if ($lecture->lectureType == "Exam") {
                     $exams[] = $lecture;
                 }
 
                 $completes = Complete::where('userID', $user->id)->where('lectureID', $lecture->id)->get();
-                foreach($completes as $comKey => $complete)
-                {
+                foreach ($completes as $comKey => $complete) {
                     $completeCount = $completeCount + 1;
                 }
             }
         }
 
         $totalGrade = 0;
-        foreach($exams as $eKey => $exam)
-        {
+        foreach ($exams as $eKey => $exam) {
             $completes = Complete::where('userID', $user->id)->where('lectureID', $exam->id)->get();
-            foreach($completes as $comkey => $complete)
-            {
+            foreach ($completes as $comkey => $complete) {
                 $totalGrade = $totalGrade + $complete->grade;
             }
         }
 
         $averageGrade = $totalGrade / count($exams);
 
-        if($lectureCount == $completeCount && $averageGrade >= 64.00)
-        {
+        if ($lectureCount == $completeCount && $averageGrade >= 64.00) {
             $enrollUpdate = Enroll::where('userID', $user->id)->where('courseID', $courseID)->first();
             $enrollUpdate->status = "Graduate";
             $enrollUpdate->save();
 
             return Response::json(['success' => 'You have completed this course!']);
-        }
-        else {
+        } else {
             return Response::json(['error' => "You have not completed this course."]);
         }
     }
@@ -878,12 +785,11 @@ class CoursesController extends Controller
     {
         $courseID = $request->input('courseID');
         $lessonName = $request->input('lessonName');
-        
+
         $course = Course::find($courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -901,8 +807,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -919,8 +824,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -940,8 +844,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -954,7 +857,7 @@ class CoursesController extends Controller
 
         return Response::json(['success' => $lecture->id]);
     }
-    
+
     public function updateLecture(Request $request, $id)
     {
         $lectureName = $request->input('lectureName');
@@ -967,8 +870,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -990,8 +892,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1010,19 +911,18 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
-        $docFolder = 'storage/course/documents/'.$lectureID;
+        $docFolder = 'storage/course/documents/' . $lectureID;
         if (!is_dir($docFolder)) {
             mkdir($docFolder, 0777, true);
         }
 
-        $path = '/storage/course/documents/'.$lectureID;
-        $fileData->move(public_path().$path, $fileData->getClientOriginalName());
-        $filePath = $request->root().'/storage/course/documents/'.$lectureID.'/'.$fileData->getClientOriginalName();
+        $path = '/storage/course/documents/' . $lectureID;
+        $fileData->move(public_path() . $path, $fileData->getClientOriginalName());
+        $filePath = $request->root() . '/storage/course/documents/' . $lectureID . '/' . $fileData->getClientOriginalName();
 
         $doc = new Document;
         $doc->lectureID = $lectureID;
@@ -1042,8 +942,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1063,8 +962,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1087,8 +985,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1108,8 +1005,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1123,8 +1019,7 @@ class CoursesController extends Controller
         $questionID = $request->input('questionID');
         $answerContent = $request->input('answerContent');
         $isCorrect = $request->input('isCorrect');
-        if($isCorrect == 'false')
-        {
+        if ($isCorrect == 'false') {
             $isCorrect = 0;
         }
 
@@ -1134,8 +1029,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1159,8 +1053,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1181,8 +1074,7 @@ class CoursesController extends Controller
         $course = Course::find($lesson->courseID);
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1203,15 +1095,13 @@ class CoursesController extends Controller
     {
         $user = Auth::user();
 
-        if($user->roleID == 4)
-        {
+        if ($user->roleID == 4) {
             return Response::json(['error' => 'You cannot enroll on an instructor account.']);
         }
 
         $enrollCheck = Enroll::where("userID", $user->id)->where('courseID', $id)->first();
 
-        if(empty($enrollCheck))
-        {
+        if (empty($enrollCheck)) {
             $enroll = new Enroll;
             $enroll->userID = $user->id;
             $enroll->courseID = $id;
@@ -1232,19 +1122,16 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($id);
 
-        if($user->id != $course->userID)
-        {
+        if ($user->id != $course->userID) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
-        if($course->courseStatus == 'Published')
-        {
+        if ($course->courseStatus == 'Published') {
             $course->courseStatus = 'Draft';
             $course->save();
 
             return Response::json(['success' => 'Course Unpublished.']);
-        } else if($course->courseStatus == 'Draft')
-        {
+        } else if ($course->courseStatus == 'Draft') {
             $course->courseStatus = 'Published';
             $course->save();
             return Response::json(['success' => 'Course Published.']);
@@ -1257,14 +1144,12 @@ class CoursesController extends Controller
         $user = Auth::user();
         $course = Course::find($cid);
 
-        if($user->id != $course->userID && $uid != $user->id)
-        {
+        if ($user->id != $course->userID && $uid != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
         $enroll = Enroll::where('userID', $uid)->where('courseID', $cid)->first();
-        if(empty($enroll))
-        {
+        if (empty($enroll)) {
             return Response::json(['error' => 'Student does not exist.']);
         }
 
@@ -1274,15 +1159,12 @@ class CoursesController extends Controller
 
         $lectureArray = [];
 
-        foreach($lessons as $lesKey => $lesson)
-        {
+        foreach ($lessons as $lesKey => $lesson) {
             $lectures = Lecture::where('lessonID', $lesson->id)->get();
-            
-            foreach($lectures as $lecKey => $lecture)
-            {
+
+            foreach ($lectures as $lecKey => $lecture) {
                 $complete = Complete::where('userID', $uid)->where('lectureID', $lecture->id)->first();
-                if(empty($complete))
-                {
+                if (empty($complete)) {
                     $lecture->complete = 0;
                     $lecture->grade = 0;
                 } else {
@@ -1290,12 +1172,10 @@ class CoursesController extends Controller
                     $lecture->grade = $complete->grade;
                 }
 
-                if($lecture->lectureType == "Exam")
-                {
+                if ($lecture->lectureType == "Exam") {
                     $questions = Question::where('lectureID', $lecture->id)->get();
-                    foreach($questions as $quesKey => $question)
-                    {
-                        if($question->questionType == 'Multiple') {
+                    foreach ($questions as $quesKey => $question) {
+                        if ($question->questionType == 'Multiple') {
                             $answers = Answer::where('questionID', $question->id)->get();
                             $question->answers = $answers;
                         }
@@ -1312,7 +1192,7 @@ class CoursesController extends Controller
             }
         }
 
-        
+
 
         return Response::json(['course' => $course, 'student' => $student, 'lectures' => $lectureArray]);
     }
@@ -1326,8 +1206,7 @@ class CoursesController extends Controller
 
         $user = Auth::user();
 
-        if($course->userID != $user->id)
-        {
+        if ($course->userID != $user->id) {
             return Response::json(['error' => 'You do not have permission']);
         }
 
@@ -1337,30 +1216,26 @@ class CoursesController extends Controller
 
         $complete = Complete::where('lectureID', $lecture->id)->where('userID', $uid)->first();
         $grade = $complete->grade;
-        
-        if($i == 1)
-        {
+
+        if ($i == 1) {
             $result = "Answer Approved.";
 
             $questions = Question::where('lectureID', $lecture->id)->get();
             $questionCount = count($questions);
 
             $solutionCount = 0;
-            foreach($questions as $qKey => $question)
-            {
+            foreach ($questions as $qKey => $question) {
                 $sol = Solution::where('questionID', $question->id)->where('userID', $uid)->first();
 
-                if($sol->solCorrect == 1)
-                {
+                if ($sol->solCorrect == 1) {
                     $solutionCount = $solutionCount + 1;
                 }
             }
-            
+
             $grade = $solutionCount / $questionCount * 100;
             $complete->grade = $grade;
             $complete->save();
-        }
-        else {
+        } else {
             $result = "Answer Denied.";
         }
 
