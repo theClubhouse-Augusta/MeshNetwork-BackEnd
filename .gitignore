@@ -4,7 +4,7 @@
 /.idea
 /.vscode
 ./public/storage/events/*
-./public/storage
+public/storage
 public/static/
 public/challenge
 Homestead.json
