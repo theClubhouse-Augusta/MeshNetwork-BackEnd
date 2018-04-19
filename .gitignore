@@ -6,7 +6,7 @@
 ./public/storage/events/*
 ./public/storage
 public/static/
-./public/challenge
+public/challenge
 Homestead.json
 foo.php
 Homestead.yaml
@@ -14,6 +14,7 @@ Homestead.yaml
 .env.production
 .project
 .buildpath
+aliases
 myapp.zip
 bean.sh
 Vagrantfile
