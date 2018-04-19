@@ -13,6 +13,7 @@ Homestead.yaml
 .env
 .env.production
 .project
+.buildpath
 myapp.zip
 bean.sh
 Vagrantfile
