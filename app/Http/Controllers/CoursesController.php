@@ -366,7 +366,7 @@ class CoursesController extends Controller
   {
     $user = Auth::user();
 
-    $courses = Enroll::where('userID', $user->id)
+    $courses = Enroll::where('enrolls.userID', $user->id)
       ->join('courses', 'enrolls.courseID', '=', 'courses.id')
       ->select(
         'courses.id',
@@ -392,7 +392,7 @@ class CoursesController extends Controller
               $complete = count($completes);
             }
           }
-        };
+        }
 
         if ($lectureCount > 0) {
           $course->percent = $complete / $lectureCount * 100;
