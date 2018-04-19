@@ -5,7 +5,7 @@
 /.vscode
 ./public/storage/events/*
 ./public/storage
-./public/static
+public/static/
 ./public/challenge
 Homestead.json
 foo.php
