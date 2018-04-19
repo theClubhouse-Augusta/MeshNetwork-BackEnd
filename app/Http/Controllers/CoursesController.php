@@ -442,7 +442,9 @@ class CoursesController extends Controller
 
   public function showCourse($id, $uid)
   {
-    $course = Course::where('id', $id)->where('archive', '=', 0)->first();
+    $course = Course::where('id', $id)
+      ->where('archive', '=', 0)
+      ->first();
     $user = Auth::user();
 
     if ($user->id == $uid || $course->userID == $user->id) {
@@ -576,10 +578,22 @@ class CoursesController extends Controller
           }
         }
       }
-
-      return Response::json(['course' => $course, 'lessons' => $lessons, 'lectures' => $lectures, 'students' => $students, 'questions' => $questions, 'answers' => $answers, 'files' => $files, 'enrolled' => $enrolled]);
+      return Response::json([
+        'course' => $course,
+        'lessons' => $lessons,
+        'lectures' => $lectures,
+        'students' => $students,
+        'questions' => $questions,
+        'answers' => $answers,
+        'files' => $files,
+        'enrolled' => $enrolled
+      ]);
     } else {
-      return Response::json(['course' => [], 'lessons' => [], 'lectures' => []]);
+      return Response::json([
+        'course' => [],
+        'lessons' => [],
+        'lectures' => []
+      ]);
     }
   }
 
