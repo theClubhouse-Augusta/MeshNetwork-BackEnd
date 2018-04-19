@@ -19,7 +19,7 @@ myapp.zip
 bean.sh
 Vagrantfile
 /.settings
-.ebextenstions
+/.ebextenstions/
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 .vagrant
