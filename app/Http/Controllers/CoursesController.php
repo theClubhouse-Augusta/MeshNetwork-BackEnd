@@ -209,11 +209,11 @@ class CoursesController extends Controller
 
     $imageFile = 'storage/course';
     if (!is_dir($imageFile)) {
-      mkdir($imageFile, 0777, true);
+      mkdir($imageFile, 0775, true);
     }
     $thumbnailFile = 'storage/course/thumbnails';
     if (!is_dir($thumbnailFile)) {
-      mkdir($thumbnailFile, 0777, true);
+      mkdir($thumbnailFile, 0775, true);
     }
 
     $string = str_random(15);
@@ -287,11 +287,11 @@ class CoursesController extends Controller
 
     $imageFile = 'storage/course/instructors';
     if (!is_dir($imageFile)) {
-      mkdir($imageFile, 0777, true);
+      mkdir($imageFile, 0775, true);
     }
     $thumbnailFile = 'storage/course/instructors';
     if (!is_dir($thumbnailFile)) {
-      mkdir($thumbnailFile, 0777, true);
+      mkdir($thumbnailFile, 0775, true);
     }
 
     $string = str_random(15);
@@ -950,7 +950,7 @@ class CoursesController extends Controller
 
     $docFolder = 'storage/course/documents/' . $lectureID;
     if (!is_dir($docFolder)) {
-      mkdir($docFolder, 0777, true);
+      mkdir($docFolder, 0775, true);
     }
 
     $path = '/storage/course/documents/' . $lectureID;

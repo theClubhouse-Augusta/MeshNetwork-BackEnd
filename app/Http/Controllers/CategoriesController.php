@@ -71,7 +71,7 @@ class CategoriesController extends Controller
 
     $imageFile = 'categories';
     if (!is_dir($imageFile)) {
-      mkdir($imageFile, 0777, true);
+      mkdir($imageFile, 0775, true);
     }
 
     $imageName = str_random(4);
