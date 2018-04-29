@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Route;
 // DashboardController
 
 // WORKS
-
 // SpaceController
-Route::get('eventzs', 'EventController@eventzs');
 Route::resource('workspaces', 'SpaceController');
 // PhotoController
 Route::resource('photos', 'PhotoController');
@@ -26,7 +24,6 @@ Route::get('joins/{slug}', 'DashboardController@Joins');
 Route::get('appearances/{slug}', 'DashboardController@Appearances');
 Route::get('events/metrics/{slug}', 'DashboardController@Events');
 Route::get('appearances/range/{spaceId}/{startMonth}/{startYear}/{endMonth}/{endYear}', 'DashboardController@appearanceForMonthYear');
-
 Route::get('appearances/users/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserCheckins');
 Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getUserSignUps');
 Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getCustomerSignUps');
@@ -46,6 +43,7 @@ Route::post('forgotpassword', 'AuthController@resetPassword');
 Route::post('customer/email', 'UserController@updateCustomerMeshEmail'); // logged in user profile update
 Route::get('user/auth', 'AuthController@getUser'); // get Auth User
 Route::get('user/profile/{id}', 'UserController@user'); // get user.id
+Route::get('showuser/{id}', 'UserController@showUser'); // show logged in user
 Route::post('user/update', 'UserController@updateUser'); // logged in user profile update
 Route::get('getDashboardUsers/{id}', 'UserController@getDashboardUsers');
 Route::post('changeRole', 'UserController@changeRole');
@@ -190,7 +188,6 @@ Route::get('approveAnswer/{qid}/{uid}/{i}', 'CoursesController@approveAnswer');
 // UserController
 // Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user
 // Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
-// Route::get('showuser', 'UserController@showUser'); // show logged in user
 // Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
 // Route::get('userToOrg/{userID}', 'UserController@makeOrganizer');
 
@@ -239,4 +236,3 @@ Route::get('approveAnswer/{qid}/{uid}/{i}', 'CoursesController@approveAnswer');
 //Route::post('photo', 'PhotosController@storePhotos');
 // Route::post('deletePhoto/{spaceID}/{id}', 'PhotosController@deletePhoto');
 
-// Route::any('{path?}', 'MainController@index')->where("path", ".+");
