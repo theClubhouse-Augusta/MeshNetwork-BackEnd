@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DateTime;
 
 use App\User;
+use App\Company;
 use App\Appearance;
 use App\Role;
 use App\Calendar;
@@ -472,6 +473,10 @@ class UserController extends Controller
     $space = Workspace::where('id', $user->spaceID)
       ->select('name')
       ->first();
+    $company = Company::where('userID', $user->id)->first();
+    if (!empty($company)) {
+      $user->companyID = $company->id;
+    }
     $events = $this->getUpcomingEvents();
     $upcoming = $this->getAttendingEvents($user->id);
 

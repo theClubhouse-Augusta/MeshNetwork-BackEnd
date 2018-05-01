@@ -30,6 +30,8 @@ Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear
 Route::get('balance/current/{pastMonth}/{now}', 'DashboardController@allBalancesFromDate');
 Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMonthsCustomers');
 
+// CompanyController
+Route::get('company/{id}', 'CompanyController@getCompany'); // show logged in user
 
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users
