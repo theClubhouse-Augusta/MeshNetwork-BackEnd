@@ -450,10 +450,6 @@ class UserController extends Controller
         return Response::json(['error' => 'nothing matched query']);*/
   }
 
-  public function userWTF($userID)
-  {
-    $user = Auth::user();
-  }
   /**
    * Show logged in user.
    * @param void
@@ -477,8 +473,8 @@ class UserController extends Controller
     if (!empty($company)) {
       $user->companyID = $company->id;
     }
-    $events = $this->getUpcomingEvents();
-    $upcoming = $this->getAttendingEvents($user->id);
+    $events = $this->getUpcomingEvents($user->id);
+//    $upcoming = $this->getAttendingEvents($user->id);
 
     if (empty($user)) {
       return Response::json(['error' => 'User does not exist']);
@@ -489,33 +485,46 @@ class UserController extends Controller
       'skills' => !empty($skills) ? $skills : false,
       'space' => !empty($space) ? $space : false,
       'events' => !empty($events) ? $events : false,
-      'upcoming' => !empty($upcoming) ? $upcoming : false,
+//      'upcoming' => !empty($upcoming) ? $upcoming : false,
     ]);
   }
 
-  private function getUpcomingEvents()
+  private function getUpcomingEvents($userID)
   {
     $now = new DateTime();
+    $attending = Calendar::where('userID', $userID)->pluck('eventID')->toArray();
     $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
-
     $eventIDs = array();
+    $startDates = array();
     foreach ($eventdates as $key => $event) {
       if ($key == 0) {
         $id = $event->eventID;
+        $start = $event->start;
         array_push($eventIDs, $id);
-      }
-      if ($key != 0) {
+        array_push($startDates, $start);
+      } else {
         $check = $event->eventID;
         if ($id != $check) {
           $id = $check;
           array_push($eventIDs, $id);
+          array_push($startDates, $event->start);
         }
       }
     }
     $events = array();
+    $count = 0;
     foreach ($eventIDs as $id) {
+      $isAttending = in_array($id, $attending);
       $event = Event::find($id);
-      array_push($events, $event);
+      array_push(
+        $events,
+        [
+          "event" => $event,
+          "isAttending" => $isAttending,
+          "startDate" => $startDates[$count]
+        ]
+      );
+      $count++;
     }
     return $events;
 
@@ -528,8 +537,9 @@ class UserController extends Controller
     $upcoming = array();
     if (!empty($attending)) {
       foreach ($attending as $attend) {
-        $eventdate = Eventdate::where('eventID', $attend->eventID)->first();
-        if (!empty($eventdate)) {
+      //  $eventdate = Eventdate::where('eventID', $attend->eventID)->first();
+        $eventdates = Eventdate::where('eventID', $attend->eventID)->where('start', '>', $now->format('Y-m-d'))->get();
+        /*if (!empty($eventdate)) {
           $event = Event::find($attend->eventID);
           $title = $event->title;
           $id = $event->id;
@@ -546,7 +556,7 @@ class UserController extends Controller
               ]
             );
           }
-        }
+        } */
       }
     }
     return $upcoming;
@@ -619,8 +629,8 @@ class UserController extends Controller
       ->select('name')
       ->first();
 
-    $events = $this->getUpcomingEvents();
-    $upcoming = $this->getAttendingEvents($user->id);
+    $events = $this->getUpcomingEvents($user->id);
+//    $upcoming = $this->getAttendingEvents($user->id);
 
     if (empty($user)) {
       return Response::json(['error' => 'User does not exist']);

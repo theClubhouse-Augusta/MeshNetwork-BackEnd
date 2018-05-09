@@ -32,6 +32,7 @@ Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMont
 
 // CompanyController
 Route::get('company/{id}', 'CompanyController@getCompany'); // show logged in user
+Route::get('company/user/update', 'CompanyController@getCompanyOfLoggedInUser'); // show logged in user
 
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users

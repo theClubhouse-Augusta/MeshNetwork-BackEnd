@@ -84,8 +84,7 @@ class SpaceController extends Controller
     $lon = $coordinates->results[0]->geometry->location->lng;
     $lat = $coordinates->results[0]->geometry->location->lat;
 
-
-            // create new App\Workspace;
+    // create new App\Workspace;
     $workspace = new Workspace($request->except([
       'slug',
       'logo',

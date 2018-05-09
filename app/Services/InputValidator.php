@@ -7,6 +7,7 @@ use \Mews\Purifier\Facades\Purifier;
 // Models
 use App\User;
 use App\Workspace;
+use App\Company;
 
 class InputValidator
 {
@@ -34,7 +35,7 @@ class InputValidator
         // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
     if ($avatar != null) {
-      $this->imageFails = $this->validImageUpload($avatar);
+      $this->imageFails = $this->invalidImageUpload($avatar);
       if ($this->imageFails) {
         return [
           'isValid' => false,
@@ -49,6 +50,43 @@ class InputValidator
       return [
         'isValid' => false,
         'message' => 'you must fill out all fields'
+      ];
+    } else {
+      return [
+        'isValid' => true,
+      ];
+    }
+  }
+
+  public function validateCompanyStore($request, $logo = null)
+  {
+    $rules = [
+      'name' => 'required|string',
+      'logo' => 'nullable|string',
+      'employeeCount' => 'nullable|string',
+      'description' => 'nullable|string',
+      'tags' => 'required|string',
+      'url' => 'nullable|string',
+    ];
+    // Validate input against rules
+    $validator = Validator::make(Purifier::clean($request->all()), $rules);
+    $imageFails = ($logo != null) ? $this->invalidImageUpload($logo) : false;
+    $nameAlreadyInUse = !empty(Company::where('name', $request['name'])->first());
+
+    if ($validator->fails()) {
+      return [
+        'isValid' => false,
+        'message' => 'you must fill out all fields'
+      ];
+    } else if ($imageFails) {
+      return [
+        'isValid' => false,
+        'message' => 'invalid image upload',
+      ];
+    } else if ($nameAlreadyInUse) {
+      return [
+        'isValid' => false,
+        'message' => 'Another collaborative workspace has taken that name',
       ];
     } else {
       return [
@@ -76,7 +114,7 @@ class InputValidator
     ];
         // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
-    $imageFails = ($logo != null) ? $this->validImageUpload($logo) : false;
+    $imageFails = ($logo != null) ? $this->invalidImageUpload($logo) : false;
     $nameAlreadyInUse = !empty(Workspace::where('name', $request['name'])->first());
 
     if ($validator->fails()) {
@@ -121,15 +159,15 @@ class InputValidator
     }
   }
 
-  private function validImageUpload($image)
+  private function invalidImageUpload($image)
   {
-        // Check for valid image upload
+    // Check for valid image upload
     if (!empty($image)) {
-            // Check for file upload error
+      // Check for file upload error
       if ($image['error'] !== UPLOAD_ERR_OK) {
         return true;
       }
-            // checks for valid image upload
+      // checks for valid image upload
       try {
         $info = getimagesize($image['tmp_name']);
       } catch (\Exception $e) {
@@ -140,7 +178,7 @@ class InputValidator
         return true;
       }
 
-            // checks for valid image upload
+      // checks for valid image upload
       if (($info[2] !== IMAGETYPE_GIF)
         && ($info[2] !== IMAGETYPE_JPEG)
         && ($info[2] !== IMAGETYPE_PNG)) {
