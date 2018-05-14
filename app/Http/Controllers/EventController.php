@@ -139,19 +139,19 @@ class EventController extends Controller
         $event->description = $description;
 
         if ((!empty($city) && !empty($state) && !empty($address))) {
-            $event->city = $city;
-            $event->address = $address;
-            $event->state = $state;
-            $coordinates = $this->getGeoLocation($address, $city, $state);
-            $lon = $coordinates->results[0]->geometry->location->lng;
-            $lat = $coordinates->results[0]->geometry->location->lat;
-            $event->lon = $lon;
-            $event->lat = $lat;
+          $event->city = $city;
+          $event->address = $address;
+          $event->state = $state;
+          $coordinates = $this->getGeoLocation($address, $city, $state);
+          $lon = $coordinates->results[0]->geometry->location->lng;
+          $lat = $coordinates->results[0]->geometry->location->lat;
+          $event->lon = $lon;
+          $event->lat = $lat;
         }
         $event->url = $url;
 
         if (!$event->save())
-            return Response::json(['error' => 'Database error']);
+          return Response::json(['error' => 'Database error']);
 
         $eventID = $event->id;
 

@@ -65,13 +65,16 @@ class InputValidator
       'logo' => 'nullable|string',
       'employeeCount' => 'nullable|string',
       'description' => 'nullable|string',
-      'tags' => 'required|string',
+      'tags' => 'nullable|string',
       'url' => 'nullable|string',
+      'userID' =>  'nullable|string',
+      'update' => 'required|string',
+      'companyId' => 'nullable|string',
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
     $imageFails = ($logo != null) ? $this->invalidImageUpload($logo) : false;
-    $nameAlreadyInUse = !empty(Company::where('name', $request['name'])->first());
+    $nameAlreadyInUse = $request['update'] ? false : !empty(Company::where('name', $request['name'])->first());
 
     if ($validator->fails()) {
       return [

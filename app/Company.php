@@ -11,5 +11,6 @@ class Company extends Model
       'employeeCount',
       'description',
       'url',
+      'userID'
     ];
 }

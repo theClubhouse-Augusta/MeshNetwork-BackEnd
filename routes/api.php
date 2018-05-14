@@ -32,7 +32,10 @@ Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMont
 
 // CompanyController
 Route::get('company/{id}', 'CompanyController@getCompany'); // show logged in user
-Route::get('company/user/update', 'CompanyController@getCompanyOfLoggedInUser'); // show logged in user
+Route::post('company/create', 'CompanyController@store'); // show logged in user
+Route::post('company/update/{id}', 'CompanyController@store'); // show logged in user
+Route::get('verticals/all', 'CompanyController@allVerticals'); // show logged in user
+Route::get('company/user/get', 'CompanyController@getCompanyOfLoggedInUser'); // show logged in user
 
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users
@@ -59,46 +62,6 @@ Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sig
 Route::post('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('organizers/events', 'UserController@OrganizersForEvents'); // to populate tags in sign up form
 
-/*Route::get('getSpaceUsers/{spaceID}', 'UserController@getSpaceUsers');
-Route::get('userToOrg/{userID}', 'UserController@makeOrganizer');
-
-// RoleController
-Route::post('newrole', 'RoleController@store');
-Route::get('getroles', 'RoleController@get');
-Route::post('showrole', 'RoleController@show');
-Route::get('deleterole/{id}', 'RoleController@delete');
-
-// WorkspaceController
-Route::post('newspace', 'WorkspaceController@store');
-Route::get('spacestatus/{spaceID}/{status}', 'WorkspaceController@approve');
-Route::post('spaceupdate', 'WorkspaceController@update');
-Route::get('workspaces', 'WorkspaceController@get');
-Route::get('workspace/{slug}', 'WorkspaceController@show');
-Route::get('workevents/{spaceID}', 'WorkspaceController@events');
-Route::get('plans/{spaceID}', 'WorkspaceController@getSubscriptions');
-Route::get('publickey/{spaceID}', 'WorkspaceController@getKey');
-Route::get('getSpaceBySlug/{slug}', 'WorkspaceController@getSpaceBySlug');
-Route::get('spaceOrganizers/{spaceID}', 'WorkspaceController@spaceOrganizers');
-Route::get('getSpaceStats/{spaceID}', 'WorkspaceController@getSpaceStats');
-
-// EventController
-Route::post('sponser','EventController@makeSponser');
-Route::get('sponsors','EventController@Sponsers');
-Route::get('events','EventController@get');
-Route::get('upcoming/{spaceID}','EventController@upcoming');
-Route::post('event','EventController@store');
-Route::post('eventUpdate','EventController@update');
-Route::get('event/{eventID}','EventController@show');
-Route::post('searchEvent','EventController@search');
-Route::post('optEvent, ','EventController@opt');
-Route::get('deleteEvent/{id}','EventController@delete');
-Route::get('getCalendar','EventController@getCalendar');
-Route::get('event/join/{eventID}','EventController@storeCalendar');
-Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
-Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
-Route::get('eventDates/{id}', 'EventController@EventDates');
-Route::get('today/event', 'EventController@getTodaysEvents');*/
-//
 Route::get('users/{spaceID}', 'UserController@getSpaceUsers');
 Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
 Route::get('workspace/{slugOrSpaceID}', 'WorkspaceController@show');
