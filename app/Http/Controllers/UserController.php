@@ -496,24 +496,28 @@ class UserController extends Controller
     $eventdates = Eventdate::where('start', '>', $now->format('Y-m-d'))->get();
     $eventIDs = array();
     $startDates = array();
+    $endDates = array();
     foreach ($eventdates as $key => $event) {
       if ($key == 0) {
         $id = $event->eventID;
         $start = $event->start;
+        $end = $event->end;
         array_push($eventIDs, $id);
         array_push($startDates, $start);
+        array_push($endDates, $end);
       } else {
         $check = $event->eventID;
         if ($id != $check) {
           $id = $check;
           array_push($eventIDs, $id);
           array_push($startDates, $event->start);
+          array_push($endDates, $event->end);
         }
       }
     }
     $events = array();
-    $count = 0;
-    foreach ($eventIDs as $id) {
+//    $count = 0;
+    foreach ($eventIDs as $key => $id) {
       $isAttending = in_array($id, $attending);
       $event = Event::find($id);
       array_push(
@@ -521,10 +525,11 @@ class UserController extends Controller
         [
           "event" => $event,
           "isAttending" => $isAttending,
-          "startDate" => $startDates[$count]
+          "startDate" => $startDates[$key],
+          "endDate" => $endDates[$key]
         ]
       );
-      $count++;
+  //    $count++;
     }
     return $events;
 
@@ -626,12 +631,16 @@ class UserController extends Controller
     }
 
     $space = Workspace::where('id', $user->spaceID)
-      ->select('name')
+      ->select(['name', 'logo'])
       ->first();
 
     $events = $this->getUpcomingEvents($user->id);
 //    $upcoming = $this->getAttendingEvents($user->id);
 
+    $company = Company::where('userID', $user->id)->first();
+    if (!empty($company)) {
+      $user->companyID = $company->id;
+    }
     if (empty($user)) {
       return Response::json(['error' => 'User does not exist']);
     }

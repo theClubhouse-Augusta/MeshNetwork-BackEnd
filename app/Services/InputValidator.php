@@ -3,8 +3,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Validator;
 use \Mews\Purifier\Facades\Purifier;
-
-// Models
 use App\User;
 use App\Workspace;
 use App\Company;
@@ -45,7 +43,6 @@ class InputValidator
       }
     }
 
-
     if ($validator->fails()) {
       return [
         'isValid' => false,
@@ -63,13 +60,22 @@ class InputValidator
     $rules = [
       'name' => 'required|string',
       'logo' => 'nullable|string',
-      'employeeCount' => 'nullable|string',
+      'employeeCount' => 'required|string',
       'description' => 'nullable|string',
       'tags' => 'nullable|string',
       'url' => 'nullable|string',
-      'userID' =>  'nullable|string',
+      'userID' => 'nullable|string',
       'update' => 'required|string',
       'companyId' => 'nullable|string',
+      'foundingDate' => 'required|string',
+      'facebook' => 'nullable|string',
+      'instagram' => 'nullable|string',
+      'pinterest' => 'nullable|string',
+      'linkedin' => 'nullable|string',
+      'discord' => 'nullable|string',
+      'snapchat' => 'nullable|string',
+      'youtube' => 'nullable|string',
+      'twitter' => 'nullable|string',
     ];
     // Validate input against rules
     $validator = Validator::make(Purifier::clean($request->all()), $rules);
@@ -90,6 +96,29 @@ class InputValidator
       return [
         'isValid' => false,
         'message' => 'Another collaborative workspace has taken that name',
+      ];
+    } else {
+      return [
+        'isValid' => true,
+      ];
+    }
+  }
+
+  public function validateTestCal($request, $logo = null)
+  {
+    $rules = [
+      'title' => 'required|string',
+      'description' => 'required|string',
+      'start' => 'required|string',
+      'end' => 'required|string',
+    ];
+    // Validate input against rules
+    $validator = Validator::make(Purifier::clean($request->all()), $rules);
+
+    if ($validator->fails()) {
+      return [
+        'isValid' => false,
+        'message' => 'you must fill out all fields'
       ];
     } else {
       return [

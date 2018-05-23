@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Route;
 // |
 // */
 // DashboardController
-
-// WORKS
 // SpaceController
 Route::resource('workspaces', 'SpaceController');
 // PhotoController
@@ -29,14 +27,13 @@ Route::get('signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}
 Route::get('customers/signups/{spaceId}/{month}/{year}/{day}/{endMonth}/{endYear}/{endDay}', 'DashboardController@getCustomerSignUps');
 Route::get('balance/current/{pastMonth}/{now}', 'DashboardController@allBalancesFromDate');
 Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMonthsCustomers');
-
 // CompanyController
 Route::get('company/{id}', 'CompanyController@getCompany'); // show logged in user
 Route::post('company/create', 'CompanyController@store'); // show logged in user
 Route::post('company/update/{id}', 'CompanyController@store'); // show logged in user
-Route::get('verticals/all', 'CompanyController@allVerticals'); // show logged in user
+Route::get('verticals', 'CompanyController@allVerticals'); // show logged in user
 Route::get('company/user/get', 'CompanyController@getCompanyOfLoggedInUser'); // show logged in user
-
+Route::post('calendarInvite', 'EventController@calendarInvite'); // show logged in user
 // AuthController
 Route::get('users', 'AuthController@getUsers');  // admin get users
 Route::get('customers', 'AuthController@allCustomers');  // sign up
@@ -44,7 +41,6 @@ Route::get('authorize', 'AuthController@checkAuth');  // sign up
 Route::post('signUp', 'AuthController@signUp');  // sign up
 Route::post('login', 'AuthController@signIn');  // login
 Route::post('forgotpassword', 'AuthController@resetPassword');
-
 // UserController
 Route::post('customer/email', 'UserController@updateCustomerMeshEmail'); // logged in user profile update
 Route::get('user/auth', 'AuthController@getUser'); // get Auth User
@@ -54,14 +50,12 @@ Route::post('user/update', 'UserController@updateUser'); // logged in user profi
 Route::get('getDashboardUsers/{id}', 'UserController@getDashboardUsers');
 Route::post('changeRole', 'UserController@changeRole');
 Route::get('getKioskUsers', 'UserController@getKioskUsers');
-
 // TESTING
 Route::get('userskills', 'UserController@userSkills'); // to populate tags in sign up form
 Route::get('skills', 'UserController@getSkills'); // to populate tags in sign up form
 Route::get('skills/all', 'UserController@allSkills'); // to populate tags in sign up form
 Route::post('search', 'UserController@search'); // search by skill/SpaceID
 Route::get('organizers/events', 'UserController@OrganizersForEvents'); // to populate tags in sign up form
-
 Route::get('users/{spaceID}', 'UserController@getSpaceUsers');
 Route::get('users/space/{spaceID}', 'UserController@usersFromSpace'); // get users from spaceID (for Kiosk)
 Route::get('workspace/{slugOrSpaceID}', 'WorkspaceController@show');
@@ -79,7 +73,6 @@ Route::get('spacename/{spaceID}', 'WorkspaceController@getName');
 Route::get('attend/{eventID}', 'EventController@attend');
 Route::post('deleteEvent/{id}', 'EventController@deleteEvent');
 Route::post('updateEvent', 'EventController@updateEvent');
-//
 Route::get('todayevent/{spaceID}', 'EventController@getTodaysEvents');
 Route::get('events/{spaceID}', 'EventController@getDashboardEvents');
 Route::post('appearance', 'AppearanceController@store');
@@ -89,14 +82,11 @@ Route::post('resource/delete/{id}', 'BookingController@deleteResource');
 Route::get('occasions', 'AppearanceController@getValidOccasions');
 Route::get('bookings/{resourceID}', 'BookingController@getBookings');
 Route::post('booking', 'BookingController@store');
-
-
 //Challenge Routes
 Route::get('getCategories', 'CategoriesController@index');
 Route::get('selectCategories', 'CategoriesController@select');
 Route::post('storeCategory', 'CategoriesController@store');
 Route::get('showCategory/{id}/{type}', 'CategoriesController@show');
-
 Route::get('getChallenges/{count}', 'ChallengesController@index');
 Route::post('storeChallenge', 'ChallengesController@store');
 Route::post('updateChallenge/{id}', 'ChallengesController@update');

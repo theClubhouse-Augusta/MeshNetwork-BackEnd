@@ -201,21 +201,21 @@ class CompanyController extends Controller
   {
     $userID = Auth::id();
     $company = Company::where('userID', $userID)->first();
-    $companyVerticals = Companytovertical::where('companyID', $company->id)->get();
-    $verticalsArray = [];
-    foreach ($companyVerticals as $companyVertical) {
-      $vertical = Companyvertical::find($companyVertical->verticalID);
-      array_push($verticalsArray, [
-        'label' => $vertical->name,
-        'value' => $vertical->name,
-        'id' => $vertical->id
-      ]);
-    }
     if (!empty($company)) {
-      return Response::json([
-        'company' => $company,
-        'verticals' => $verticalsArray,
-      ]);
+      $companyVerticals = Companytovertical::where('companyID', $company->id)->get();
+      $verticalsArray = [];
+      foreach ($companyVerticals as $companyVertical) {
+        $vertical = Companyvertical::find($companyVertical->verticalID);
+        array_push($verticalsArray, [
+          'label' => $vertical->name,
+          'value' => $vertical->name,
+          'id' => $vertical->id
+        ]);
+        return Response::json([
+          'company' => $company,
+          'verticals' => $verticalsArray,
+        ]);
+      }
     } else {
       return Response::json(['userID' => $userID]);
     }
@@ -255,6 +255,6 @@ class CompanyController extends Controller
         'id' => $vertical->id
       ]);
     }
-    return Response::json($verticalsArray);
+    return Response::json(['options' => $verticalsArray]);
   }
 }
