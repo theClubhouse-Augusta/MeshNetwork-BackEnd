@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\Route;
 // |--------------------------------------------------------------------------
 // | API Routes
 // |--------------------------------------------------------------------------
-// |
 // | Here is where you can register API routes for your application. These
 // | routes are loaded by the RouteServiceProvider within a group which
 // | is assigned the "api" middleware group. Enjoy building your API!
 // |
 // */
+
 // DashboardController
 // SpaceController
 Route::resource('workspaces', 'SpaceController');
@@ -97,7 +97,6 @@ Route::post('uploadFile', 'ChallengesController@uploadFile');
 Route::get('getSubmissions/{id}', 'ChallengesController@getSubmissions');
 Route::post('storeSubmission', 'ChallengesController@storeSubmission');
 Route::post('deleteSubmission/{id}', 'ChallengesController@deleteSubmission');
-
 //LMS Routes
 Route::get('getCourses/{category}/{count}', 'CoursesController@getCourses');
 Route::get('myCourses/{category}', 'CoursesController@getMyCourses');
@@ -132,63 +131,3 @@ Route::get('enrollCourse/{id}', 'CoursesController@enrollCourse');
 Route::get('publishCourse/{id}', 'CoursesController@publishCourse');
 Route::get('getCourseStudent/{cid}/{uid}', 'CoursesController@getCourseStudent');
 Route::get('approveAnswer/{qid}/{uid}/{i}', 'CoursesController@approveAnswer');
-
-
-// Route::get('log/{message}', 'DashboardController@log');
-// Route::get('email', 'DashboardController@email');
-
-
-// AuthController
-// Route::get('ban/{id}', 'AuthController@ban'); // ban user.id
-
-// UserController
-// Route::get('deleteuser/{id}', 'UserController@delete'); // Admin delete user
-// Route::post('searchname', 'UserController@searchName'); // search by name/spaceID
-// Route::get('organizers/all', 'UserController@Organizers'); // to populate tags in sign up form
-// Route::get('userToOrg/{userID}', 'UserController@makeOrganizer');
-
-// // RoleController
-// Route::post('newrole', 'RoleController@store');
-// Route::get('getroles', 'RoleController@get');
-// Route::post('showrole', 'RoleController@show');
-// Route::get('deleterole/{id}', 'RoleController@delete');
-
-// // WorkspaceController
-// Route::get('spacestatus/{spaceID}/{status}', 'WorkspaceController@approve');
-//Route::patch('workspace', 'WorkspaceController@update');
-//Route::resource('workspace', 'WorkspaceController', ['names' => [
-//    'update' => 'workspace'
-//]]);
-// Route::get('getSpaceBySlug/{slug}', 'WorkspaceController@getSpaceBySlug');
-
-// // EventController
-// Route::post('sponser','EventController@makeSponser');
-// Route::get('events','EventController@get');
-/* Route::get('upcoming/{spaceID}','EventController@upcoming'); */
-// Route::post('eventUpdate','EventController@update');
-// Route::post('searchEvent','EventController@search');
-// Route::post('optEvent, ','EventController@opt');
-// Route::get('deleteEvent/{id}','EventController@delete');
-// Route::get('getCalendar','EventController@getCalendar');
-// Route::get('event/join/{eventID}','EventController@storeCalendar');
-// Route::get('deleteCalendar/{id}','EventController@deleteCalendar');
-// Route::get('eventOrganizers/{id}', 'EventController@EventOrganizers');
-// Route::get('eventDates/{id}', 'EventController@EventDates');
-// Route::get('today/event', 'EventController@getTodaysEvents');
-
-// // AppeanceController
-// Route::get('appearances','AppearanceController@get');
-// Route::get('countAppearances/{sort}/{eventID?}/{spaceID?}','AppearanceController@getCount');
-// Route::get('appearance/{userID}','AppearanceController@show');
-// Route::get('storeInvite','AppearanceController@stroreInvite');
-// Route::get('getInvite','AppearanceController@getInvite');
-
-// // BookingController
-// Route::get('booking/approve/{token}','BookingController@approve');
-// Route::get('booking/deny/{token}','BookingController@deny');
-
-// //PhotosController
-//Route::get('photos/{spaceID}', 'PhotosController@getPhotos');
-//Route::post('photo', 'PhotosController@storePhotos');
-// Route::post('deletePhoto/{spaceID}/{id}', 'PhotosController@deletePhoto');
-

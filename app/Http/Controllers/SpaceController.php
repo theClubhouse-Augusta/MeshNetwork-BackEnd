@@ -33,7 +33,10 @@ class SpaceController extends Controller
   public function index()
   {
     $haus = Workspace::where('id', 5)->first();
-    $spaces = Workspace::where('id', '!=', 5)->get()->toArray();
+    $spaces = Workspace::where('id', '!=', 5)
+      ->where('id', '!=', 9)
+      ->get()
+      ->toArray();
 
     if (!empty($haus)) {
       array_unshift($spaces, $haus);
