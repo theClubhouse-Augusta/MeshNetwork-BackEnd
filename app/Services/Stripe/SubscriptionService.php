@@ -144,44 +144,24 @@ class SubscriptionService {
                 $this->stripeCustomer = NULL;
             }
         } catch(\Stripe\Error\Card $e) {
-            // var_dump($e);
             $this->error = $e;
-            // $this->error = $exceptionFormatter::formatStripeException($e);
         } catch (\Stripe\Error\RateLimit $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\InvalidRequest $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\Authentication $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\ApiConnection $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\Api $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\Permission $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\SignatureVerification $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Stripe\Error\Base $e) {
-            // $this->error = $exceptionFormatter::formatStripeException($e);
-            // var_dump($e);
             $this->error = $e;
         } catch (\Exception $e) {
-            // $this->error = $exceptionFormatter::formatException($e);
-            // var_dump($e);
             $this->error = $e;
         } 
         finally {

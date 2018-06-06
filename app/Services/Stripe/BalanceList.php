@@ -29,45 +29,25 @@ class BalanceList {
                 array_push($this->balances, $balance);
             }
         } catch(\Stripe\Error\Card $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-           //$this->error = $e;
-           $this->error = "ten";
+           $this->error = $e;
         } catch (\Stripe\Error\RateLimit $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-           //$this->error = $e;
-           $this->error = "nine";
+           $this->error = $e;
         } catch (\Stripe\Error\InvalidRequest $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "eigth";
+           $this->error = $e;
         } catch (\Stripe\Error\Authentication $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "seven";
+           $this->error = $e;
         } catch (\Stripe\Error\ApiConnection $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "six";
+           $this->error = $e;
         } catch (\Stripe\Error\Api $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "five";
+           $this->error = $e;
         } catch (\Stripe\Error\Permission $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "four";
+           $this->error = $e;
         } catch (\Stripe\Error\SignatureVerification $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "three";
+           $this->error = $e;
         } catch (\Stripe\Error\Base $e) {
-        //    $this->error = $exceptionFormatter::formatStripeException($e);
-//            $this->error = $e;
-           $this->error = "two";
+           $this->error = $e;
         } catch (\Exception $e) {
-            // $this->error = $exceptionFormatter::formatException($e);
-           //$this->error = $e;
-           $this->error = "one";
+           $this->error = $e;
         } 
     }
 }
