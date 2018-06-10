@@ -365,38 +365,40 @@ class CoursesController extends Controller
   public function getMyCourses(Request $request)
   {
     $user = Auth::user();
+    $check = Enroll::where('userID', $user->id)->get();
+    $courses = [];
+    if (count($check) > 0) {
+      $courses = Enroll::where('enrolls.userID', $user->id)
+        ->join('courses', 'enrolls.courseID', '=', 'courses.id')
+        ->select(
+          'courses.id',
+          'courses.courseName',
+          'courses.userID',
+          'courses.courseCategory',
+          'courses.courseSummary',
+          'courses.courseImage'
+        )->paginate(16);
+      if (!empty($courses)) {
+        foreach ($courses as $courkey => $course) {
+          $complete = 0;
+          $percent = 0;
+          $lectureCount = 0;
 
-    $courses = Enroll::where('enrolls.userID', $user->id)
-      ->join('courses', 'enrolls.courseID', '=', 'courses.id')
-      ->select(
-        'courses.id',
-        'courses.courseName',
-        'courses.userID',
-        'courses.courseCategory',
-        'courses.courseSummary',
-        'courses.courseImage'
-      )->paginate(16);
-    if (!empty($courses)) {
-      foreach ($courses as $courkey => $course) {
-        $complete = 0;
-        $percent = 0;
-        $lectureCount = 0;
-
-        $lessons = Lesson::where('courseID', $course->id)->get();
-        foreach ($lessons as $leskey => $lesson) {
-          $lectures = Lecture::where('lessonID', '=', $lesson->id)->get();
-          $lectureCount = count($lectures);
-          foreach ($lectures as $lecKey => $lecture) {
-            $completes = Complete::where('userID', '=', $user->id)->where('lectureID', '=', $lecture->id)->get();
-            if (!$completes->isEmpty()) {
-              $complete = count($completes);
+          $lessons = Lesson::where('courseID', $course->id)->get();
+          foreach ($lessons as $leskey => $lesson) {
+            $lectures = Lecture::where('lessonID', '=', $lesson->id)->get();
+            $lectureCount = count($lectures);
+            foreach ($lectures as $lecKey => $lecture) {
+              $completes = Complete::where('userID', '=', $user->id)->where('lectureID', '=', $lecture->id)->get();
+              if (!$completes->isEmpty()) {
+                $complete = count($completes);
+              }
             }
           }
-        }
-
-        if ($lectureCount > 0) {
-          $course->percent = $complete / $lectureCount * 100;
-          $course->complete = $complete . '/' . $lectureCount;
+          if ($lectureCount > 0) {
+            $course->percent = $complete / $lectureCount * 100;
+            $course->complete = $complete . '/' . $lectureCount;
+          }
         }
       }
     } else {
