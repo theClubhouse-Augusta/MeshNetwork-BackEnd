@@ -29,6 +29,13 @@ class CompanyController extends Controller
     ]]);
   }
 
+  public function companies()
+  {
+    return Response::json([
+      'companyIds' => Company::all()->pluck('id')->toArray()
+    ]);
+  }
+
   /**
    * Store a newly created resource in storage.
    *

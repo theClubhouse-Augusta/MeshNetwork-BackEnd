@@ -29,6 +29,7 @@ Route::get('customers/month/{pastMonth}/{now}', 'DashboardController@getThisMont
 Route::get('company/{id}', 'CompanyController@getCompany'); // show logged in user
 Route::post('company/create', 'CompanyController@store'); // show logged in user
 Route::post('company/update/{id}', 'CompanyController@store'); // show logged in user
+Route::get('companies', 'CompanyController@companies'); // show logged in user
 Route::get('verticals', 'CompanyController@allVerticals'); // show logged in user
 Route::get('company/user/get', 'CompanyController@getCompanyOfLoggedInUser'); // show logged in user
 Route::post('calendarInvite', 'EventController@calendarInvite'); // show logged in user

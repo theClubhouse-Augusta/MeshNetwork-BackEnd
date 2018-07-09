@@ -41,7 +41,7 @@ class SpaceController extends Controller
     if (!empty($haus)) {
       array_unshift($spaces, $haus);
     }
-    return Response::json($spaces);
+    return Response::json(['spaces' => $spaces]);
   }
 
   /**

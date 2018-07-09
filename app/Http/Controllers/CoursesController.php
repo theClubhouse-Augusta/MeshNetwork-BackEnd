@@ -9,7 +9,6 @@ use Purifier;
 use Auth;
 use JWTAuth;
 use Image;
-
 use App\User;
 use App\Course;
 use App\Lesson;
@@ -890,7 +889,7 @@ class CoursesController extends Controller
     $lecture->lectureType = $lectureType;
     $lecture->save();
 
-    return Response::json(['success' => $lecture->id]);
+    return Response::json(['lecture' => $lecture]);
   }
 
   public function updateLecture(Request $request, $id)
@@ -940,13 +939,11 @@ class CoursesController extends Controller
   {
     $lectureID = $request->input('lectureID');
     $fileData = $request->file('fileContent');
-
     $lecture = Lecture::find($lectureID);
-    $lesson = Lesson::find($lecture->lessonID);
-    $course = Course::find($lesson->courseID);
+    $lesson = Lesson::find($lecture['lessonID']);
+    $course = Course::find($lesson['courseID']);
     $user = Auth::user();
-
-    if ($course->userID != $user->id) {
+    if ($course['userID'] != $user->id) {
       return Response::json(['error' => 'You do not have permission']);
     }
 
